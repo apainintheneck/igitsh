@@ -4,5 +4,6 @@ require_relative "gitsh/version"
 
 module Gitsh
   class Error < StandardError; end
-  # Your code goes here...
+
+  autoload :Git, "gitsh/git"
 end
