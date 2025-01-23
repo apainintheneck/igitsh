@@ -35,13 +35,13 @@ RSpec.describe Gitsh::Git do
 
   describe ".run" do
     it "succeeds with a valid command" do
-      status = described_class.run("help", out: File::NULL, err: File::NULL)
+      status = described_class.run(["help"], out: File::NULL, err: File::NULL)
       expect(status).to be_a(Process::Status)
       expect(status.exitstatus).to eq(0)
     end
 
     it "fails with an invalid command" do
-      status = described_class.run("not-a-command", out: File::NULL, err: File::NULL)
+      status = described_class.run(["not-a-command"], out: File::NULL, err: File::NULL)
       expect(status).to be_a(Process::Status)
       expect(status.exitstatus).to eq(1)
     end

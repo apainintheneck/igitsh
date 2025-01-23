@@ -10,6 +10,7 @@ module Gitsh
   class ParseError < Error; end
 
   autoload :Command, "gitsh/command"
+  autoload :Executor, "gitsh/executor"
   autoload :Git, "gitsh/git"
   autoload :Parser, "gitsh/parser"
   autoload :Token, "gitsh/token"

@@ -49,8 +49,12 @@ module Gitsh
         .freeze
     end
 
+    # @param args [Array<String>]
+    # @param out [IO] (default STDOUT)
+    # @param err [IO] (default STDIN)
+    #
     # @return [Process::Status]
-    def self.run(*args, out: $stdout, err: $stderr)
+    def self.run(args, out: $stdout, err: $stderr)
       system("git", *args, out: out, err: err)
       $CHILD_STATUS
     end
