@@ -46,16 +46,18 @@ module Gitsh
     # Ex. `;`
     class End < Base; end
 
-    # @param token [Gitsh::Token::Base]
-    # @return [Gitsh::Command::Base, nil]
-    def self.to_action(token)
+    # @param token [Gitsh::Token::And, Gitsh::Token::Or, Gitsh::Token::End]
+    # @return [Gitsh::Command::Base]
+    def self.to_action_command(token)
       case token
       when Token::And
-        Command::And
+        Command::And.new
       when Token::Or
-        Command::Or
+        Command::Or.new
       when Token::End
-        Command.end
+        Command::End.new
+      else
+        raise Error, "Expected action token instead of: #{token}"
       end
     end
   end

@@ -18,8 +18,14 @@ module Gitsh
       attr_reader :arguments
 
       # @return [Array<String>]
-      def initialize(arguments:)
-        @arguments = arguments.freeze
+      def initialize(arguments: [])
+        @arguments = arguments
+      end
+
+      # @return [Boolean]
+      def ==(other)
+        self.class == other.class &&
+          arguments == other.arguments
       end
     end
     private_constant :Base

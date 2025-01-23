@@ -79,12 +79,12 @@ module Gitsh
         else
           case scanner.peek(1)
           when "'"
-            raise SyntaxError.new(message: "#{scanner.charpos}: Missing matching single-quote to close string")
+            raise SyntaxError, "#{scanner.charpos}: Missing matching single-quote to close string"
           when "\""
-            raise SyntaxError.new(message: "#{scanner.charpos}: Missing matching double-quote to close string")
+            raise SyntaxError, "#{scanner.charpos}: Missing matching double-quote to close string"
           else
             # This should be unreachable but we provide a sensible error message anyway.
-            raise SyntaxError.new(message: "#{scanner.charpos}: Unknown syntax error")
+            raise SyntaxError, "#{scanner.charpos}: Unknown syntax error"
           end
         end
       end
