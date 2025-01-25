@@ -13,12 +13,14 @@ module Gitsh
 
     # @return [Boolean]
     def self.repo?
-      `git rev-parse --is-inside-work-tree`.strip == "true"
+      out_str, _err_str, _status = Open3.capture3("git rev-parse --is-inside-work-tree")
+      out_str.strip == "true"
     end
 
     # @return [String, nil]
     def self.current_branch
-      branch_name = `git rev-parse --abbrev-ref HEAD`.strip
+      out_str, _err_str, _status = Open3.capture3("git rev-parse --abbrev-ref HEAD")
+      branch_name = out_str.strip
       branch_name unless branch_name.empty?
     end
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "gitsh"
+require "fileutils"
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -75,4 +76,12 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+end
+
+# Copied from `Library/Homebrew/dev-cmd/tests.rb`.
+# This prevents git repo set up errors.
+%w[AUTHOR COMMITTER].each do |role|
+  ENV["GIT_#{role}_NAME"] = "gitsh tests"
+  ENV["GIT_#{role}_EMAIL"] = "gitsh-tests@localhost"
+  ENV["GIT_#{role}_DATE"] = "Sun Jan 22 19:59:13 2017 +0000"
 end

@@ -13,6 +13,7 @@ module Gitsh
   autoload :Executor, "gitsh/executor"
   autoload :Git, "gitsh/git"
   autoload :Parser, "gitsh/parser"
+  autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
   autoload :Tokenizer, "gitsh/tokenizer"
 end

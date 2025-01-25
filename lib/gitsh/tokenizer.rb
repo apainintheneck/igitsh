@@ -48,7 +48,7 @@ module Gitsh
     # @param scanner [StringScanner]
     # @return [String]
     def self.scan_string_token(scanner)
-      builder = StringIO.new
+      builder = []
 
       while !scanner.eos? && !scanner.check(/&{2}|[|]{2}|;|\s/)
         # a single ampersand or pipe character
@@ -89,7 +89,7 @@ module Gitsh
         end
       end
 
-      builder.string
+      builder.join
     end
     private_class_method :scan_string_token
   end
