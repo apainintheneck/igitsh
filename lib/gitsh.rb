@@ -2,6 +2,7 @@
 
 require_relative "gitsh/version"
 require "reline"
+require "xdg"
 
 module Gitsh
   class Error < StandardError; end
@@ -18,10 +19,18 @@ module Gitsh
   autoload :Token, "gitsh/token"
   autoload :Tokenizer, "gitsh/tokenizer"
 
+  HISTORY_FILE_PATH = (XDG::Data.new.home / "gitsh/history").freeze
+  private_constant :HISTORY_FILE_PATH
+
   def self.run!
     # Set up shell history.
     original_history = Reline::HISTORY.to_a
-    Reline::HISTORY.clear
+    if HISTORY_FILE_PATH.exist?
+      Reline::HISTORY.replace(HISTORY_FILE_PATH.read.lines(chomp: true))
+    else
+      HISTORY_FILE_PATH.dirname.mkpath
+      Reline::HISTORY.clear
+    end
 
     # Set up shell completions.
     Reline.completion_case_fold = true
@@ -49,7 +58,10 @@ module Gitsh
       case result
       when Gitsh::Executor::Result::Success
         # Save the current input line to the shell history.
-        Reline::HISTORY.push(line) if Reline::HISTORY.last != line
+        if Reline::HISTORY.last != line
+          Reline::HISTORY.push(line)
+          HISTORY_FILE_PATH.write("#{line}\n", mode: "a")
+        end
       when Gitsh::Executor::Result::Failure
         # Don't save the lines with syntax or parsing errors to the shell history.
       when Gitsh::Executor::Result::Exit
