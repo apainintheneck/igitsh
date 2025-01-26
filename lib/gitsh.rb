@@ -20,7 +20,6 @@ module Gitsh
   autoload :Tokenizer, "gitsh/tokenizer"
 
   HISTORY_FILE_PATH = (XDG::Data.new.home / "gitsh/history").freeze
-  private_constant :HISTORY_FILE_PATH
 
   def self.run!
     # Set up shell history.

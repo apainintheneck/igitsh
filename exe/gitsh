@@ -1,7 +1,36 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require "optparse"
+
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 require "gitsh"
+
+OptionParser.new do |parser|
+  parser.banner = <<-BANNER
+  gitsh -- a simple shell for git
+
+  This shell includes completions and history.
+  Run any `git` command without prefixing `git`
+  and just `exit` when you're done.
+
+  Options:
+  BANNER
+
+  parser.on("--history-file", "Path to the history file") do
+    puts Gitsh::HISTORY_FILE_PATH
+    exit
+  end
+
+  parser.on("-v", "--version", "Show the current version") do
+    puts Gitsh::VERSION
+    exit
+  end
+
+  parser.on("-h", "--help", "Show this help page") do
+    puts parser
+    exit
+  end
+end.parse!
 
 Gitsh.run!
