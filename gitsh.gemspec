@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.bindir = "exe"
   spec.executables = ["rfc-reader"]
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
+  spec.add_dependency "tty-which", "~> 0.5"
+  spec.add_dependency "rainbow", "~> 3.1.1"
+  spec.add_dependency "reline", "~> 0.6.0"
 end
