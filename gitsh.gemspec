@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "tty-which", "~> 0.5"
   spec.add_dependency "rainbow", "~> 3.1.1"
+  spec.add_dependency "reline", "~> 0.6.0"
 end
