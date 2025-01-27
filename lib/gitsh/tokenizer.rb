@@ -4,6 +4,10 @@ require "strscan"
 
 module Gitsh
   module Tokenizer
+    SINGLE_QUOTE = "'"
+    DOUBLE_QUOTE = '"'
+    private_constant :SINGLE_QUOTE, :DOUBLE_QUOTE
+
     # @param line [String]
     # @return [Array<Gitsh::Token::Base>]
     def self.tokenize(line)
@@ -50,21 +54,9 @@ module Gitsh
     def self.scan_string_token(scanner)
       builder = []
 
-      while !scanner.eos? && !scanner.check(/&{2}|[|]{2}|;|\s/)
+      until scanner.eos? || scanner.match?(/&{2}|[|]{2}|;|\s/)
         # a single ampersand or pipe character
         str = scanner.scan(/[&|]/)
-
-        # TODO: Handle exempting quotes with the backslash character in strings.
-
-        # a single-quoted string (without the quotes)
-        str ||= if scanner.scan(/'([^']*)'/)
-          scanner[1]
-        end
-
-        # a double-quoted string (without the quotes)
-        str ||= if scanner.scan(/"([^"]*)"/)
-          scanner[1]
-        end
 
         # everything else that is not:
         # - an ampersand
@@ -74,18 +66,65 @@ module Gitsh
         # - a whitespace character
         str ||= scanner.scan(/[^&|;'"\s]+/)
 
+        # a single-quoted string
+        str ||= if scanner.skip(SINGLE_QUOTE)
+          charpos = scanner.charpos - 1
+          substr = +""
+
+          until scanner.skip(SINGLE_QUOTE)
+            if scanner.eos?
+              raise SyntaxError, "#{charpos}: Missing matching single-quote to close string"
+            elsif scanner.skip("\\")
+              case (char = scanner.getch)
+              when "\\"
+                substr << "\\"
+              when SINGLE_QUOTE
+                substr << SINGLE_QUOTE
+              when nil
+                next
+              else
+                substr << "\\" << char
+              end
+            else
+              substr << scanner.scan(/[^\\']+/)
+            end
+          end
+
+          substr
+        end
+
+        # a double-quoted string
+        str ||= if scanner.skip(DOUBLE_QUOTE)
+          charpos = scanner.charpos - 1
+          substr = +""
+
+          until scanner.skip(DOUBLE_QUOTE)
+            if scanner.eos?
+              raise SyntaxError, "#{charpos}: Missing matching double-quote to close string"
+            elsif scanner.skip("\\")
+              case (char = scanner.getch)
+              when "\\"
+                substr << "\\"
+              when DOUBLE_QUOTE
+                substr << DOUBLE_QUOTE
+              when nil
+                next
+              else
+                substr << "\\" << char
+              end
+            else
+              substr << scanner.scan(/[^\\"]+/)
+            end
+          end
+
+          substr
+        end
+
         if str
           builder << str
         else
-          case scanner.peek(1)
-          when "'"
-            raise SyntaxError, "#{scanner.charpos}: Missing matching single-quote to close string"
-          when "\""
-            raise SyntaxError, "#{scanner.charpos}: Missing matching double-quote to close string"
-          else
-            # This should be unreachable but we provide a sensible error message anyway.
-            raise SyntaxError, "#{scanner.charpos}: Unknown syntax error"
-          end
+          # This should be unreachable but we provide a sensible error message anyway.
+          raise SyntaxError, "#{scanner.charpos}: Unknown syntax error"
         end
       end
 

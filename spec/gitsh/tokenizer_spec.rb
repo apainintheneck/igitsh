@@ -46,6 +46,14 @@ RSpec.describe Gitsh::Tokenizer do
             Gitsh::Token::String.new(content: "log", start_position: 1, end_position: 3),
             Gitsh::Token::String.new(content: "--committer=Lawrence Kraft", start_position: 5, end_position: 32)
           ]
+        ],
+        [
+          %(commit -m 'Quote \\' of some time'),
+          [
+            Gitsh::Token::String.new(content: "commit", start_position: 0, end_position: 5),
+            Gitsh::Token::String.new(content: "-m", start_position: 7, end_position: 8),
+            Gitsh::Token::String.new(content: "Quote ' of some time", start_position: 10, end_position: 32)
+          ]
         ]
       ].each do |line, tokens|
         expect(described_class.tokenize(line)).to eq(tokens)
@@ -83,6 +91,14 @@ RSpec.describe Gitsh::Tokenizer do
             Gitsh::Token::String.new(content: "log", start_position: 0, end_position: 2),
             Gitsh::Token::String.new(content: "--author=One Punch Man", start_position: 4, end_position: 27)
           ]
+        ],
+        [
+          %(commit -m "Quote \\" of all time"),
+          [
+            Gitsh::Token::String.new(content: "commit", start_position: 0, end_position: 5),
+            Gitsh::Token::String.new(content: "-m", start_position: 7, end_position: 8),
+            Gitsh::Token::String.new(content: "Quote \" of all time", start_position: 10, end_position: 31)
+          ]
         ]
       ].each do |line, tokens|
         expect(described_class.tokenize(line)).to eq(tokens)
@@ -94,7 +110,9 @@ RSpec.describe Gitsh::Tokenizer do
         %(grep "skdfsdklfj),
         %(commit -m 'slkdfjsdklfjds),
         %(log --author="sdkfsdlkj'dsfkjds'),
-        %(branch -D 'sdkfsdlkj"dsfkjds")
+        %(branch -D 'sdkfsdlkj"dsfkjds"),
+        %(checkout -b 'skldfjsd\\'skdlfjsdkf),
+        %(commit -m "sdfjsdfsdf\\"sdk  djf)
       ].each do |line|
         expect { described_class.tokenize(line) }
           .to raise_error(Gitsh::SyntaxError, /Missing matching (?:single|double)-quote/)
