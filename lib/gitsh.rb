@@ -32,11 +32,11 @@ module Gitsh
     end
 
     # Set up shell completions.
-    Reline.completion_case_fold = true
-    Reline.completion_proc = proc do |word|
+    Reline.autocompletion = true
+    Reline.completion_proc = proc do |_word|
       (Git.commands + %w[exit quit])
         # Complete all commands starting with the given prefix.
-        .grep(/^#{Regexp.escape(word)}./)
+        .grep(/^#{Regexp.escape(Reline.line_buffer)}./)
         # Sort results by shortest command and then alphabetically.
         .sort_by { |cmd| [cmd.size, cmd] }
     end
