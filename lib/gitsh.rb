@@ -25,7 +25,7 @@ module Gitsh
     # Set up shell history.
     original_history = Reline::HISTORY.to_a
     if HISTORY_FILE_PATH.exist?
-      Reline::HISTORY.replace(HISTORY_FILE_PATH.read.lines(chomp: true))
+      Reline::HISTORY.replace(HISTORY_FILE_PATH.read.lines(chomp: true).uniq)
     else
       HISTORY_FILE_PATH.dirname.mkpath
       Reline::HISTORY.clear
@@ -62,7 +62,10 @@ module Gitsh
           HISTORY_FILE_PATH.write("#{line}\n", mode: "a")
         end
       when Gitsh::Executor::Result::Failure
-        # Don't save the lines with syntax or parsing errors to the shell history.
+        # Only save the lines with syntax or parsing errors to the session history.
+        if Reline::HISTORY.last != line
+          Reline::HISTORY.push(line)
+        end
       when Gitsh::Executor::Result::Exit
         # The user entered 'exit' or 'quit'.
         return

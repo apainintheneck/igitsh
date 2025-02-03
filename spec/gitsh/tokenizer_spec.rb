@@ -115,7 +115,7 @@ RSpec.describe Gitsh::Tokenizer do
         %(commit -m "sdfjsdfsdf\\"sdk  djf)
       ].each do |line|
         expect { described_class.tokenize(line) }
-          .to raise_error(Gitsh::SyntaxError, /Missing matching (?:single|double)-quote/)
+          .to raise_error(Gitsh::SyntaxError, /> unterminated string/)
       end
     end
 

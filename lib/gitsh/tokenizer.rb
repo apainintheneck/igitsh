@@ -6,11 +6,12 @@ module Gitsh
   module Tokenizer
     SINGLE_QUOTE = "'"
     DOUBLE_QUOTE = '"'
-    private_constant :SINGLE_QUOTE, :DOUBLE_QUOTE
+    BACKSLASH = "\\"
 
     # @param line [String]
     # @return [Array<Gitsh::Token::Base>]
     def self.tokenize(line)
+      line = line.dup.freeze
       tokens = []
       scanner = StringScanner.new(line)
 
@@ -22,26 +23,36 @@ module Gitsh
         elsif scanner.scan("&&") # and (&&)
           tokens << Token::And.new(
             content: "&&",
+            source: line,
             start_position: start_position,
-            end_position: scanner.charpos - 1
+            end_position: scanner.charpos
           )
         elsif scanner.scan("||") # or (||)
           tokens << Token::Or.new(
             content: "||",
+            source: line,
             start_position: start_position,
-            end_position: scanner.charpos - 1
+            end_position: scanner.charpos
           )
         elsif scanner.scan(";") # end (;)
           tokens << Token::End.new(
             content: ";",
+            source: line,
             start_position: start_position,
-            end_position: scanner.charpos - 1
+            end_position: scanner.charpos
+          )
+        elsif (content = scanner.scan(/[&|]/)) # partial (&&) or (||)
+          tokens << Token::PartialAction.new(
+            content: content,
+            source: line,
+            start_position: start_position,
+            end_position: scanner.charpos
           )
         else # quoted or unquoted string
-          tokens << Token::String.new(
-            content: scan_string_token(scanner),
+          tokens << scan_string_token(
+            line: line,
             start_position: start_position,
-            end_position: scanner.charpos - 1
+            scanner: scanner
           )
         end
       end
@@ -49,86 +60,93 @@ module Gitsh
       tokens
     end
 
+    # @param line [String]
+    # @param start_position [Integer]
     # @param scanner [StringScanner]
+    #
     # @return [String]
-    def self.scan_string_token(scanner)
-      builder = []
+    def self.scan_string_token(line:, start_position:, scanner:)
+      terminated = true
 
-      until scanner.eos? || scanner.match?(/&{2}|[|]{2}|;|\s/)
-        # a single ampersand or pipe character
-        str = scanner.scan(/[&|]/)
+      # Everything else that is not:
+      # - an ampersand
+      # - a pipe character
+      # - a semicolon
+      # - a single or double quote
+      # - a whitespace character
+      str ||= scanner.scan(/[^&|;'"\s]+/)
 
-        # everything else that is not:
-        # - an ampersand
-        # - a pipe character
-        # - a semicolon
-        # - a single or double quote
-        # - a whitespace character
-        str ||= scanner.scan(/[^&|;'"\s]+/)
+      # a single-quoted string
+      str ||= if scanner.skip(SINGLE_QUOTE)
+        substr = +""
 
-        # a single-quoted string
-        str ||= if scanner.skip(SINGLE_QUOTE)
-          charpos = scanner.charpos - 1
-          substr = +""
-
-          until scanner.skip(SINGLE_QUOTE)
-            if scanner.eos?
-              raise SyntaxError, "#{charpos}: Missing matching single-quote to close string"
-            elsif scanner.skip("\\")
-              case (char = scanner.getch)
-              when "\\"
-                substr << "\\"
-              when SINGLE_QUOTE
-                substr << SINGLE_QUOTE
-              when nil
-                next
-              else
-                substr << "\\" << char
-              end
+        until scanner.skip(SINGLE_QUOTE)
+          if scanner.eos?
+            terminated = false
+            break
+          elsif scanner.skip(BACKSLASH)
+            case (char = scanner.getch)
+            when BACKSLASH
+              substr << BACKSLASH
+            when SINGLE_QUOTE
+              substr << SINGLE_QUOTE
+            when nil
+              next
             else
-              substr << scanner.scan(/[^\\']+/)
+              substr << BACKSLASH << char
             end
+          else
+            substr << scanner.scan(/[^\\']+/)
           end
-
-          substr
         end
 
-        # a double-quoted string
-        str ||= if scanner.skip(DOUBLE_QUOTE)
-          charpos = scanner.charpos - 1
-          substr = +""
-
-          until scanner.skip(DOUBLE_QUOTE)
-            if scanner.eos?
-              raise SyntaxError, "#{charpos}: Missing matching double-quote to close string"
-            elsif scanner.skip("\\")
-              case (char = scanner.getch)
-              when "\\"
-                substr << "\\"
-              when DOUBLE_QUOTE
-                substr << DOUBLE_QUOTE
-              when nil
-                next
-              else
-                substr << "\\" << char
-              end
-            else
-              substr << scanner.scan(/[^\\"]+/)
-            end
-          end
-
-          substr
-        end
-
-        if str
-          builder << str
-        else
-          # This should be unreachable but we provide a sensible error message anyway.
-          raise SyntaxError, "#{scanner.charpos}: Unknown syntax error"
-        end
+        substr
       end
 
-      builder.join
+      # a double-quoted string
+      str ||= if scanner.skip(DOUBLE_QUOTE)
+        substr = +""
+
+        until scanner.skip(DOUBLE_QUOTE)
+          if scanner.eos?
+            terminated = false
+            break
+          elsif scanner.skip(BACKSLASH)
+            case (char = scanner.getch)
+            when BACKSLASH
+              substr << BACKSLASH
+            when DOUBLE_QUOTE
+              substr << DOUBLE_QUOTE
+            when nil
+              next
+            else
+              substr << BACKSLASH << char
+            end
+          else
+            substr << scanner.scan(/[^\\"]+/)
+          end
+        end
+
+        substr
+      end
+
+      if str
+        token_class = if terminated
+          Token::String
+        else
+          Token::UnterminatedString
+        end
+
+        return token_class.new(
+          content: str,
+          source: line,
+          start_position: start_position,
+          end_position: scanner.charpos
+        )
+      end
+
+      # This should be unreachable but we provide a sensible error message anyway.
+      raise SyntaxError, "#{start_position}: Unknown string parsing error"
     end
     private_class_method :scan_string_token
   end
