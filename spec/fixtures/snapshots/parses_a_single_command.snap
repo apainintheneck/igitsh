@@ -1,0 +1,26 @@
+[
+	{
+		line: "checkout auto_update_tap",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["checkout", "auto_update_tap"],
+			),
+		],
+	},
+	{
+		line: "git clone https://github.com/ruby/irb.git",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["git", "clone", "https://github.com/ruby/irb.git"],
+			),
+		],
+	},
+	{
+		line: "grep -C 5 -i -F match_snapshot",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["grep", "-C", "5", "-i", "-F", "match_snapshot"],
+			),
+		],
+	},
+]

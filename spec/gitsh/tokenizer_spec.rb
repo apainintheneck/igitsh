@@ -2,7 +2,7 @@
 
 RSpec.describe Gitsh::Tokenizer do
   def expect_tokenized_lines(lines)
-    tokenized_lines = lines.map do |line|
+    tokenized_lines = Array(lines).map do |line|
       {
         line: line,
         tokens: described_class.tokenize(line)

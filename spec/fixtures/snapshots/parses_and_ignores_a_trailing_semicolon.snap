@@ -1,0 +1,26 @@
+[
+	{
+		line: "git grep 'Github::API';",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["git", "grep", "Github::API"],
+			),
+		],
+	},
+	{
+		line: "diff head   ;  ",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["diff", "head"],
+			),
+		],
+	},
+	{
+		line: "git commit --amend;  ",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["git", "commit", "--amend"],
+			),
+		],
+	},
+]
