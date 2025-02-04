@@ -2,6 +2,19 @@
 
 require "gitsh"
 require "fileutils"
+require "rspec/snapshot"
+require "sumi"
+require "date" # needed for "sumi"
+
+# Serializes values in a human readable way for snapshots using the
+# awesome_print gem
+class SumiSerializer
+  # @param [*] value The value to serialize.
+  # @return [String] The serialized value.
+  def dump(value)
+    Sumi.inspect(value)
+  end
+end
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -76,6 +89,18 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+
+  # The default setting is `:relative`, which means snapshot files will be
+  # created in a '__snapshots__' directory adjacent to the spec file where the
+  # matcher is used.
+  #
+  # Set this value to put all snapshots in a fixed directory
+  config.snapshot_dir = "spec/fixtures/snapshots"
+
+  # Defaults to using the awesome_print gem to serialize values for snapshots
+  #
+  # Set this value to use a custom snapshot serializer
+  config.snapshot_serializer = SumiSerializer
 end
 
 # Copied from `Library/Homebrew/dev-cmd/tests.rb`.
