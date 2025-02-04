@@ -27,4 +27,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rainbow", "~> 3.1.1"
   spec.add_dependency "reline", "~> 0.6.0"
   spec.add_dependency "xdg", "~> 6.0"
+
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "standard", "~> 1.3"
 end
