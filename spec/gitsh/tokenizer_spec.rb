@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe Gitsh::Tokenizer do
-  def tokenize_lines(lines)
-    lines.map do |line|
+  def expect_tokenized_lines(lines)
+    tokenized_lines = lines.map do |line|
       {
         line: line,
         tokens: described_class.tokenize(line)
       }
     end
+
+    expect(tokenized_lines)
   end
 
   describe ".tokenize" do
@@ -18,32 +20,28 @@ RSpec.describe Gitsh::Tokenizer do
     end
 
     it "tokenizes commands without arguments" do |example|
-      expect(tokenize_lines(%w[diff log branch commit cherry-pick]))
+      expect_tokenized_lines(%w[diff log branch commit cherry-pick])
         .to match_snapshot(example.description.tr(" ", "_"))
     end
 
     it "tokenizes single-quoted strings" do |example|
-      expect(
-        tokenize_lines([
-          %(grep 'type : Tokenizer'),
-          %(grep 'describe ".tokenize" do'  ),
-          %(add -- '*.js'),
-          %( log --committer='Lawrence Kraft'),
-          %(commit -m 'Quote \\' of some time')
-        ])
-      ).to match_snapshot(example.description.tr(" ", "_"))
+      expect_tokenized_lines([
+        %(grep 'type : Tokenizer'),
+        %(grep 'describe ".tokenize" do'  ),
+        %(add -- '*.js'),
+        %( log --committer='Lawrence Kraft'),
+        %(commit -m 'Quote \\' of some time')
+      ]).to match_snapshot(example.description.tr(" ", "_"))
     end
 
     it "tokenizes double-quoted strings" do |example|
-      expect(
-        tokenize_lines([
-          %(grep   " type : Tokenizer"),
-          %(log   --grep   "'exit' or 'quit'"),
-          %(  add -- "*.js"),
-          %(log --author="One Punch Man"),
-          %(commit -m "Quote \\" of all time")
-        ])
-      ).to match_snapshot(example.description.tr(" ", "_"))
+      expect_tokenized_lines([
+        %(grep   " type : Tokenizer"),
+        %(log   --grep   "'exit' or 'quit'"),
+        %(  add -- "*.js"),
+        %(log --author="One Punch Man"),
+        %(commit -m "Quote \\" of all time")
+      ]).to match_snapshot(example.description.tr(" ", "_"))
     end
 
     it "parses unterminated strings", :aggregate_failures do
@@ -111,13 +109,11 @@ RSpec.describe Gitsh::Tokenizer do
     end
 
     it "tokenizes strings with multiple actions" do |example|
-      expect(
-        tokenize_lines([
-          "one && two; three || four",
-          "&&   &&&&;||",
-          "one two &&||||; three four ;;"
-        ])
-      ).to match_snapshot(example.description.tr(" ", "_"))
+      expect_tokenized_lines([
+        "one && two; three || four",
+        "&&   &&&&;||",
+        "one two &&||||; three four ;;"
+      ]).to match_snapshot(example.description.tr(" ", "_"))
     end
   end
 end
