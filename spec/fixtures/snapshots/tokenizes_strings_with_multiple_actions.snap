@@ -1,0 +1,149 @@
+[
+	{
+		line: "one && two; three || four",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "one",
+				@source = "one && two; three || four",
+				@start_position = 0,
+				@end_position = 3,
+			),
+			Gitsh::Token::And(
+				@content = "&&",
+				@source = "one && two; three || four",
+				@start_position = 4,
+				@end_position = 6,
+			),
+			Gitsh::Token::String(
+				@content = "two",
+				@source = "one && two; three || four",
+				@start_position = 7,
+				@end_position = 10,
+			),
+			Gitsh::Token::End(
+				@content = ";",
+				@source = "one && two; three || four",
+				@start_position = 10,
+				@end_position = 11,
+			),
+			Gitsh::Token::String(
+				@content = "three",
+				@source = "one && two; three || four",
+				@start_position = 12,
+				@end_position = 17,
+			),
+			Gitsh::Token::Or(
+				@content = "||",
+				@source = "one && two; three || four",
+				@start_position = 18,
+				@end_position = 20,
+			),
+			Gitsh::Token::String(
+				@content = "four",
+				@source = "one && two; three || four",
+				@start_position = 21,
+				@end_position = 25,
+			),
+		],
+	},
+	{
+		line: "&&   &&&&;||",
+		tokens: [
+			Gitsh::Token::And(
+				@content = "&&",
+				@source = "&&   &&&&;||",
+				@start_position = 0,
+				@end_position = 2,
+			),
+			Gitsh::Token::And(
+				@content = "&&",
+				@source = "&&   &&&&;||",
+				@start_position = 5,
+				@end_position = 7,
+			),
+			Gitsh::Token::And(
+				@content = "&&",
+				@source = "&&   &&&&;||",
+				@start_position = 7,
+				@end_position = 9,
+			),
+			Gitsh::Token::End(
+				@content = ";",
+				@source = "&&   &&&&;||",
+				@start_position = 9,
+				@end_position = 10,
+			),
+			Gitsh::Token::Or(
+				@content = "||",
+				@source = "&&   &&&&;||",
+				@start_position = 10,
+				@end_position = 12,
+			),
+		],
+	},
+	{
+		line: "one two &&||||; three four ;;",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "one",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 0,
+				@end_position = 3,
+			),
+			Gitsh::Token::String(
+				@content = "two",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 4,
+				@end_position = 7,
+			),
+			Gitsh::Token::And(
+				@content = "&&",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 8,
+				@end_position = 10,
+			),
+			Gitsh::Token::Or(
+				@content = "||",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 10,
+				@end_position = 12,
+			),
+			Gitsh::Token::Or(
+				@content = "||",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 12,
+				@end_position = 14,
+			),
+			Gitsh::Token::End(
+				@content = ";",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 14,
+				@end_position = 15,
+			),
+			Gitsh::Token::String(
+				@content = "three",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 16,
+				@end_position = 21,
+			),
+			Gitsh::Token::String(
+				@content = "four",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 22,
+				@end_position = 26,
+			),
+			Gitsh::Token::End(
+				@content = ";",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 27,
+				@end_position = 28,
+			),
+			Gitsh::Token::End(
+				@content = ";",
+				@source = "one two &&||||; three four ;;",
+				@start_position = 28,
+				@end_position = 29,
+			),
+		],
+	},
+]

@@ -1,0 +1,57 @@
+[
+	{
+		line: "diff",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "diff",
+				@source = "diff",
+				@start_position = 0,
+				@end_position = 4,
+			),
+		],
+	},
+	{
+		line: "log",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "log",
+				@source = "log",
+				@start_position = 0,
+				@end_position = 3,
+			),
+		],
+	},
+	{
+		line: "branch",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "branch",
+				@source = "branch",
+				@start_position = 0,
+				@end_position = 6,
+			),
+		],
+	},
+	{
+		line: "commit",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "commit",
+				@source = "commit",
+				@start_position = 0,
+				@end_position = 6,
+			),
+		],
+	},
+	{
+		line: "cherry-pick",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "cherry-pick",
+				@source = "cherry-pick",
+				@start_position = 0,
+				@end_position = 11,
+			),
+		],
+	},
+]
