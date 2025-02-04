@@ -14,6 +14,7 @@ module Gitsh
   autoload :Command, "gitsh/command"
   autoload :Executor, "gitsh/executor"
   autoload :Git, "gitsh/git"
+  autoload :Highlighter, "gitsh/highlighter"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
@@ -33,13 +34,8 @@ module Gitsh
 
     # Set up shell completions.
     Reline.autocompletion = true
-    Reline.completion_proc = proc do |_word|
-      (Git.commands + %w[exit quit])
-        # Complete all commands starting with the given prefix.
-        .grep(/^#{Regexp.escape(Reline.line_buffer)}./)
-        # Sort results by shortest command and then alphabetically.
-        .sort_by { |cmd| [cmd.size, cmd] }
-    end
+    Reline.completion_proc = method(:completions)
+    Reline.output_modifier_proc = method(:highlight)
 
     puts "# Welcome to gitsh!"
 
@@ -77,4 +73,43 @@ module Gitsh
     # Note: This is only useful when testing in IRB.
     Reline::HISTORY.replace(original_history)
   end
+
+  # @return [Array<String>]
+  def self.all_commands
+    @all_commands ||= (Git.commands + %w[exit quit]).freeze
+  end
+
+  # @param word [String]
+  #
+  # @return [Array<String>, nil]
+  def self.completions(word)
+    return if word.empty?
+
+    case line_tokens
+    in [Gitsh::Token::String]
+      # First command
+    in [*, Gitsh::Token::And | Gitsh::Token::Or | Gitsh::Token::End, Gitsh::Token::String]
+      # Follow-up command after action
+    else
+      return
+    end
+
+    all_commands
+      # Complete all commands starting with the given prefix.
+      .grep(/^#{Regexp.escape(word)}./)
+      # Sort results by shortest command and then alphabetically.
+      .sort_by { |cmd| [cmd.size, cmd] }
+  end
+  private_class_method :completions
+
+  # @return [String]
+  def self.highlight(...)
+    Highlighter.from_tokens(line_tokens)
+  end
+
+  # @return [Array<Gitsh::Token::Base>]
+  def self.line_tokens
+    Gitsh::Tokenizer.tokenize(Reline.line_buffer)
+  end
+  private_class_method :line_tokens
 end

@@ -35,6 +35,16 @@ module Gitsh
         ParseError.new(pretty_error_message(message))
       end
 
+      # @return [String]
+      def start_char
+        @source[start_position]
+      end
+
+      # @return [String]
+      def raw_content
+        @source[start_position...end_position]
+      end
+
       # @return [Boolean]
       def ==(other)
         self.class === other &&
@@ -66,7 +76,12 @@ module Gitsh
     private_constant :Base
 
     # Ex. `"string"`
-    class String < Base; end
+    class String < Base
+      # @return [Boolean]
+      def quoted?
+        %('").include?(start_char)
+      end
+    end
 
     # Ex. `&&`
     class And < Base; end

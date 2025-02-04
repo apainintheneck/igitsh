@@ -32,17 +32,17 @@ module Gitsh
       builder << "gitsh".color(:aqua)
 
       if branch
-        builder << "(" << branch.color(:magenta).bold
+        builder << "(" << branch.color(:mediumslateblue)
 
         if changes
           builder << "|"
 
           if changes.unstaged_count.zero? && changes.staged_count.zero?
-            builder << "✔".color(:green).bold
+            builder << "✔".color(:green)
           end
 
           if changes.staged_count.positive?
-            builder << "●#{changes.staged_count}".color(:yellow)
+            builder << "●#{changes.staged_count}".color(:yellowgreen)
           end
 
           if changes.unstaged_count.positive?
@@ -54,12 +54,12 @@ module Gitsh
       end
 
       if status.positive?
-        builder << "[#{status}]".color(:red)
+        builder << "[#{status}]".color(:crimson)
       end
 
       builder << "> "
 
-      builder.join
+      builder.join.bold
     end
     private_class_method :build
   end

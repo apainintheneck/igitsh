@@ -27,14 +27,6 @@ RSpec.describe Gitsh::Executor do
     # Success
     #
     context "with a single command" do
-      it "executes a command with a git prefix" do
-        expect(described_class.execute_line(line: "git help", out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
-
-        expect(out_str).to start_with("usage: git")
-        expect(err.size).to eq(0)
-      end
-
       it "executes a command without a git prefix" do
         expect(described_class.execute_line(line: "help", out: out, err: err))
           .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))

@@ -4,13 +4,13 @@ require "rainbow"
 
 RSpec.describe Gitsh::Prompt do
   let(:gitsh) { Rainbow("gitsh").color(:aqua) }
-  let(:branch) { Rainbow("main").color(:magenta).bold }
-  let(:check) { Rainbow("✔").color(:green).bold }
-  let(:staged) { Rainbow("●2").color(:yellow) }
+  let(:branch) { Rainbow("main").color(:mediumslateblue) }
+  let(:check) { Rainbow("✔").color(:green) }
+  let(:staged) { Rainbow("●2").color(:yellowgreen) }
   let(:unstaged) { Rainbow("+1").color(:blue) }
   let(:success) { 0 }
   let(:failure) { 127 }
-  let(:exit_code) { Rainbow("[127]").color(:red) }
+  let(:exit_code) { Rainbow("[127]").color(:crimson) }
 
   def quiet_system(command)
     system(command, out: File::NULL, err: File::NULL)
@@ -49,7 +49,8 @@ RSpec.describe Gitsh::Prompt do
 
         context "with no changes" do
           it "returns expected prompt" do
-            expect(described_class.string(exit_code: success)).to eq "#{gitsh}(#{branch}|#{check})> "
+            expect(described_class.string(exit_code: success))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{check})> ").bold
           end
         end
 
@@ -60,7 +61,8 @@ RSpec.describe Gitsh::Prompt do
             FileUtils.touch "file2"
             quiet_system("git add file1 file2")
 
-            expect(described_class.string(exit_code: success)).to eq "#{gitsh}(#{branch}|#{staged})> "
+            expect(described_class.string(exit_code: success))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{staged})> ").bold
           end
         end
 
@@ -73,7 +75,8 @@ RSpec.describe Gitsh::Prompt do
             # One unstaged file change
             File.write "file1", "text"
 
-            expect(described_class.string(exit_code: success)).to eq "#{gitsh}(#{branch}|#{unstaged})> "
+            expect(described_class.string(exit_code: success))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{unstaged})> ").bold
           end
         end
 
@@ -86,7 +89,8 @@ RSpec.describe Gitsh::Prompt do
             # One unstaged file change
             File.write "file1", "text"
 
-            expect(described_class.string(exit_code: success)).to eq "#{gitsh}(#{branch}|#{staged}#{unstaged})> "
+            expect(described_class.string(exit_code: success))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{staged}#{unstaged})> ").bold
           end
         end
       end
@@ -97,7 +101,8 @@ RSpec.describe Gitsh::Prompt do
         end
 
         it "returns default prompt string" do
-          expect(described_class.string(exit_code: success)).to eq "#{gitsh}> "
+          expect(described_class.string(exit_code: success))
+            .to eq Rainbow("#{gitsh}> ").bold
         end
       end
     end
@@ -110,7 +115,8 @@ RSpec.describe Gitsh::Prompt do
 
         context "with no changes" do
           it "returns expected prompt" do
-            expect(described_class.string(exit_code: failure)).to eq "#{gitsh}(#{branch}|#{check})#{exit_code}> "
+            expect(described_class.string(exit_code: failure))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{check})#{exit_code}> ").bold
           end
         end
 
@@ -121,7 +127,8 @@ RSpec.describe Gitsh::Prompt do
             FileUtils.touch "file2"
             quiet_system("git add file1 file2")
 
-            expect(described_class.string(exit_code: failure)).to eq "#{gitsh}(#{branch}|#{staged})#{exit_code}> "
+            expect(described_class.string(exit_code: failure))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{staged})#{exit_code}> ").bold
           end
         end
 
@@ -134,7 +141,8 @@ RSpec.describe Gitsh::Prompt do
             # One unstaged file change
             File.write "file1", "text"
 
-            expect(described_class.string(exit_code: failure)).to eq "#{gitsh}(#{branch}|#{unstaged})#{exit_code}> "
+            expect(described_class.string(exit_code: failure))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{unstaged})#{exit_code}> ").bold
           end
         end
 
@@ -147,7 +155,8 @@ RSpec.describe Gitsh::Prompt do
             # One unstaged file change
             File.write "file1", "text"
 
-            expect(described_class.string(exit_code: failure)).to eq "#{gitsh}(#{branch}|#{staged}#{unstaged})#{exit_code}> "
+            expect(described_class.string(exit_code: failure))
+              .to eq Rainbow("#{gitsh}(#{branch}|#{staged}#{unstaged})#{exit_code}> ").bold
           end
         end
       end
@@ -158,7 +167,8 @@ RSpec.describe Gitsh::Prompt do
         end
 
         it "returns default prompt string" do
-          expect(described_class.string(exit_code: failure)).to eq "#{gitsh}#{exit_code}> "
+          expect(described_class.string(exit_code: failure))
+            .to eq Rainbow("#{gitsh}#{exit_code}> ").bold
         end
       end
     end
