@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
+require "rainbow/refinement"
+
 module Gitsh
   module Token
     class Base
+      # @return [String]
+      attr_reader :source
       # @return [String]
       attr_reader :content
       # @return [Integer]
@@ -10,18 +14,35 @@ module Gitsh
       # @return [Integer]
       attr_reader :end_position
 
-      # @return content [String]
-      # @return start_position [Integer]
-      # @return end_position [Integer]
-      def initialize(content:, start_position: 0, end_position: 0)
+      # @param content [String] the content of the parsed token
+      # @param source [String] the source string that the token was parsed from
+      # @param start_position [Integer]
+      # @param end_position [Integer]
+      def initialize(content:, source: "", start_position: 0, end_position: 0)
         @content = content
+        @source = source
         @start_position = start_position
         @end_position = end_position
       end
 
+      # @return [Gitsh::SyntaxError]
+      def syntax_error(message)
+        SyntaxError.new(pretty_error_message(message))
+      end
+
+      # @return [Gitsh::ParseError]
+      def parse_error(message)
+        ParseError.new(pretty_error_message(message))
+      end
+
       # @return [String]
-      def location
-        "#{start_position}:#{end_position}"
+      def start_char
+        @source[start_position]
+      end
+
+      # @return [String]
+      def raw_content
+        @source[start_position...end_position]
       end
 
       # @return [Boolean]
@@ -31,11 +52,36 @@ module Gitsh
           other.start_position == @start_position &&
           other.end_position == @end_position
       end
+
+      private
+
+      using Rainbow
+
+      # @param message [String]
+      #
+      # @return [String]
+      def pretty_error_message(message)
+        pre_error = @source[0...start_position]
+        error = @source[start_position...end_position]
+        post_error = @source[end_position..]
+
+        <<~ERROR
+          | #{"error>".color(:blue).bold} #{message}
+          |
+          | #{pre_error}#{error}#{post_error}
+          | #{" " * pre_error.length}#{"^" * error.length}
+        ERROR
+      end
     end
     private_constant :Base
 
     # Ex. `"string"`
-    class String < Base; end
+    class String < Base
+      # @return [Boolean]
+      def quoted?
+        %('").include?(start_char)
+      end
+    end
 
     # Ex. `&&`
     class And < Base; end
@@ -45,6 +91,13 @@ module Gitsh
 
     # Ex. `;`
     class End < Base; end
+
+    # When the closing quote is missing.
+    # Ex. `"string`
+    class UnterminatedString < Base; end
+
+    # When there is a single (&) or (|)
+    class PartialAction < Base; end
 
     # @param token [Gitsh::Token::And, Gitsh::Token::Or, Gitsh::Token::End]
     # @return [Gitsh::Command::Base]

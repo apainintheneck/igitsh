@@ -1,0 +1,35 @@
+[
+	{
+		line: "add --all; commit -m \"tmp\"",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["add", "--all"],
+			),
+			Gitsh::Command::End(
+				@arguments = ["commit", "-m", "tmp"],
+			),
+		],
+	},
+	{
+		line: "add --all || commit -m \"tmp\"",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["add", "--all"],
+			),
+			Gitsh::Command::Or(
+				@arguments = ["commit", "-m", "tmp"],
+			),
+		],
+	},
+	{
+		line: "add --all && commit -m \"tmp\"",
+		commands: [
+			Gitsh::Command::End(
+				@arguments = ["add", "--all"],
+			),
+			Gitsh::Command::And(
+				@arguments = ["commit", "-m", "tmp"],
+			),
+		],
+	},
+]

@@ -1,81 +1,84 @@
 # frozen_string_literal: true
 
 RSpec.describe Gitsh::Parser do
-  it "parses a single command" do
-    expect(described_class.parse("checkout auto_update_tap"))
-      .to eq([Gitsh::Command::End.new(arguments: %w[checkout auto_update_tap])])
-  end
+  let(:error) { Rainbow("error>").blue.bold }
 
-  it "parses multiple commands", :aggregated_failures do
-    [
-      [
-        %(add --all; commit -m "tmp"),
-        [
-          Gitsh::Command::End.new(arguments: %w[add --all]),
-          Gitsh::Command::End.new(arguments: %w[commit -m tmp])
-        ]
-      ],
-      [
-        %(add --all || commit -m "tmp"),
-        [
-          Gitsh::Command::End.new(arguments: %w[add --all]),
-          Gitsh::Command::Or.new(arguments: %w[commit -m tmp])
-        ]
-      ],
-      [
-        %(add --all && commit -m "tmp"),
-        [
-          Gitsh::Command::End.new(arguments: %w[add --all]),
-          Gitsh::Command::And.new(arguments: %w[commit -m tmp])
-        ]
-      ]
-    ].each do |line, parse_result|
-      expect(described_class.parse(line)).to eq(parse_result)
+  def expect_parsed_lines(lines)
+    parsed_lines = Array(lines).map do |line|
+      {
+        line: line,
+        commands: described_class.parse(line)
+      }
     end
+
+    expect(parsed_lines)
   end
 
-  it "parses a long series of commands" do
-    expect(described_class.parse("add ex.js && add ex.rb; git diff; git commit -m 'commit'")).to eq([
-      Gitsh::Command::End.new(arguments: %w[add ex.js]),
-      Gitsh::Command::And.new(arguments: %w[add ex.rb]),
-      Gitsh::Command::End.new(arguments: %w[git diff]),
-      Gitsh::Command::End.new(arguments: %w[git commit -m commit])
-    ])
+  it "parses a single command" do |example|
+    expect_parsed_lines([
+      "checkout auto_update_tap",
+      "git clone https://github.com/ruby/irb.git",
+      "grep -C 5 -i -F match_snapshot"
+    ]).to match_snapshot(example.description.tr(" ", "_"))
   end
 
-  it "parses and ignores a trailing semicolon" do
-    expect(described_class.parse(%(grep 'rescue Github::API';)))
-      .to eq([Gitsh::Command::End.new(arguments: ["grep", "rescue Github::API"])])
+  it "parses multiple commands" do |example|
+    expect_parsed_lines([
+      %(add --all; commit -m "tmp"),
+      %(add --all || commit -m "tmp"),
+      %(add --all && commit -m "tmp")
+    ]).to match_snapshot(example.description.tr(" ", "_"))
+  end
+
+  it "parses a long series of commands" do |example|
+    expect_parsed_lines([
+      "add ex.js && add ex.rb; git diff; git commit -m 'commit'",
+      "git grep -q match_snapshot && git add .; git commit -m snapshots",
+      "git log -5 || git diff HEAD && git commit --amend"
+    ]).to match_snapshot(example.description.tr(" ", "_"))
+  end
+
+  it "parses and ignores a trailing semicolon" do |example|
+    expect_parsed_lines([
+      "git grep 'Github::API';",
+      "diff head   ;  ",
+      "git commit --amend;  "
+    ]).to match_snapshot(example.description.tr(" ", "_"))
   end
 
   it "raises an error when there is an action to start a line", :aggregate_failures do
     %w[&& || ;].each do |action|
       line = [action, "second", "third"].join(" ")
-      error_message = "0:#{action.size - 1}: Expected a string to start the line but got '#{action}' instead"
-
-      expect { described_class.parse(line) }
-        .to raise_error(Gitsh::ParseError, error_message)
+      expect { described_class.parse(line) }.to raise_error(Gitsh::ParseError, <<~ERROR)
+        | #{error} unexpected '#{action}' to start the line
+        |
+        | #{action} second third
+        | #{"^" * action.length}
+      ERROR
     end
   end
 
   it "raises an error when there are two actions in a row in the middle of a line", :aggregate_failures do
-    %w[&& || ;].repeated_combination(2).each do |combo|
-      line = ["first", *combo, "last"].join(" ")
-      error_message = "Expected a string after '#{combo.first}' but got '#{combo.last}' instead"
-      error_message_end = /#{Regexp.escape(error_message)}$/
-
-      expect { described_class.parse(line) }
-        .to raise_error(Gitsh::ParseError, error_message_end)
+    %w[&& || ;].repeated_combination(2).each do |second, third|
+      line = ["first", second, third, "last"].join(" ")
+      expect { described_class.parse(line) }.to raise_error(Gitsh::ParseError, <<~ERROR)
+        | #{error} expected a string after '#{second}' but got '#{third}' instead
+        |
+        | first #{second} #{third} last
+        |       #{" " * second.length} #{"^" * third.length}
+      ERROR
     end
   end
 
   it "raises an error when there is a && or || action to end a line", :aggregate_failures do
     %w[&& ||].each do |action|
       line = ["first", "second", action].join(" ")
-      error_message = "13:14: Expected a string or a semicolon to end the line but got '#{action}' instead"
-
-      expect { described_class.parse(line) }
-        .to raise_error(Gitsh::ParseError, error_message)
+      expect { described_class.parse(line) }.to raise_error(Gitsh::ParseError, <<~ERROR)
+        | #{error} unexpected '#{action}' to end the line
+        |
+        | first second #{action}
+        |              #{"^" * action.length}
+      ERROR
     end
   end
 end

@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "A simple shell for Git commands with autocompletion and custom shortcuts."
   spec.homepage = "https://github.com/apainintheneck/gitsh/"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.1.0"
+  spec.required_ruby_version = ">= 3.2.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -27,4 +27,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rainbow", "~> 3.1.1"
   spec.add_dependency "reline", "~> 0.6.0"
   spec.add_dependency "xdg", "~> 6.0"
+
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "standard", "~> 1.3"
+  spec.add_development_dependency "sumi", "~> 0.1.0"
+  spec.add_development_dependency "rspec-snapshot", "~> 2.0.3"
 end

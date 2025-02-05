@@ -59,8 +59,6 @@ module Gitsh
         end
 
         case command.arguments.first
-        when "git"
-          command.arguments.shift # ignore unnecessary 'git' prefix
         when "exit", "quit"
           out.puts "Have a nice day!"
           return Result::Exit.new(exit_code: 0)

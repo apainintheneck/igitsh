@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe Gitsh::Tokenizer do
+  def expect_tokenized_lines(lines)
+    tokenized_lines = Array(lines).map do |line|
+      {
+        line: line,
+        tokens: described_class.tokenize(line)
+      }
+    end
+
+    expect(tokenized_lines)
+  end
+
   describe ".tokenize" do
     it "tokenizes blanks lines" do
       ["", "   ", "\t", "\n", "  \t \n"].each do |line|
@@ -8,104 +19,32 @@ RSpec.describe Gitsh::Tokenizer do
       end
     end
 
-    it "tokenizes commands without arguments", :aggregate_failures do
-      %w[diff log branch commit].each do |line|
-        expect(described_class.tokenize(line)).to eq([
-          Gitsh::Token::String.new(content: line, start_position: 0, end_position: line.size - 1)
-        ])
-      end
+    it "tokenizes commands without arguments" do |example|
+      expect_tokenized_lines(%w[diff log branch commit cherry-pick])
+        .to match_snapshot(example.description.tr(" ", "_"))
     end
 
-    it "tokenizes single-quoted strings", :aggregate_failures do
-      [
-        [
-          %(grep 'type : Tokenizer'),
-          [
-            Gitsh::Token::String.new(content: "grep", start_position: 0, end_position: 3),
-            Gitsh::Token::String.new(content: "type : Tokenizer", start_position: 5, end_position: 22)
-          ]
-        ],
-        [
-          %(grep 'describe ".tokenize" do'  ),
-          [
-            Gitsh::Token::String.new(content: "grep", start_position: 0, end_position: 3),
-            Gitsh::Token::String.new(content: "describe \".tokenize\" do", start_position: 5, end_position: 29)
-          ]
-        ],
-        [
-          %(add -- '*.js'),
-          [
-            Gitsh::Token::String.new(content: "add", start_position: 0, end_position: 2),
-            Gitsh::Token::String.new(content: "--", start_position: 4, end_position: 5),
-            Gitsh::Token::String.new(content: "*.js", start_position: 7, end_position: 12)
-          ]
-        ],
-        [
-          %( log --committer='Lawrence Kraft'),
-          [
-            Gitsh::Token::String.new(content: "log", start_position: 1, end_position: 3),
-            Gitsh::Token::String.new(content: "--committer=Lawrence Kraft", start_position: 5, end_position: 32)
-          ]
-        ],
-        [
-          %(commit -m 'Quote \\' of some time'),
-          [
-            Gitsh::Token::String.new(content: "commit", start_position: 0, end_position: 5),
-            Gitsh::Token::String.new(content: "-m", start_position: 7, end_position: 8),
-            Gitsh::Token::String.new(content: "Quote ' of some time", start_position: 10, end_position: 32)
-          ]
-        ]
-      ].each do |line, tokens|
-        expect(described_class.tokenize(line)).to eq(tokens)
-      end
+    it "tokenizes single-quoted strings" do |example|
+      expect_tokenized_lines([
+        %(grep 'type : Tokenizer'),
+        %(grep 'describe ".tokenize" do'  ),
+        %(add -- '*.js'),
+        %( log --committer='Lawrence Kraft'),
+        %(commit -m 'Quote \\' of some time')
+      ]).to match_snapshot(example.description.tr(" ", "_"))
     end
 
-    it "tokenizes double-quoted strings", :aggregate_failures do
-      [
-        [
-          %(grep   " type : Tokenizer"),
-          [
-            Gitsh::Token::String.new(content: "grep", start_position: 0, end_position: 3),
-            Gitsh::Token::String.new(content: " type : Tokenizer", start_position: 7, end_position: 25)
-          ]
-        ],
-        [
-          %(log   --grep   "'exit' or 'quit'"),
-          [
-            Gitsh::Token::String.new(content: "log", start_position: 0, end_position: 2),
-            Gitsh::Token::String.new(content: "--grep", start_position: 6, end_position: 11),
-            Gitsh::Token::String.new(content: "'exit' or 'quit'", start_position: 15, end_position: 32)
-          ]
-        ],
-        [
-          %(  add -- "*.js"),
-          [
-            Gitsh::Token::String.new(content: "add", start_position: 2, end_position: 4),
-            Gitsh::Token::String.new(content: "--", start_position: 6, end_position: 7),
-            Gitsh::Token::String.new(content: "*.js", start_position: 9, end_position: 14)
-          ]
-        ],
-        [
-          %(log --author="One Punch Man"),
-          [
-            Gitsh::Token::String.new(content: "log", start_position: 0, end_position: 2),
-            Gitsh::Token::String.new(content: "--author=One Punch Man", start_position: 4, end_position: 27)
-          ]
-        ],
-        [
-          %(commit -m "Quote \\" of all time"),
-          [
-            Gitsh::Token::String.new(content: "commit", start_position: 0, end_position: 5),
-            Gitsh::Token::String.new(content: "-m", start_position: 7, end_position: 8),
-            Gitsh::Token::String.new(content: "Quote \" of all time", start_position: 10, end_position: 31)
-          ]
-        ]
-      ].each do |line, tokens|
-        expect(described_class.tokenize(line)).to eq(tokens)
-      end
+    it "tokenizes double-quoted strings" do |example|
+      expect_tokenized_lines([
+        %(grep   " type : Tokenizer"),
+        %(log   --grep   "'exit' or 'quit'"),
+        %(  add -- "*.js"),
+        %(log --author="One Punch Man"),
+        %(commit -m "Quote \\" of all time")
+      ]).to match_snapshot(example.description.tr(" ", "_"))
     end
 
-    it "raises a syntax error when a matching closing quote is missing", :aggregate_failures do
+    it "parses unterminated strings", :aggregate_failures do
       [
         %(grep "skdfsdklfj),
         %(commit -m 'slkdfjsdklfjds),
@@ -114,8 +53,21 @@ RSpec.describe Gitsh::Tokenizer do
         %(checkout -b 'skldfjsd\\'skdlfjsdkf),
         %(commit -m "sdfjsdfsdf\\"sdk  djf)
       ].each do |line|
-        expect { described_class.tokenize(line) }
-          .to raise_error(Gitsh::SyntaxError, /Missing matching (?:single|double)-quote/)
+        expect(described_class.tokenize(line))
+          .to end_with(Gitsh::Token::UnterminatedString)
+      end
+    end
+
+    it "parses unterminated strings", :aggregate_failures do
+      [
+        %(grep skdfs&dklfj),
+        %(commit -m 'slkdfjsdklfjds' &&& git status),
+        %(|log --author="sdkfsdlkj'dsfkjds'),
+        %(branch -D sdkfsdlk|jdsfkjds),
+        %(checkout -b skdlfjsdkf|)
+      ].each do |line|
+        expect(described_class.tokenize(line))
+          .to include(Gitsh::Token::PartialAction)
       end
     end
 
@@ -156,33 +108,12 @@ RSpec.describe Gitsh::Tokenizer do
       include_examples "tokenize with action"
     end
 
-    it "tokenizes strings with multiple actions", :aggregate_failures do
-      [
-        [
-          "one && two; three || four",
-          [
-            Gitsh::Token::String.new(content: "one", start_position: 0, end_position: 2),
-            Gitsh::Token::And.new(content: "&&", start_position: 4, end_position: 5),
-            Gitsh::Token::String.new(content: "two", start_position: 7, end_position: 9),
-            Gitsh::Token::End.new(content: ";", start_position: 10, end_position: 10),
-            Gitsh::Token::String.new(content: "three", start_position: 12, end_position: 16),
-            Gitsh::Token::Or.new(content: "||", start_position: 18, end_position: 19),
-            Gitsh::Token::String.new(content: "four", start_position: 21, end_position: 24)
-          ]
-        ],
-        [
-          "&&   &&&&;||",
-          [
-            Gitsh::Token::And.new(content: "&&", start_position: 0, end_position: 1),
-            Gitsh::Token::And.new(content: "&&", start_position: 5, end_position: 6),
-            Gitsh::Token::And.new(content: "&&", start_position: 7, end_position: 8),
-            Gitsh::Token::End.new(content: ";", start_position: 9, end_position: 9),
-            Gitsh::Token::Or.new(content: "||", start_position: 10, end_position: 11)
-          ]
-        ]
-      ].each do |line, tokens|
-        expect(described_class.tokenize(line)).to eq(tokens)
-      end
+    it "tokenizes strings with multiple actions" do |example|
+      expect_tokenized_lines([
+        "one && two; three || four",
+        "&&   &&&&;||",
+        "one two &&||||; three four ;;"
+      ]).to match_snapshot(example.description.tr(" ", "_"))
     end
   end
 end

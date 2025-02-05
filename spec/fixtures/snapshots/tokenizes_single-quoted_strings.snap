@@ -1,0 +1,105 @@
+[
+	{
+		line: "grep 'type : Tokenizer'",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "grep",
+				@source = "grep 'type : Tokenizer'",
+				@start_position = 0,
+				@end_position = 4,
+			),
+			Gitsh::Token::String(
+				@content = "type : Tokenizer",
+				@source = "grep 'type : Tokenizer'",
+				@start_position = 5,
+				@end_position = 23,
+			),
+		],
+	},
+	{
+		line: "grep 'describe \".tokenize\" do'  ",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "grep",
+				@source = "grep 'describe \".tokenize\" do'  ",
+				@start_position = 0,
+				@end_position = 4,
+			),
+			Gitsh::Token::String(
+				@content = "describe \".tokenize\" do",
+				@source = "grep 'describe \".tokenize\" do'  ",
+				@start_position = 5,
+				@end_position = 30,
+			),
+		],
+	},
+	{
+		line: "add -- '*.js'",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "add",
+				@source = "add -- '*.js'",
+				@start_position = 0,
+				@end_position = 3,
+			),
+			Gitsh::Token::String(
+				@content = "--",
+				@source = "add -- '*.js'",
+				@start_position = 4,
+				@end_position = 6,
+			),
+			Gitsh::Token::String(
+				@content = "*.js",
+				@source = "add -- '*.js'",
+				@start_position = 7,
+				@end_position = 13,
+			),
+		],
+	},
+	{
+		line: " log --committer='Lawrence Kraft'",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "log",
+				@source = " log --committer='Lawrence Kraft'",
+				@start_position = 1,
+				@end_position = 4,
+			),
+			Gitsh::Token::String(
+				@content = "--committer=",
+				@source = " log --committer='Lawrence Kraft'",
+				@start_position = 5,
+				@end_position = 17,
+			),
+			Gitsh::Token::String(
+				@content = "Lawrence Kraft",
+				@source = " log --committer='Lawrence Kraft'",
+				@start_position = 17,
+				@end_position = 33,
+			),
+		],
+	},
+	{
+		line: "commit -m 'Quote \\' of some time'",
+		tokens: [
+			Gitsh::Token::String(
+				@content = "commit",
+				@source = "commit -m 'Quote \\' of some time'",
+				@start_position = 0,
+				@end_position = 6,
+			),
+			Gitsh::Token::String(
+				@content = "-m",
+				@source = "commit -m 'Quote \\' of some time'",
+				@start_position = 7,
+				@end_position = 9,
+			),
+			Gitsh::Token::String(
+				@content = "Quote ' of some time",
+				@source = "commit -m 'Quote \\' of some time'",
+				@start_position = 10,
+				@end_position = 33,
+			),
+		],
+	},
+]

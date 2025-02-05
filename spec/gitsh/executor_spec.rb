@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "tempfile"
+require "rainbow"
 
 RSpec.describe Gitsh::Executor do
   let!(:out) { Tempfile.new }
@@ -8,6 +9,8 @@ RSpec.describe Gitsh::Executor do
 
   let(:out_str) { out.tap(&:rewind).read }
   let(:err_str) { err.tap(&:rewind).read }
+
+  let(:error) { Rainbow("error>").blue.bold }
 
   around do |example|
     example.run
@@ -24,14 +27,6 @@ RSpec.describe Gitsh::Executor do
     # Success
     #
     context "with a single command" do
-      it "executes a command with a git prefix" do
-        expect(described_class.execute_line(line: "git help", out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
-
-        expect(out_str).to start_with("usage: git")
-        expect(err.size).to eq(0)
-      end
-
       it "executes a command without a git prefix" do
         expect(described_class.execute_line(line: "help", out: out, err: err))
           .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
@@ -160,12 +155,43 @@ RSpec.describe Gitsh::Executor do
     #
     # Failure
     #
-    it "fails when there is a syntax error" do
+    it "fails when there is an unterminated single-quoted string" do
       expect(described_class.execute_line(line: "first second 'third fourth", out: out, err: err))
         .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
 
       expect(out.size).to eq(0)
-      expect(err_str).to eq("13: Missing matching single-quote to close string\n")
+      expect(err_str).to eq <<~ERROR
+        | #{error} unterminated string
+        |
+        | first second 'third fourth
+        |              ^^^^^^^^^^^^^
+      ERROR
+    end
+
+    it "fails when there is an unterminated double-quoted string" do
+      expect(described_class.execute_line(line: "first second \"third fourth", out: out, err: err))
+        .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
+
+      expect(out.size).to eq(0)
+      expect(err_str).to eq <<~ERROR
+        | #{error} unterminated string
+        |
+        | first second "third fourth
+        |              ^^^^^^^^^^^^^
+      ERROR
+    end
+
+    it "fails when there is a partial action" do
+      expect(described_class.execute_line(line: "git clone sdlkfdjsf&sdfklsdfjsd", out: out, err: err))
+        .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
+
+      expect(out.size).to eq(0)
+      expect(err_str).to eq <<~ERROR
+        | #{error} expected '&&' but got '&' instead
+        |
+        | git clone sdlkfdjsf&sdfklsdfjsd
+        |                    ^
+      ERROR
     end
 
     it "fails when there is a parse error" do
@@ -173,7 +199,12 @@ RSpec.describe Gitsh::Executor do
         .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
 
       expect(out.size).to eq(0)
-      expect(err_str).to eq("9:10: Expected a string after '&&' but got '&&' instead\n")
+      expect(err_str).to eq <<~ERROR
+        | #{error} expected a string after '&&' but got '&&' instead
+        |
+        | first && && fourth
+        |          ^^
+      ERROR
     end
   end
 end
