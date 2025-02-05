@@ -27,39 +27,39 @@ module Gitsh
     #
     # @return [String]
     def self.build(status:, branch: nil, changes: nil)
-      builder = []
+      string = +""
 
-      builder << "gitsh".color(:aqua)
+      string << "gitsh".color(:aqua)
 
       if branch
-        builder << "(" << branch.color(:mediumslateblue)
+        string << "(" << branch.color(:mediumslateblue)
 
         if changes
-          builder << "|"
+          string << "|"
 
           if changes.unstaged_count.zero? && changes.staged_count.zero?
-            builder << "✔".color(:green)
+            string << "✔".color(:green)
           end
 
           if changes.staged_count.positive?
-            builder << "●#{changes.staged_count}".color(:yellowgreen)
+            string << "●#{changes.staged_count}".color(:yellowgreen)
           end
 
           if changes.unstaged_count.positive?
-            builder << "+#{changes.unstaged_count}".color(:blue)
+            string << "+#{changes.unstaged_count}".color(:blue)
           end
         end
 
-        builder << ")"
+        string << ")"
       end
 
       if status.positive?
-        builder << "[#{status}]".color(:crimson)
+        string << "[#{status}]".color(:crimson)
       end
 
-      builder << "> "
+      string << "> "
 
-      builder.join.bold
+      string.bold.freeze
     end
     private_class_method :build
   end

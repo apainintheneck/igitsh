@@ -18,7 +18,7 @@ module Gitsh
         string << highlight_token(prev_token, token)
       end
 
-      string
+      string.freeze
     end
 
     using Rainbow
