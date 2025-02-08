@@ -114,14 +114,19 @@ RSpec.describe Gitsh::Prompt do
         end
 
         context "with no changes" do
-          it "returns expected prompt" do
+          it "returns expected prompt", :aggregate_failures do
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{check})#{exit_code}> ").bold
+
+            stub_const("Gitsh::USE_COLOR", false)
+
+            expect(described_class.string(exit_code: failure))
+              .to eq "gitsh(main|✔)[127]> "
           end
         end
 
         context "with 2 staged changes" do
-          it "returns expected prompt" do
+          it "returns expected prompt", :aggregate_failures do
             # Two staged file changes
             FileUtils.touch "file1"
             FileUtils.touch "file2"
@@ -129,11 +134,16 @@ RSpec.describe Gitsh::Prompt do
 
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{staged})#{exit_code}> ").bold
+
+            stub_const("Gitsh::USE_COLOR", false)
+
+            expect(described_class.string(exit_code: failure))
+              .to eq "gitsh(main|●2)[127]> "
           end
         end
 
         context "with 1 unstaged change" do
-          it "returns expected prompt" do
+          it "returns expected prompt", :aggregate_failures do
             # Commit one file
             FileUtils.touch "file1"
             quiet_system("git add file1")
@@ -143,11 +153,16 @@ RSpec.describe Gitsh::Prompt do
 
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{unstaged})#{exit_code}> ").bold
+
+            stub_const("Gitsh::USE_COLOR", false)
+
+            expect(described_class.string(exit_code: failure))
+              .to eq "gitsh(main|+1)[127]> "
           end
         end
 
         context "with 2 staged changes and 1 unstaged change" do
-          it "returns expected prompt" do
+          it "returns expected prompt", :aggregate_failures do
             # Two staged file changes
             FileUtils.touch "file1"
             FileUtils.touch "file2"
@@ -157,6 +172,11 @@ RSpec.describe Gitsh::Prompt do
 
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{staged}#{unstaged})#{exit_code}> ").bold
+
+            stub_const("Gitsh::USE_COLOR", false)
+
+            expect(described_class.string(exit_code: failure))
+              .to eq "gitsh(main|●2+1)[127]> "
           end
         end
       end
@@ -166,9 +186,14 @@ RSpec.describe Gitsh::Prompt do
           in_temp_dir { example.run }
         end
 
-        it "returns default prompt string" do
+        it "returns default prompt string", :aggregate_failures do
           expect(described_class.string(exit_code: failure))
             .to eq Rainbow("#{gitsh}#{exit_code}> ").bold
+
+          stub_const("Gitsh::USE_COLOR", false)
+
+          expect(described_class.string(exit_code: failure))
+            .to eq "gitsh[127]> "
         end
       end
     end

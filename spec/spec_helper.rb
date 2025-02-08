@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Make sure that tests run with color by default.
+ENV.delete("NO_COLOR")
+
 require "gitsh"
 require "fileutils"
 require "rspec/snapshot"
