@@ -3,8 +3,22 @@
 require "gitsh"
 require "fileutils"
 require "rspec/snapshot"
+require "prop_check"
 require "sumi"
 require "date" # needed for "sumi"
+
+module Gitsh
+  # Additional test helper functions.
+  module Test
+    # @param line [String]
+    #
+    # @return [String] highlighted string
+    def self.highlight(line)
+      tokens = Gitsh::Tokenizer.tokenize(line)
+      Gitsh::Highlighter.from_tokens(tokens)
+    end
+  end
+end
 
 # Serializes values in a human readable way for snapshots using the
 # awesome_print gem
