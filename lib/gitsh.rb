@@ -21,6 +21,7 @@ module Gitsh
   autoload :Tokenizer, "gitsh/tokenizer"
 
   HISTORY_FILE_PATH = (XDG::Data.new.home / "gitsh/history").freeze
+  USE_COLOR = ENV["NO_COLOR"].then { _1.nil? || _1.empty? }
 
   def self.run!
     # Set up shell history.
@@ -35,7 +36,7 @@ module Gitsh
     # Set up shell completions.
     Reline.autocompletion = true
     Reline.completion_proc = method(:completions)
-    Reline.output_modifier_proc = method(:highlight)
+    Reline.output_modifier_proc = method(:highlight) if USE_COLOR
 
     puts "# Welcome to gitsh!"
 
