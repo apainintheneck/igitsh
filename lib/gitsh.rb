@@ -7,9 +7,14 @@ require "xdg"
 module Gitsh
   class Error < StandardError; end
 
+  # When the error is caught at the tokenizer level.
   class SyntaxError < Error; end
 
+  # When the error is caught at the parser level.
   class ParseError < Error; end
+
+  # Used to indicate that the user wants to exit the program.
+  class ExitError < Error; end
 
   autoload :Command, "gitsh/command"
   autoload :Executor, "gitsh/executor"
@@ -24,6 +29,7 @@ module Gitsh
   HISTORY_FILE_PATH = (XDG::Data.new.home / "gitsh/history").freeze
   USE_COLOR = ENV["NO_COLOR"].then { _1.nil? || _1.empty? }
 
+  # Sets up shell history, completions, syntax highlighting and starts the REPL.
   def self.run!
     # Set up shell history.
     original_history = Reline::HISTORY.to_a
@@ -37,6 +43,8 @@ module Gitsh
     # Set up shell completions.
     Reline.autocompletion = true
     Reline.completion_proc = method(:completions)
+
+    # Set up syntax highlighing.
     Reline.output_modifier_proc = method(:highlight) if USE_COLOR
 
     puts "# Welcome to gitsh!"
@@ -47,7 +55,7 @@ module Gitsh
     loop do
       prompt = Prompt.string(exit_code: exit_code)
       line = Reline.readline(prompt)&.strip
-      break if line.nil?
+      raise ExitError if line.nil? # for ctrl-d
       next if line.empty?
 
       result = Executor.execute_line(line: line)
@@ -64,12 +72,13 @@ module Gitsh
         if Reline::HISTORY.last != line
           Reline::HISTORY.push(line)
         end
-      when Gitsh::Executor::Result::Exit
-        # The user entered 'exit' or 'quit'.
-        return
       end
 
       exit_code = result.exit_code
+    # Exit based on "exit", "quit", ctrl-d or ctrl-c.
+    rescue ExitError, Interrupt
+      puts "Have a nice day!"
+      break
     end
   ensure
     # Note: This is only useful when testing in IRB.
@@ -100,7 +109,9 @@ module Gitsh
   private_class_method :completions
 
   # @return [String]
-  def self.highlight(...)
+  def self.highlight(line, complete:)
+    return if line.strip.empty?
+
     Highlighter.from_token_zipper(line_token_zipper)
   end
 

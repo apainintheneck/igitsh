@@ -60,11 +60,7 @@ module Gitsh
           skip_to_end = false
         end
 
-        case command.arguments.first
-        when "exit", "quit"
-          out.puts "Have a nice day!"
-          return Result::Exit.new(exit_code: 0)
-        end
+        raise ExitError if %w[exit quit].include?(command.arguments.first)
 
         exit_code = Git.run(
           command.arguments,
