@@ -137,19 +137,15 @@ RSpec.describe Gitsh::Executor do
     # Exit
     #
     it "exits successfully" do
-      expect(described_class.execute_line(line: "exit", out: out, err: err))
-        .to eq(Gitsh::Executor::Result::Exit.new(exit_code: 0))
-
-      expect(out_str).to start_with("Have a nice day!")
-      expect(err.size).to eq(0)
+      expect do
+        described_class.execute_line(line: "exit", out: out, err: err)
+      end.to raise_error(Gitsh::ExitError)
     end
 
     it "quits successfully" do
-      expect(described_class.execute_line(line: "quit", out: out, err: err))
-        .to eq(Gitsh::Executor::Result::Exit.new(exit_code: 0))
-
-      expect(out_str).to start_with("Have a nice day!")
-      expect(err.size).to eq(0)
+      expect do
+        described_class.execute_line(line: "quit", out: out, err: err)
+      end.to raise_error(Gitsh::ExitError)
     end
 
     #
