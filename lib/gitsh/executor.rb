@@ -28,6 +28,8 @@ module Gitsh
       class Exit < Base; end
     end
 
+    # Tokenize, parse and run the input line as a series of Git commands.
+    #
     # @param line [String]
     # @param out [IO] (default STDOUT)
     # @param err [IO] (default STDIN)

@@ -5,10 +5,16 @@ ENV.delete("NO_COLOR")
 
 require "gitsh"
 require "fileutils"
-require "rspec/snapshot"
 require "prop_check"
-require "sumi"
-require "date" # needed for "sumi"
+require "rspec/snapshot"
+require "yaml"
+
+# For the snapshot testing library.
+class YAMLSerializer
+  def dump(object)
+    YAML.dump(object)
+  end
+end
 
 module Gitsh
   # Additional test helper functions.
@@ -17,19 +23,9 @@ module Gitsh
     #
     # @return [String] highlighted string
     def self.highlight(line)
-      tokens = Gitsh::Tokenizer.tokenize(line)
-      Gitsh::Highlighter.from_tokens(tokens)
+      zipper = Gitsh::Tokenizer.tokenize(line)
+      Gitsh::Highlighter.from_token_zipper(zipper)
     end
-  end
-end
-
-# Serializes values in a human readable way for snapshots using the
-# awesome_print gem
-class SumiSerializer
-  # @param [*] value The value to serialize.
-  # @return [String] The serialized value.
-  def dump(value)
-    Sumi.inspect(value)
   end
 end
 
@@ -117,7 +113,7 @@ RSpec.configure do |config|
   # Defaults to using the awesome_print gem to serialize values for snapshots
   #
   # Set this value to use a custom snapshot serializer
-  config.snapshot_serializer = SumiSerializer
+  config.snapshot_serializer = YAMLSerializer
 end
 
 # Copied from `Library/Homebrew/dev-cmd/tests.rb`.

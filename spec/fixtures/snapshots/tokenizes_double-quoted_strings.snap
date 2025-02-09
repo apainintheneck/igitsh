@@ -1,111 +1,82 @@
-[
-	{
-		line: "grep   \" type : Tokenizer\"",
-		tokens: [
-			Gitsh::Token::String(
-				@content = "grep",
-				@source = "grep   \" type : Tokenizer\"",
-				@start_position = 0,
-				@end_position = 4,
-			),
-			Gitsh::Token::String(
-				@content = " type : Tokenizer",
-				@source = "grep   \" type : Tokenizer\"",
-				@start_position = 7,
-				@end_position = 26,
-			),
-		],
-	},
-	{
-		line: "log   --grep   \"'exit' or 'quit'\"",
-		tokens: [
-			Gitsh::Token::String(
-				@content = "log",
-				@source = "log   --grep   \"'exit' or 'quit'\"",
-				@start_position = 0,
-				@end_position = 3,
-			),
-			Gitsh::Token::String(
-				@content = "--grep",
-				@source = "log   --grep   \"'exit' or 'quit'\"",
-				@start_position = 6,
-				@end_position = 12,
-			),
-			Gitsh::Token::String(
-				@content = "'exit' or 'quit'",
-				@source = "log   --grep   \"'exit' or 'quit'\"",
-				@start_position = 15,
-				@end_position = 33,
-			),
-		],
-	},
-	{
-		line: "  add -- \"*.js\"",
-		tokens: [
-			Gitsh::Token::String(
-				@content = "add",
-				@source = "  add -- \"*.js\"",
-				@start_position = 2,
-				@end_position = 5,
-			),
-			Gitsh::Token::String(
-				@content = "--",
-				@source = "  add -- \"*.js\"",
-				@start_position = 6,
-				@end_position = 8,
-			),
-			Gitsh::Token::String(
-				@content = "*.js",
-				@source = "  add -- \"*.js\"",
-				@start_position = 9,
-				@end_position = 15,
-			),
-		],
-	},
-	{
-		line: "log --author=\"One Punch Man\"",
-		tokens: [
-			Gitsh::Token::String(
-				@content = "log",
-				@source = "log --author=\"One Punch Man\"",
-				@start_position = 0,
-				@end_position = 3,
-			),
-			Gitsh::Token::String(
-				@content = "--author=",
-				@source = "log --author=\"One Punch Man\"",
-				@start_position = 4,
-				@end_position = 13,
-			),
-			Gitsh::Token::String(
-				@content = "One Punch Man",
-				@source = "log --author=\"One Punch Man\"",
-				@start_position = 13,
-				@end_position = 28,
-			),
-		],
-	},
-	{
-		line: "commit -m \"Quote \\\" of all time\"",
-		tokens: [
-			Gitsh::Token::String(
-				@content = "commit",
-				@source = "commit -m \"Quote \\\" of all time\"",
-				@start_position = 0,
-				@end_position = 6,
-			),
-			Gitsh::Token::String(
-				@content = "-m",
-				@source = "commit -m \"Quote \\\" of all time\"",
-				@start_position = 7,
-				@end_position = 9,
-			),
-			Gitsh::Token::String(
-				@content = "Quote \" of all time",
-				@source = "commit -m \"Quote \\\" of all time\"",
-				@start_position = 10,
-				@end_position = 32,
-			),
-		],
-	},
-]
+---
+- :line: 'grep   " type : Tokenizer"'
+  :tokens: !ruby/object:Gitsh::TokenZipper
+    source: 'grep   " type : Tokenizer"'
+    tokens:
+    - !ruby/object:Gitsh::Token::String
+      source: 'grep   " type : Tokenizer"'
+      start_position: 0
+      end_position: 4
+    - !ruby/object:Gitsh::Token::String
+      source: 'grep   " type : Tokenizer"'
+      start_position: 7
+      end_position: 26
+    index: 0
+- :line: log   --grep   "'exit' or 'quit'"
+  :tokens: !ruby/object:Gitsh::TokenZipper
+    source: log   --grep   "'exit' or 'quit'"
+    tokens:
+    - !ruby/object:Gitsh::Token::String
+      source: log   --grep   "'exit' or 'quit'"
+      start_position: 0
+      end_position: 3
+    - !ruby/object:Gitsh::Token::String
+      source: log   --grep   "'exit' or 'quit'"
+      start_position: 6
+      end_position: 12
+    - !ruby/object:Gitsh::Token::String
+      source: log   --grep   "'exit' or 'quit'"
+      start_position: 15
+      end_position: 33
+    index: 0
+- :line: '  add -- "*.js"'
+  :tokens: !ruby/object:Gitsh::TokenZipper
+    source: '  add -- "*.js"'
+    tokens:
+    - !ruby/object:Gitsh::Token::String
+      source: '  add -- "*.js"'
+      start_position: 2
+      end_position: 5
+    - !ruby/object:Gitsh::Token::String
+      source: '  add -- "*.js"'
+      start_position: 6
+      end_position: 8
+    - !ruby/object:Gitsh::Token::String
+      source: '  add -- "*.js"'
+      start_position: 9
+      end_position: 15
+    index: 0
+- :line: log --author="One Punch Man"
+  :tokens: !ruby/object:Gitsh::TokenZipper
+    source: log --author="One Punch Man"
+    tokens:
+    - !ruby/object:Gitsh::Token::String
+      source: log --author="One Punch Man"
+      start_position: 0
+      end_position: 3
+    - !ruby/object:Gitsh::Token::String
+      source: log --author="One Punch Man"
+      start_position: 4
+      end_position: 13
+    - !ruby/object:Gitsh::Token::String
+      source: log --author="One Punch Man"
+      start_position: 13
+      end_position: 28
+    index: 0
+- :line: commit -m "Quote \" of all time"
+  :tokens: !ruby/object:Gitsh::TokenZipper
+    source: commit -m "Quote \" of all time"
+    tokens:
+    - !ruby/object:Gitsh::Token::String
+      source: commit -m "Quote \" of all time"
+      start_position: 0
+      end_position: 6
+    - !ruby/object:Gitsh::Token::String
+      source: commit -m "Quote \" of all time"
+      start_position: 7
+      end_position: 9
+    - !ruby/object:Gitsh::Token::String
+      source: commit -m "Quote \" of all time"
+      start_position: 10
+      end_position: 32
+    index: 0

@@ -1,26 +1,21 @@
-[
-	{
-		line: "git grep 'Github::API';",
-		commands: [
-			Gitsh::Command::End(
-				@arguments = ["git", "grep", "Github::API"],
-			),
-		],
-	},
-	{
-		line: "diff head   ;  ",
-		commands: [
-			Gitsh::Command::End(
-				@arguments = ["diff", "head"],
-			),
-		],
-	},
-	{
-		line: "git commit --amend;  ",
-		commands: [
-			Gitsh::Command::End(
-				@arguments = ["git", "commit", "--amend"],
-			),
-		],
-	},
-]
+---
+- :line: git grep 'Github::API';
+  :commands:
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - grep
+    - Github::API
+- :line: 'diff head   ;  '
+  :commands:
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - diff
+    - head
+- :line: 'git commit --amend;  '
+  :commands:
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - commit
+    - "--amend"

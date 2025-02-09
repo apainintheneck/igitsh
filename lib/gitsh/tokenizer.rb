@@ -9,7 +9,8 @@ module Gitsh
     BACKSLASH = "\\"
 
     # @param line [String]
-    # @return [Array<Gitsh::Token::Base>]
+    #
+    # @return [Gitsh::TokenZipper]
     def self.tokenize(line)
       line = line.dup.freeze
       tokens = []
@@ -20,30 +21,26 @@ module Gitsh
 
         if scanner.skip(/\s+/) # whitespace
           next
-        elsif scanner.scan("&&") # and (&&)
+        elsif scanner.skip("&&") # and (&&)
           tokens << Token::And.new(
-            content: "&&",
             source: line,
             start_position: start_position,
             end_position: scanner.charpos
           )
-        elsif scanner.scan("||") # or (||)
+        elsif scanner.skip("||") # or (||)
           tokens << Token::Or.new(
-            content: "||",
             source: line,
             start_position: start_position,
             end_position: scanner.charpos
           )
-        elsif scanner.scan(";") # end (;)
+        elsif scanner.skip(";") # end (;)
           tokens << Token::End.new(
-            content: ";",
             source: line,
             start_position: start_position,
             end_position: scanner.charpos
           )
-        elsif (content = scanner.scan(/[&|]/)) # partial (&&) or (||)
+        elsif scanner.skip(/[&|]/) # partial (&&) or (||)
           tokens << Token::PartialAction.new(
-            content: content,
             source: line,
             start_position: start_position,
             end_position: scanner.charpos
@@ -57,7 +54,7 @@ module Gitsh
         end
       end
 
-      tokens
+      TokenZipper.new(source: line, tokens: tokens.freeze)
     end
 
     # @param line [String]
@@ -67,6 +64,7 @@ module Gitsh
     # @return [String]
     def self.scan_string_token(line:, start_position:, scanner:)
       terminated = true
+      matched = nil
 
       # Everything else that is not:
       # - an ampersand
@@ -74,63 +72,41 @@ module Gitsh
       # - a semicolon
       # - a single or double quote
       # - a whitespace character
-      str ||= scanner.scan(/[^&|;'"\s]+/)
+      matched = true if scanner.skip(/[^&|;'"\s]+/)
 
       # a single-quoted string
-      str ||= if scanner.skip(SINGLE_QUOTE)
-        substr = +""
-
+      matched ||= if scanner.skip(SINGLE_QUOTE)
         until scanner.skip(SINGLE_QUOTE)
           if scanner.eos?
             terminated = false
             break
           elsif scanner.skip(BACKSLASH)
-            case (char = scanner.getch)
-            when BACKSLASH
-              substr << BACKSLASH
-            when SINGLE_QUOTE
-              substr << SINGLE_QUOTE
-            when nil
-              next
-            else
-              substr << BACKSLASH << char
-            end
+            scanner.getch
           else
-            substr << scanner.scan(/[^\\']+/)
+            scanner.skip(/[^\\']+/)
           end
         end
 
-        substr
+        true
       end
 
       # a double-quoted string
-      str ||= if scanner.skip(DOUBLE_QUOTE)
-        substr = +""
-
+      matched ||= if scanner.skip(DOUBLE_QUOTE)
         until scanner.skip(DOUBLE_QUOTE)
           if scanner.eos?
             terminated = false
             break
           elsif scanner.skip(BACKSLASH)
-            case (char = scanner.getch)
-            when BACKSLASH
-              substr << BACKSLASH
-            when DOUBLE_QUOTE
-              substr << DOUBLE_QUOTE
-            when nil
-              next
-            else
-              substr << BACKSLASH << char
-            end
+            scanner.getch
           else
-            substr << scanner.scan(/[^\\"]+/)
+            scanner.skip(/[^\\"]+/)
           end
         end
 
-        substr
+        true
       end
 
-      if str
+      if matched
         token_class = if terminated
           Token::String
         else
@@ -138,7 +114,6 @@ module Gitsh
         end
 
         return token_class.new(
-          content: str,
           source: line,
           start_position: start_position,
           end_position: scanner.charpos
