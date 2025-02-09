@@ -3,54 +3,50 @@
 require "rainbow/refinement"
 
 module Gitsh
+  # Each token represents the offsets in the source string of the parsed value.
   module Token
     class Base
       # @return [String]
       attr_reader :source
-      # @return [String]
-      attr_reader :content
       # @return [Integer]
       attr_reader :start_position
       # @return [Integer]
       attr_reader :end_position
 
-      # @param content [String] the content of the parsed token
-      # @param source [String] the source string that the token was parsed from
       # @param start_position [Integer]
       # @param end_position [Integer]
-      def initialize(content:, source: "", start_position: 0, end_position: 0)
-        @content = content
+      # @param source [String] must be frozen
+      def initialize(start_position:, end_position:, source:)
+        raise ArgumentError, ":source must be frozen" unless source.frozen?
+
         @source = source
         @start_position = start_position
         @end_position = end_position
       end
 
-      # @return [Gitsh::SyntaxError]
-      def syntax_error(message)
-        SyntaxError.new(pretty_error_message(message))
-      end
-
-      # @return [Gitsh::ParseError]
-      def parse_error(message)
-        ParseError.new(pretty_error_message(message))
-      end
-
       # @return [String]
       def start_char
-        @source[start_position]
+        @start_char ||= source[start_position]
       end
 
       # @return [String]
       def raw_content
-        @source[start_position...end_position]
+        @raw_content ||= source[start_position...end_position]
+      end
+      alias_method :content, :raw_content
+
+      # @param message [String]
+      #
+      # @return [Gitsh::SyntaxError]
+      def syntax_error(message)
+        SyntaxError.new(pretty_error_message(message: message))
       end
 
-      # @return [Boolean]
-      def ==(other)
-        self.class === other &&
-          other.content == @content &&
-          other.start_position == @start_position &&
-          other.end_position == @end_position
+      # @param message [String]
+      #
+      # @return [Gitsh::ParseError]
+      def parse_error(message)
+        ParseError.new(pretty_error_message(message: message))
       end
 
       private
@@ -60,10 +56,10 @@ module Gitsh
       # @param message [String]
       #
       # @return [String]
-      def pretty_error_message(message)
-        pre_error = @source[0...start_position]
-        error = @source[start_position...end_position]
-        post_error = @source[end_position..]
+      def pretty_error_message(message:)
+        pre_error = source[0...start_position]
+        error = raw_content
+        post_error = source[end_position..]
 
         <<~ERROR
           | #{"error>".color(:blue).bold} #{message}
@@ -81,6 +77,15 @@ module Gitsh
       def quoted?
         %('").include?(start_char)
       end
+
+      # @return [String]
+      def content
+        @content ||= if quoted?
+          source[(start_position + 1)...(end_position - 1)]
+        else
+          super
+        end
+      end
     end
 
     # Ex. `&&`
@@ -94,24 +99,14 @@ module Gitsh
 
     # When the closing quote is missing.
     # Ex. `"string`
-    class UnterminatedString < Base; end
+    class UnterminatedString < Base
+      # @return [String]
+      def content
+        @content ||= source[(start_position + 1)...end_position]
+      end
+    end
 
     # When there is a single (&) or (|)
     class PartialAction < Base; end
-
-    # @param token [Gitsh::Token::And, Gitsh::Token::Or, Gitsh::Token::End]
-    # @return [Gitsh::Command::Base]
-    def self.to_action_command(token)
-      case token
-      when Token::And
-        Command::And.new
-      when Token::Or
-        Command::Or.new
-      when Token::End
-        Command::End.new
-      else
-        raise Error, "Expected action token instead of: #{token}"
-      end
-    end
   end
 end

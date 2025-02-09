@@ -53,8 +53,8 @@ RSpec.describe Gitsh::Tokenizer do
         %(checkout -b 'skldfjsd\\'skdlfjsdkf),
         %(commit -m "sdfjsdfsdf\\"sdk  djf)
       ].each do |line|
-        expect(described_class.tokenize(line))
-          .to end_with(Gitsh::Token::UnterminatedString)
+        expect(described_class.tokenize(line).last)
+          .to be_an_unterminated_string_token
       end
     end
 
@@ -66,7 +66,7 @@ RSpec.describe Gitsh::Tokenizer do
         %(branch -D sdkfsdlk|jdsfkjds),
         %(checkout -b skdlfjsdkf|)
       ].each do |line|
-        expect(described_class.tokenize(line))
+        expect(described_class.tokenize(line).tokens)
           .to include(Gitsh::Token::PartialAction)
       end
     end
@@ -79,10 +79,10 @@ RSpec.describe Gitsh::Tokenizer do
           "first #{action}second",
           "first#{action}second"
         ].each do |line|
-          tokens = described_class.tokenize(line)
+          zipper = described_class.tokenize(line)
 
-          expect(tokens.map(&:class)).to eq([Gitsh::Token::String, klass, Gitsh::Token::String])
-          expect(tokens.map(&:content)).to eq(["first", action, "second"])
+          expect(zipper.tokens.map(&:class)).to eq([Gitsh::Token::String, klass, Gitsh::Token::String])
+          expect(zipper.tokens.map(&:content)).to eq(["first", action, "second"])
         end
       end
     end

@@ -1,47 +1,57 @@
-[
-	{
-		line: "add ex.js && add ex.rb; git diff; git commit -m 'commit'",
-		commands: [
-			Gitsh::Command::End(
-				@arguments = ["add", "ex.js"],
-			),
-			Gitsh::Command::And(
-				@arguments = ["add", "ex.rb"],
-			),
-			Gitsh::Command::End(
-				@arguments = ["git", "diff"],
-			),
-			Gitsh::Command::End(
-				@arguments = ["git", "commit", "-m", "commit"],
-			),
-		],
-	},
-	{
-		line: "git grep -q match_snapshot && git add .; git commit -m snapshots",
-		commands: [
-			Gitsh::Command::End(
-				@arguments = ["git", "grep", "-q", "match_snapshot"],
-			),
-			Gitsh::Command::And(
-				@arguments = ["git", "add", "."],
-			),
-			Gitsh::Command::End(
-				@arguments = ["git", "commit", "-m", "snapshots"],
-			),
-		],
-	},
-	{
-		line: "git log -5 || git diff HEAD && git commit --amend",
-		commands: [
-			Gitsh::Command::End(
-				@arguments = ["git", "log", "-5"],
-			),
-			Gitsh::Command::Or(
-				@arguments = ["git", "diff", "HEAD"],
-			),
-			Gitsh::Command::And(
-				@arguments = ["git", "commit", "--amend"],
-			),
-		],
-	},
-]
+---
+- :line: add ex.js && add ex.rb; git diff; git commit -m 'commit'
+  :commands:
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - add
+    - ex.js
+  - !ruby/object:Gitsh::Command::And
+    arguments:
+    - add
+    - ex.rb
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - diff
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - commit
+    - "-m"
+    - commit
+- :line: git grep -q match_snapshot && git add .; git commit -m snapshots
+  :commands:
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - grep
+    - "-q"
+    - match_snapshot
+  - !ruby/object:Gitsh::Command::And
+    arguments:
+    - git
+    - add
+    - "."
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - commit
+    - "-m"
+    - snapshots
+- :line: git log -5 || git diff HEAD && git commit --amend
+  :commands:
+  - !ruby/object:Gitsh::Command::End
+    arguments:
+    - git
+    - log
+    - "-5"
+  - !ruby/object:Gitsh::Command::Or
+    arguments:
+    - git
+    - diff
+    - HEAD
+  - !ruby/object:Gitsh::Command::And
+    arguments:
+    - git
+    - commit
+    - "--amend"

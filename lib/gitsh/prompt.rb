@@ -4,6 +4,8 @@ require "rainbow/refinement"
 
 module Gitsh
   module Prompt
+    # Returns the shell prompt as a string.
+    #
     # @param exit_code [Integer]
     #
     # @return [String]

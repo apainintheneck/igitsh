@@ -18,6 +18,7 @@ module Gitsh
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
+  autoload :TokenZipper, "gitsh/token_zipper"
   autoload :Tokenizer, "gitsh/tokenizer"
 
   HISTORY_FILE_PATH = (XDG::Data.new.home / "gitsh/history").freeze
@@ -86,14 +87,9 @@ module Gitsh
   def self.completions(word)
     return if word.empty?
 
-    case line_tokens
-    in [Gitsh::Token::String]
-      # First command
-    in [*, Gitsh::Token::And | Gitsh::Token::Or | Gitsh::Token::End, Gitsh::Token::String]
-      # Follow-up command after action
-    else
-      return
-    end
+    last_token_zipper = line_token_zipper.last
+    return unless last_token_zipper.command?
+    return if last_token_zipper.valid_command?
 
     all_commands
       # Complete all commands starting with the given prefix.
@@ -105,12 +101,12 @@ module Gitsh
 
   # @return [String]
   def self.highlight(...)
-    Highlighter.from_tokens(line_tokens)
+    Highlighter.from_token_zipper(line_token_zipper)
   end
 
-  # @return [Array<Gitsh::Token::Base>]
-  def self.line_tokens
+  # @return [Gitsh::TokenZipper]
+  def self.line_token_zipper
     Gitsh::Tokenizer.tokenize(Reline.line_buffer)
   end
-  private_class_method :line_tokens
+  private_class_method :line_token_zipper
 end

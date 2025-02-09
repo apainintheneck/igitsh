@@ -4,18 +4,19 @@ require "rainbow/refinement"
 
 module Gitsh
   module Highlighter
-    # @param tokens [Array<Gitsh::Token::Base>]
+    # Highlight an input line for the command line.
+    #
+    # @param tokens [Gitsh::TokenZipper]
     #
     # @return [String]
-    def self.from_tokens(tokens)
+    def self.from_token_zipper(zipper)
       string = +""
-      return string if tokens.empty?
+      return string if zipper.empty?
 
-      [nil, *tokens].each_cons(2) do |prev_token, token|
-        token_gap = token.start_position - prev_token&.end_position.to_i
-
+      zipper.each do |sub_zipper|
+        string << highlight_token(sub_zipper)
+        token_gap = sub_zipper.gap_to_next
         string << " " * token_gap if token_gap.positive?
-        string << highlight_token(prev_token, token)
       end
 
       string.freeze
@@ -23,33 +24,30 @@ module Gitsh
 
     using Rainbow
 
-    # @param prev_token [Gitsh::Token::Base, nil]
-    # @param token [Gitsh::Token::Base]
+    # @param zipper [Gitsh::Zipper]
     #
     # @return [String]
-    def self.highlight_token(prev_token, token)
-      case token
-      in Token::And | Token::Or | Token::End
-        token.content.color(:mediumspringgreen)
-      in Token::PartialAction
-        token.content.color(:orange)
-      in Token::UnterminatedString
-        token.start_char.color(:crimson) + token.content.color(:greenyellow)
-      in Token::String
-        case prev_token
-        when Token::String
-          if token.quoted?
-            token.raw_content.color(:yellowgreen)
+    def self.highlight_token(zipper)
+      if zipper.action?
+        zipper.token.raw_content.color(:mediumspringgreen)
+      elsif zipper.partial_action_token?
+        zipper.token.raw_content.color(:orange)
+      elsif zipper.unterminated_string_token?
+        zipper.token.start_char.color(:crimson) + zipper.token.content.color(:greenyellow)
+      elsif zipper.string_token?
+        if zipper.command?
+          if zipper.valid_command?
+            zipper.token.raw_content.color(:aqua)
           else
-            token.raw_content.color(:mediumslateblue)
+            zipper.token.raw_content.color(:crimson)
           end
+        elsif zipper.token.quoted?
+          zipper.token.raw_content.color(:yellowgreen)
         else
-          if ::Gitsh.all_commands.include?(token.content)
-            token.raw_content.color(:aqua)
-          else
-            token.raw_content.color(:crimson)
-          end
+          zipper.token.raw_content.color(:mediumslateblue)
         end
+      else # Unreachable
+        zipper.token.parse_error("unable to highlight unexpected token")
       end.bold
     end
     private_class_method :highlight_token
