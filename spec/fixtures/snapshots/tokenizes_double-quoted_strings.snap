@@ -37,7 +37,7 @@
       source: '  add -- "*.js"'
       start_position: 2
       end_position: 5
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Gitsh::Token::EndOfOptions
       source: '  add -- "*.js"'
       start_position: 6
       end_position: 8

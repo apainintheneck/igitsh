@@ -3,6 +3,7 @@
 require "open3"
 require "tty-which"
 require "English"
+require "set" # needed for Ruby 3.1 support
 
 module Gitsh
   module Git
