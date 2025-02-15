@@ -16,9 +16,14 @@ module Gitsh
   # Used to indicate that the user wants to exit the program.
   class ExitError < Error; end
 
+  # When a line of code should never be reached in normal execution.
+  class UnreachableError < Error; end
+
   autoload :Command, "gitsh/command"
+  autoload :Completer, "gitsh/completer"
   autoload :Executor, "gitsh/executor"
   autoload :Git, "gitsh/git"
+  autoload :GitHelp, "gitsh/git_help"
   autoload :Highlighter, "gitsh/highlighter"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
@@ -87,7 +92,7 @@ module Gitsh
 
   # @return [Array<String>]
   def self.all_commands
-    @all_commands ||= (Git.commands + %w[exit quit]).freeze
+    @all_commands ||= (Git.command_list + %w[exit quit]).freeze
   end
 
   # @param word [String]
@@ -96,28 +101,22 @@ module Gitsh
   def self.completions(word)
     return if word.empty?
 
-    last_token_zipper = line_token_zipper.last
-    return unless last_token_zipper.command?
-    return if last_token_zipper.valid_command?
-
-    all_commands
-      # Complete all commands starting with the given prefix.
-      .grep(/^#{Regexp.escape(word)}./)
-      # Sort results by shortest command and then alphabetically.
-      .sort_by { |cmd| [cmd.size, cmd] }
+    Completer.from_line(line_buffer)
   end
   private_class_method :completions
 
+  # @param line [String]
+  #
   # @return [String]
-  def self.highlight(line, complete:)
+  def self.highlight(line, **)
     return if line.strip.empty?
 
-    Highlighter.from_token_zipper(line_token_zipper)
+    Highlighter.from_line(line_buffer)
   end
 
-  # @return [Gitsh::TokenZipper]
-  def self.line_token_zipper
-    Gitsh::Tokenizer.tokenize(Reline.line_buffer)
+  # @return [String]
+  def self.line_buffer
+    Reline.line_buffer.to_s
   end
-  private_class_method :line_token_zipper
+  private_class_method :line_buffer
 end

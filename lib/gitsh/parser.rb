@@ -8,7 +8,7 @@ module Gitsh
     # @return [Array<Gitsh::Command::Base>]
     def self.parse(line)
       command_list = []
-      zipper = Tokenizer.tokenize(line)
+      zipper = Tokenizer.from_line(line)
       return command_list if zipper.empty?
 
       command_list << Command::End.new
@@ -42,6 +42,8 @@ module Gitsh
           raise sub_zipper.token.syntax_error("unterminated string")
         elsif sub_zipper.partial_action_token?
           raise sub_zipper.token.syntax_error("expected '#{sub_zipper.token.content * 2}' but got '#{sub_zipper.token.content}' instead")
+        else
+          raise sub_zipper.token.unreachable_error("unknown token: #{sub_zipper.token}")
         end
       end
 

@@ -66,7 +66,7 @@ module Gitsh
           command.arguments,
           out: out,
           err: err
-        ).exitstatus
+        )
       end
 
       Result::Success.new(exit_code: exit_code)

@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "A simple shell for Git commands with autocompletion and custom shortcuts."
   spec.homepage = "https://github.com/apainintheneck/gitsh/"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.2.0"
+  spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
