@@ -3,6 +3,7 @@
 require "open3"
 require "tty-which"
 require "English"
+require "set" # needed for Ruby 3.1 support
 
 module Gitsh
   module Git
@@ -24,6 +25,17 @@ module Gitsh
       branch_name unless branch_name.empty?
     end
 
+    # @param command [String]
+    #
+    # @return [String, nil]
+    def self.help_page(command:)
+      return unless command_set.include?(command)
+
+      out_str, _err_str, _status = Open3.capture3("git", "help", "--man", command)
+      help_text = out_str.strip
+      help_text unless help_text.empty?
+    end
+
     Changes = Struct.new(:staged_count, :unstaged_count, keyword_init: true)
 
     # @return [Changes]
@@ -43,7 +55,7 @@ module Gitsh
     end
 
     # @return [Array<String>]
-    def self.commands
+    def self.command_list
       @commands ||= `git --list-cmds=main,nohelpers`
         .lines
         .map(&:strip)
@@ -51,14 +63,20 @@ module Gitsh
         .freeze
     end
 
+    # @return [Set<String>]
+    def self.command_set
+      @command_set ||= command_list.to_set.freeze
+    end
+
     # @param args [Array<String>]
     # @param out [IO] (default STDOUT)
     # @param err [IO] (default STDIN)
     #
-    # @return [Process::Status]
+    # @return [Integer]
     def self.run(args, out: $stdout, err: $stderr)
       system("git", *args, out: out, err: err)
-      $CHILD_STATUS
+      # TODO: Handle signal failures here that don't show themselves in exit codes.
+      $CHILD_STATUS.exitstatus.to_i
     end
   end
 end

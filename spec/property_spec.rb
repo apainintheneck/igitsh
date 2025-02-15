@@ -5,7 +5,11 @@ RSpec.describe "property testing" do
     let(:line_generator) do
       gen = PropCheck::Generators
 
-      gen_constants = %w[& | ; && || ' " push pull commit grep diff]
+      gen_constants = %w[
+        & | ; && || -- ' "
+        push pull commit grep diff
+        --no- --stat --max-depth --color=never
+      ]
       gen_constants << " " << "  "
       gen_constants.map! { gen.constant(_1) }
 
@@ -23,7 +27,7 @@ RSpec.describe "property testing" do
     it "tokenizes and highlights unexpected input lines" do
       PropCheck.forall(line_generator) do |array|
         line = array.join
-        expect { Gitsh::Test.highlight(line) }.not_to raise_error
+        expect { Gitsh::Highlighter.from_line(line) }.not_to raise_error
       end
     end
 
@@ -35,6 +39,13 @@ RSpec.describe "property testing" do
         rescue Gitsh::SyntaxError, Gitsh::ParseError
           # ignore expected parsing errors
         end.not_to raise_error
+      end
+    end
+
+    it "tokenizes and completes unexpected input lines" do
+      PropCheck.forall(line_generator) do |array|
+        line = array.join
+        expect { Gitsh::Completer.from_line(line) }.not_to raise_error
       end
     end
   end

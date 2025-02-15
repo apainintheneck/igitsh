@@ -8,6 +8,7 @@ require "fileutils"
 require "prop_check"
 require "rspec/snapshot"
 require "yaml"
+require "pathname"
 
 # For the snapshot testing library.
 class YAMLSerializer
@@ -16,17 +17,24 @@ class YAMLSerializer
   end
 end
 
-module Gitsh
-  # Additional test helper functions.
-  module Test
-    # @param line [String]
-    #
-    # @return [String] highlighted string
-    def self.highlight(line)
-      zipper = Gitsh::Tokenizer.tokenize(line)
-      Gitsh::Highlighter.from_token_zipper(zipper)
-    end
-  end
+# Copied from `Library/Homebrew/dev-cmd/tests.rb`.
+# This prevents git repo set up errors.
+%w[AUTHOR COMMITTER].each do |role|
+  ENV["GIT_#{role}_NAME"] = "gitsh tests"
+  ENV["GIT_#{role}_EMAIL"] = "gitsh-tests@localhost"
+  ENV["GIT_#{role}_DATE"] = "Sun Jan 22 19:59:13 2017 +0000"
+end
+
+# Setup fixture directory helper.
+SPEC_DIR = Pathname(__dir__).expand_path.freeze
+FIXTURE_DIR = (SPEC_DIR / "fixtures").freeze
+
+# @param filename [String] located in the `spec/fixtures` directory.
+#
+# @return [String] file contents
+def fixture(filename)
+  @fixture ||= {}
+  @fixture[filename] ||= File.read FIXTURE_DIR / filename
 end
 
 RSpec.configure do |config|
@@ -114,12 +122,4 @@ RSpec.configure do |config|
   #
   # Set this value to use a custom snapshot serializer
   config.snapshot_serializer = YAMLSerializer
-end
-
-# Copied from `Library/Homebrew/dev-cmd/tests.rb`.
-# This prevents git repo set up errors.
-%w[AUTHOR COMMITTER].each do |role|
-  ENV["GIT_#{role}_NAME"] = "gitsh tests"
-  ENV["GIT_#{role}_EMAIL"] = "gitsh-tests@localhost"
-  ENV["GIT_#{role}_DATE"] = "Sun Jan 22 19:59:13 2017 +0000"
 end

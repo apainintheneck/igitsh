@@ -25,25 +25,42 @@ RSpec.describe Gitsh::Git do
     end
   end
 
-  describe ".commands" do
-    it "returns a list of Git commands" do
-      expect(described_class.commands).to include(
-        "commit", "push", "pull", "status", "diff", "grep", "log"
-      )
+  describe ".help_page" do
+    it "returns nil if command doesn't exist" do
+      expect(described_class.help_page(command: "not-a-command")).to be_nil
+    end
+
+    it "returns help page for real command" do
+      # Matching exactly would surely break with different Git versions.
+      expect(described_class.help_page(command: "pull")).to include("GIT-PULL(1)")
+    end
+  end
+
+  describe ".command_list" do
+    it "returns an array of Git commands" do
+      expect(described_class.command_list)
+        .to be_an(Array)
+        .and include("commit", "push", "pull", "status", "diff", "grep", "log")
+    end
+  end
+
+  describe ".command_set" do
+    it "returns a set of Git command" do
+      expect(described_class.command_set)
+        .to be_a(Set)
+        .and include("commit", "push", "pull", "status", "diff", "grep", "log")
     end
   end
 
   describe ".run" do
     it "succeeds with a valid command" do
-      status = described_class.run(["help"], out: File::NULL, err: File::NULL)
-      expect(status).to be_a(Process::Status)
-      expect(status.exitstatus).to eq(0)
+      exit_code = described_class.run(["help"], out: File::NULL, err: File::NULL)
+      expect(exit_code).to eq(0)
     end
 
     it "fails with an invalid command" do
-      status = described_class.run(["not-a-command"], out: File::NULL, err: File::NULL)
-      expect(status).to be_a(Process::Status)
-      expect(status.exitstatus).to eq(1)
+      exit_code = described_class.run(["not-a-command"], out: File::NULL, err: File::NULL)
+      expect(exit_code).to eq(1)
     end
   end
 end

@@ -1,0 +1,298 @@
+---
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-p"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-u"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--patch"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-s"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-patch"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-U"
+  suffix: "<n>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--unified"
+  suffix: "=<n>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--output"
+  suffix: "=<file>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--output-indicator-new"
+  suffix: "=<char>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--output-indicator-old"
+  suffix: "=<char>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--output-indicator-context"
+  suffix: "=<char>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--raw"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--patch-with-raw"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--indent-heuristic"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-indent-heuristic"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--minimal"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--patience"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--histogram"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--anchored"
+  suffix: "=<text>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--diff-algorithm"
+  suffix: "={patience|minimal|histogram|myers}"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--stat"
+  suffix: "[=<width>[,<name-width>[,<count>]]]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--compact-summary"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--numstat"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--shortstat"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-X"
+  suffix: "[<param1,param2,...>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--dirstat"
+  suffix: "[=<param1,param2,...>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--cumulative"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--dirstat-by-file"
+  suffix: "[=<param1,param2>...]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--summary"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--patch-with-stat"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-z"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--name-only"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--name-status"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--submodule"
+  suffix: "[=<format>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--color"
+  suffix: "[=<when>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-color"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--color-moved"
+  suffix: "[=<mode>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-color-moved"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--color-moved-ws"
+  suffix: "=<modes>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-color-moved-ws"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--word-diff"
+  suffix: "[=<mode>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--word-diff-regex"
+  suffix: "=<regex>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--color-words"
+  suffix: "[=<regex>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-renames"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--check"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ws-error-highlight"
+  suffix: "=<kind>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--full-index"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--binary"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--abbrev"
+  suffix: "[=<n>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-B"
+  suffix: "[<n>][/<m>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--break-rewrites"
+  suffix: "[=[<n>][/<m>]]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-M"
+  suffix: "[<n>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--find-renames"
+  suffix: "[=<n>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-C"
+  suffix: "[<n>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--find-copies"
+  suffix: "[=<n>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--find-copies-harder"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-D"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--irreversible-delete"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-l"
+  suffix: "<num>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--diff-filter"
+  suffix: "=[(A|C|D|M|R|T|U|X|B)...[*]]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-S"
+  suffix: "<string>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-G"
+  suffix: "<regex>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--find-object"
+  suffix: "=<object-id>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--pickaxe-all"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--pickaxe-regex"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-O"
+  suffix: "<orderfile>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--skip-to"
+  suffix: "=<file>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--rotate-to"
+  suffix: "=<file>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-R"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--relative"
+  suffix: "[=<path>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-relative"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-a"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--text"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-cr-at-eol"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-space-at-eol"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-b"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-space-change"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-w"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-all-space"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-blank-lines"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-I"
+  suffix: "<regex>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-matching-lines"
+  suffix: "=<regex>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--inter-hunk-context"
+  suffix: "=<lines>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "-W"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--function-context"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--exit-code"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--quiet"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ext-diff"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-ext-diff"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--textconv"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-textconv"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ignore-submodules"
+  suffix: "[=<when>]"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--src-prefix"
+  suffix: "=<prefix>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--dst-prefix"
+  suffix: "=<prefix>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--no-prefix"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--default-prefix"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--line-prefix"
+  suffix: "=<prefix>"
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--ita-invisible-in-index"
+  suffix: ''
+- !ruby/struct:Gitsh::GitHelp::Option
+  prefix: "--diff-merges"
+  suffix: ''

@@ -11,7 +11,7 @@ module Gitsh
     # @param line [String]
     #
     # @return [Gitsh::TokenZipper]
-    def self.tokenize(line)
+    def self.from_line(line)
       line = line.dup.freeze
       tokens = []
       scanner = StringScanner.new(line)
@@ -44,6 +44,12 @@ module Gitsh
             source: line,
             start_position: start_position,
             end_position: scanner.charpos
+          )
+        elsif scanner.skip("-- ") # end of command line options
+          tokens << Token::EndOfOptions.new(
+            source: line,
+            start_position: start_position,
+            end_position: scanner.charpos - 1
           )
         else # quoted or unquoted string
           tokens << scan_string_token(
@@ -120,8 +126,7 @@ module Gitsh
         )
       end
 
-      # This should be unreachable but we provide a sensible error message anyway.
-      raise SyntaxError, "#{start_position}: Unknown string parsing error"
+      raise UnreachableError, "#{start_position}: Unknown string parsing error"
     end
     private_class_method :scan_string_token
   end

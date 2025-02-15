@@ -3,26 +3,35 @@
 require "rainbow/refinement"
 
 module Gitsh
+  # This class highlights the current line before printing it to the screen
+  # in the REPL along with adding any trailing option usage if it exists.
   module Highlighter
+    using Rainbow
+
     # Highlight an input line for the command line.
     #
     # @param tokens [Gitsh::TokenZipper]
     #
     # @return [String]
-    def self.from_token_zipper(zipper)
+    def self.from_line(line)
+      zipper = Tokenizer.from_line(line)
       string = +""
       return string if zipper.empty?
 
+      # Highlight each token in the zipper and preserve gaps between tokens.
       zipper.each do |sub_zipper|
         string << highlight_token(sub_zipper)
         token_gap = sub_zipper.gap_to_next
         string << " " * token_gap if token_gap.positive?
       end
 
+      # Add trailing option usage if it exists and there are no spaces after the option.
+      if !line.end_with?(" ") && (option_suffix = zipper.last.option_suffix)
+        string << option_suffix.color(:gray)
+      end
+
       string.freeze
     end
-
-    using Rainbow
 
     # @param zipper [Gitsh::Zipper]
     #
@@ -46,8 +55,8 @@ module Gitsh
         else
           zipper.token.raw_content.color(:mediumslateblue)
         end
-      else # Unreachable
-        zipper.token.parse_error("unable to highlight unexpected token")
+      else
+        raise zipper.token.unreachable_error("unable to highlight unexpected token")
       end.bold
     end
     private_class_method :highlight_token

@@ -12,18 +12,18 @@
       start_position: 5
       end_position: 23
     index: 0
-- :line: 'grep ''describe ".tokenize" do''  '
+- :line: 'grep ''describe ".from_line" do''  '
   :tokens: !ruby/object:Gitsh::TokenZipper
-    source: 'grep ''describe ".tokenize" do''  '
+    source: 'grep ''describe ".from_line" do''  '
     tokens:
     - !ruby/object:Gitsh::Token::String
-      source: 'grep ''describe ".tokenize" do''  '
+      source: 'grep ''describe ".from_line" do''  '
       start_position: 0
       end_position: 4
     - !ruby/object:Gitsh::Token::String
-      source: 'grep ''describe ".tokenize" do''  '
+      source: 'grep ''describe ".from_line" do''  '
       start_position: 5
-      end_position: 30
+      end_position: 31
     index: 0
 - :line: add -- '*.js'
   :tokens: !ruby/object:Gitsh::TokenZipper
@@ -33,7 +33,7 @@
       source: add -- '*.js'
       start_position: 0
       end_position: 3
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Gitsh::Token::EndOfOptions
       source: add -- '*.js'
       start_position: 4
       end_position: 6

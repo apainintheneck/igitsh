@@ -49,6 +49,13 @@ module Gitsh
         ParseError.new(pretty_error_message(message: message))
       end
 
+      # @param message [String]
+      #
+      # @return [Gitsh::UnreachableError]
+      def unreachable_error(message)
+        UnreachableError.new(pretty_error_message(message: message))
+      end
+
       private
 
       using Rainbow
@@ -108,5 +115,9 @@ module Gitsh
 
     # When there is a single (&) or (|)
     class PartialAction < Base; end
+
+    # Indicates the end of command line option parsing.
+    # Ex. `--`
+    class EndOfOptions < String; end
   end
 end

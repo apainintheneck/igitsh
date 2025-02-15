@@ -20,10 +20,12 @@ module Gitsh
 
     # @param source [String] must be frozen
     # @param tokens [Array<Gitsh::Token::Base>] must be frozen
-    # @param index [Integer]
-    # @param before [Gitsh::TokenZipper]
-    # @param after [Gitsh::TokenZipper]
-    def initialize(source:, tokens:, index: 0, before: nil, after: nil)
+    # @param index [Integer] Defaults to 0
+    # @param before [Gitsh::TokenZipper] Defaults to nil
+    # @param after [Gitsh::TokenZipper] Defaults to nil
+    # @param first [Gitsh::TokenZipper] Defaults to nil
+    # @param last [Gitsh::TokenZipper] Defaults to nil
+    def initialize(source:, tokens:, index: 0, before: nil, after: nil, first: nil, last: nil)
       raise ArgumentError, ":source must be frozen" unless source.frozen?
       raise ArgumentError, ":tokens must be frozen" unless tokens.frozen?
 
@@ -32,6 +34,8 @@ module Gitsh
       @index = index.clamp(-1, tokens.size)
       @before = before if before
       @after = after if after
+      @first = first if first
+      @last = last if last
     end
 
     # Returns the number of tokens.
@@ -52,11 +56,38 @@ module Gitsh
     #
     # @yield [Gitsh::TokenZipper]
     def each
-      zipper = at(index: 0)
+      return if empty?
+
+      zipper = first
 
       until zipper.tail?
         yield zipper
         zipper = zipper.after
+      end
+    end
+
+    # Yields zippers representing each token starting from the end.
+    #
+    # @yield [Gitsh::TokenZipper]
+    def reverse_each
+      return if empty?
+
+      zipper = last
+
+      until zipper.head?
+        yield zipper
+        zipper = zipper.before
+      end
+    end
+
+    # Like `#find` but starting from the end.
+    #
+    # @yield [Gitsh::TokenZipper]
+    # @return [Gitsh::TokenZipper, nil]
+    def reverse_find
+      reverse_each do |zipper|
+        bool = yield zipper
+        return zipper if bool
       end
     end
 
@@ -65,7 +96,14 @@ module Gitsh
       @before ||= if head?
         self
       else
-        self.class.new(source: @source, tokens: @tokens, index: @index - 1, after: self)
+        self.class.new(
+          source: @source,
+          tokens: @tokens,
+          index: @index - 1,
+          after: self,
+          first: @first,
+          last: @last
+        )
       end
     end
 
@@ -74,7 +112,14 @@ module Gitsh
       @after ||= if tail?
         self
       else
-        self.class.new(source: @source, tokens: @tokens, index: @index + 1, before: self)
+        self.class.new(
+          source: @source,
+          tokens: @tokens,
+          index: @index + 1,
+          before: self,
+          first: @first,
+          last: @last
+        )
       end
     end
 
@@ -134,7 +179,7 @@ module Gitsh
     #
     # @return [Gitsh::Zipper]
     def first
-      empty? ? at(index: -1) : at(index: 0)
+      @first ||= empty? ? at(index: -1) : at(index: 0)
     end
 
     # Returns true if the zipper represents the last token.
@@ -148,7 +193,7 @@ module Gitsh
     #
     # @return [Gitsh::Zipper]
     def last
-      empty? ? at(index: size) : at(index: size - 1)
+      @last ||= empty? ? at(index: size) : at(index: size - 1)
     end
 
     # Returns the token at the current index or nil
@@ -201,6 +246,13 @@ module Gitsh
       token&.is_a?(Gitsh::Token::PartialAction)
     end
 
+    # Returns true if the current token is the end of options token.
+    #
+    # @return [Boolean]
+    def end_of_options_token?
+      token&.is_a?(Gitsh::Token::EndOfOptions)
+    end
+
     # Returns true if the current token is the and, or or end action.
     #
     # @return [Boolean]
@@ -213,7 +265,7 @@ module Gitsh
     #
     # @return [Boolean]
     def command?
-      (before.head? || before.action? || before.partial_action_token?) && string_token?
+      string_token? && (before.head? || before.action? || before.partial_action_token?)
     end
 
     # Returns true if the current token is a command present in the
@@ -222,6 +274,73 @@ module Gitsh
     # @return [Boolean]
     def valid_command?
       command? && Gitsh.all_commands.include?(token.content)
+    end
+
+    # Returns the most recent command if one exists before an action or head.
+    #
+    # @return [Gitsh::TokenZipper]
+    def current_command
+      return @current_command if defined?(@current_command)
+
+      zipper = self
+
+      while zipper.string_token? && !zipper.command?
+        zipper = zipper.before
+      end
+
+      @current_command = zipper if zipper.command?
+    end
+
+    # Returns false if the end of the options token has come after a command.
+    #
+    # @return [Boolean]
+    def options_allowed?
+      zipper = before
+
+      until head?
+        return true if zipper.command?
+        return false if zipper.end_of_options_token?
+
+        zipper = zipper.before
+      end
+
+      false
+    end
+
+    # Returns true if the current_token is a short option and is not a command.
+    #
+    # @return [Boolean]
+    def short_option?
+      string_token? && token.raw_content.match?(/^-[^-]?$/) && !command?
+    end
+
+    # Returns true if the current_token is a long option and is not a command.
+    #
+    # @return [Boolean]
+    def long_option?
+      string_token? && token.raw_content.match?(/^--([^-].+)?/) && !command?
+    end
+
+    # Returns true if the current token is a short or long option and is not a command.
+    #
+    # @return [Boolean]
+    def option?
+      short_option? || long_option?
+    end
+
+    # Returns the documented parameter suffix for the current Git option prefix if options are allowed.
+    #
+    # @return [String, nil]
+    def option_suffix
+      return unless option?
+      return unless options_allowed?
+      return unless current_command
+
+      help_page = GitHelp.for(command: current_command.token.content)
+      return unless help_page
+
+      options = help_page.options_by_prefix.fetch(token.raw_content, [])
+      options.find { |option| !option.suffix.empty? }&.suffix
     end
   end
 end

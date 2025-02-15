@@ -5,17 +5,17 @@ RSpec.describe Gitsh::Tokenizer do
     tokenized_lines = Array(lines).map do |line|
       {
         line: line,
-        tokens: described_class.tokenize(line)
+        tokens: described_class.from_line(line)
       }
     end
 
     expect(tokenized_lines)
   end
 
-  describe ".tokenize" do
+  describe ".from_line" do
     it "tokenizes blanks lines" do
       ["", "   ", "\t", "\n", "  \t \n"].each do |line|
-        expect(described_class.tokenize(line)).to be_empty
+        expect(described_class.from_line(line)).to be_empty
       end
     end
 
@@ -27,7 +27,7 @@ RSpec.describe Gitsh::Tokenizer do
     it "tokenizes single-quoted strings" do |example|
       expect_tokenized_lines([
         %(grep 'type : Tokenizer'),
-        %(grep 'describe ".tokenize" do'  ),
+        %(grep 'describe ".from_line" do'  ),
         %(add -- '*.js'),
         %( log --committer='Lawrence Kraft'),
         %(commit -m 'Quote \\' of some time')
@@ -53,7 +53,7 @@ RSpec.describe Gitsh::Tokenizer do
         %(checkout -b 'skldfjsd\\'skdlfjsdkf),
         %(commit -m "sdfjsdfsdf\\"sdk  djf)
       ].each do |line|
-        expect(described_class.tokenize(line).last)
+        expect(described_class.from_line(line).last)
           .to be_an_unterminated_string_token
       end
     end
@@ -66,7 +66,7 @@ RSpec.describe Gitsh::Tokenizer do
         %(branch -D sdkfsdlk|jdsfkjds),
         %(checkout -b skdlfjsdkf|)
       ].each do |line|
-        expect(described_class.tokenize(line).tokens)
+        expect(described_class.from_line(line).tokens)
           .to include(Gitsh::Token::PartialAction)
       end
     end
@@ -79,7 +79,7 @@ RSpec.describe Gitsh::Tokenizer do
           "first #{action}second",
           "first#{action}second"
         ].each do |line|
-          zipper = described_class.tokenize(line)
+          zipper = described_class.from_line(line)
 
           expect(zipper.tokens.map(&:class)).to eq([Gitsh::Token::String, klass, Gitsh::Token::String])
           expect(zipper.tokens.map(&:content)).to eq(["first", action, "second"])
