@@ -90,6 +90,7 @@ module Gitsh
         array.concat(wrap_lines(description, width: width))
       end
     end
+    private_class_method :from_command_completion
 
     # @param option [String]
     # @param width [Integer]
@@ -115,6 +116,7 @@ module Gitsh
         end
       end
     end
+    private_class_method :from_option_completion
 
     using Rainbow
 
@@ -128,7 +130,7 @@ module Gitsh
     # @return [Array<String>] formatted lines
     def self.wrap_lines(text, width:, color: nil)
       return [] if text.empty?
-      return [] if indent >= text.size
+      return [] if INDENT.size >= text.size
 
       lines = text
         .each_char
@@ -143,5 +145,6 @@ module Gitsh
 
       lines
     end
+    private_class_method :wrap_lines
   end
 end

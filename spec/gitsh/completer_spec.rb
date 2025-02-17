@@ -38,10 +38,8 @@ RSpec.describe Gitsh::Completer do
 
     context "for options" do
       before do
-        allow(Gitsh).to receive(:all_commands)
-          .and_return(%w[diff])
-        allow(Gitsh::Git).to receive(:help_page)
-          .with(command: "diff")
+        allow(Gitsh).to receive(:all_commands).and_return(%w[diff])
+        allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
           .and_return(fixture("git_diff_help_page.txt"))
       end
 
