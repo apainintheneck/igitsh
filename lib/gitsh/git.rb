@@ -36,6 +36,25 @@ module Gitsh
       help_text unless help_text.empty?
     end
 
+    COMMAND_DESCRIPTION_REGEX = %r{
+      ^          # start of the line
+      [ ]{3}     # 3 spaces
+      ([a-z-]+)  # capture: command
+      [ ]+       # 1 or more spaces
+      (.+)       # capture: description
+      $          # end of the line
+    }x
+    private_constant :COMMAND_DESCRIPTION_REGEX
+
+    # @return [Hash<String, String>] hash of command to description
+    def self.command_descriptions
+      @command_descriptions = begin
+        out_str, _err_str, _status = Open3.capture3("git help --all")
+        description_page = out_str.strip
+        description_page.scan(COMMAND_DESCRIPTION_REGEX).to_h
+      end.freeze
+    end
+
     Changes = Struct.new(:staged_count, :unstaged_count, keyword_init: true)
 
     # @return [Changes]

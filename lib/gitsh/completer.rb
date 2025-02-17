@@ -17,8 +17,8 @@ module Gitsh
 
       if zipper.last.command?
         for_command(zipper)
-      elsif zipper.last.long_option? && zipper.last.options_allowed?
-        for_long_option(zipper)
+      elsif zipper.last.option? && zipper.last.options_allowed?
+        for_option(zipper)
       end
     end
 
@@ -40,7 +40,7 @@ module Gitsh
     # @param zipper [Gitsh::Zipper]
     #
     # @return [Array<String>, nil]
-    def self.for_long_option(zipper)
+    def self.for_option(zipper)
       last_command_zipper = zipper.reverse_find(&:command?)
       return unless last_command_zipper&.valid_command?
 
@@ -48,12 +48,12 @@ module Gitsh
       help_page = GitHelp.for(command: command)
       return unless help_page
 
-      long_option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
+      option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       help_page
-        .long_option_prefixes
+        .option_prefixes
         # Complete all commands starting with the given prefix.
-        .grep(long_option_prefix_regex)
+        .grep(option_prefix_regex)
         # Sort results by shortest command and then alphabetically.
         .sort_by { |cmd| [cmd.size, cmd] }
     end

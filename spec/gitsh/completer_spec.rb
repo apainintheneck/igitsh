@@ -45,9 +45,9 @@ RSpec.describe Gitsh::Completer do
           .and_return(fixture("git_diff_help_page.txt"))
       end
 
-      it "doesn't complete short options" do
+      it "completes short options" do
         ["diff -s", "restore README.md; diff -s"].each do |line|
-          expect(described_class.from_line(line)).to be_nil
+          expect(described_class.from_line(line)).to eq(%w[-s])
         end
       end
 

@@ -25,6 +25,7 @@ module Gitsh
   autoload :Git, "gitsh/git"
   autoload :GitHelp, "gitsh/git_help"
   autoload :Highlighter, "gitsh/highlighter"
+  autoload :Hinter, "gitsh/hinter"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
@@ -48,6 +49,9 @@ module Gitsh
     # Set up shell completions.
     Reline.autocompletion = true
     Reline.completion_proc = Completer::CALLBACK
+
+    # Set up shell hints.
+    Reline.add_dialog_proc(:hint, Hinter.callback, Reline::DEFAULT_DIALOG_CONTEXT)
 
     # Set up syntax highlighting.
     Reline.output_modifier_proc = Highlighter::CALLBACK if USE_COLOR

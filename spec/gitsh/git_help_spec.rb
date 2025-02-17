@@ -21,10 +21,10 @@ RSpec.describe Gitsh::GitHelp do
     end
   end
 
-  describe "#long_option_prefixes" do
+  describe "#option_prefixes" do
     it "should include expected prefixes" do
-      expect(help_page.long_option_prefixes.sort)
-        .to match_snapshot("git_diff_long_option_prefixes")
+      expect(help_page.option_prefixes.sort)
+        .to match_snapshot("git_diff_option_prefixes")
     end
   end
 
