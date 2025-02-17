@@ -3,10 +3,14 @@
 require "rainbow/refinement"
 
 module Gitsh
-  # This class highlights the current line before printing it to the screen
-  # in the REPL along with adding any trailing option usage if it exists.
+  # This class highlights the current line before printing it to the REPL.
   module Highlighter
-    using Rainbow
+    # Designed to be compatible with `Reline.output_modifier_proc`.
+    CALLBACK = lambda do |line, **|
+      return if line.strip.empty?
+
+      Highlighter.from_line(line)
+    end
 
     # Highlight an input line for the command line.
     #
@@ -25,13 +29,10 @@ module Gitsh
         string << " " * token_gap if token_gap.positive?
       end
 
-      # Add trailing option usage if it exists and there are no spaces after the option.
-      if !line.end_with?(" ") && (option_suffix = zipper.last.option_suffix)
-        string << option_suffix.color(:gray)
-      end
-
       string.freeze
     end
+
+    using Rainbow
 
     # @param zipper [Gitsh::Zipper]
     #

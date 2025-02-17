@@ -327,20 +327,5 @@ module Gitsh
     def option?
       short_option? || long_option?
     end
-
-    # Returns the documented parameter suffix for the current Git option prefix if options are allowed.
-    #
-    # @return [String, nil]
-    def option_suffix
-      return unless option?
-      return unless options_allowed?
-      return unless current_command
-
-      help_page = GitHelp.for(command: current_command.token.content)
-      return unless help_page
-
-      options = help_page.options_by_prefix.fetch(token.raw_content, [])
-      options.find { |option| !option.suffix.empty? }&.suffix
-    end
   end
 end

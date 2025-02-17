@@ -15,10 +15,10 @@ RSpec.describe Gitsh::Completer do
         end
       end
 
-      it "excludes commands that exactly match" do
+      it "includes commands that exactly match" do
         ["commit", "add README.md || commit"].each do |line|
           expect(described_class.from_line(line))
-            .to match_array(%w[commit-tree commit-graph])
+            .to match_array(%w[commit commit-tree commit-graph])
         end
       end
 
@@ -62,9 +62,10 @@ RSpec.describe Gitsh::Completer do
         end
       end
 
-      it "excludes options that exactly match" do
+      it "includes options that exactly match" do
         ["diff --output", "restore README.md; diff --output"].each do |line|
           expect(described_class.from_line(line)).to match_array(%w[
+            --output
             --output-indicator-new
             --output-indicator-old
             --output-indicator-context

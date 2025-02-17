@@ -2,10 +2,17 @@
 
 module Gitsh
   module Completer
+    # Designed to be compatible with `Reline.completion_proc`.
+    CALLBACK = lambda do |*|
+      Completer.from_line(Reline.line_buffer.to_s)
+    end
+
     # @param line [String]
     #
     # @return [Array<String>, nil]
     def self.from_line(line)
+      return if line.end_with?(" ")
+
       zipper = Tokenizer.from_line(line)
 
       if zipper.last.command?
@@ -19,7 +26,7 @@ module Gitsh
     #
     # @return [Array<String>, nil]
     def self.for_command(zipper)
-      command_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}./
+      command_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       Gitsh
         .all_commands
@@ -41,7 +48,7 @@ module Gitsh
       help_page = GitHelp.for(command: command)
       return unless help_page
 
-      long_option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}./
+      long_option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       help_page
         .long_option_prefixes
