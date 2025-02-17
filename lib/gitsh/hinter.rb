@@ -69,8 +69,6 @@ module Gitsh
     def self.from_completion(completion, width:)
       if Git.command_descriptions.include?(completion)
         from_command_completion(completion, width: width)
-      elsif completion.start_with?("-")
-        from_option_completion(completion, width: width)
       else
         []
       end
@@ -91,32 +89,6 @@ module Gitsh
       end
     end
     private_class_method :from_command_completion
-
-    # @param option [String]
-    # @param width [Integer]
-    #
-    # @return [Array<String>] formatted lines
-    def self.from_option_completion(option, width:)
-      zipper = Tokenizer.from_line(Reline.line_buffer.to_s)
-      command = zipper.last.current_command.token.raw_content
-      help_page = GitHelp.for(command: command)
-      return [] unless help_page
-
-      options = help_page.options_by_prefix[option]
-      return [] unless options
-      return [] if options.all? { |option| option.suffix.empty? }
-
-      sorted_option_strings = options.map(&:to_s).sort_by(&:length)
-
-      [].tap do |array|
-        array.concat(wrap_lines("[Usage]", width: width, color: :blue))
-        sorted_option_strings.each do |option_string|
-          array << ""
-          array.concat(wrap_lines(option_string, width: width))
-        end
-      end
-    end
-    private_class_method :from_option_completion
 
     using Rainbow
 

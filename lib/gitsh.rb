@@ -70,16 +70,11 @@ module Gitsh
       result = Executor.execute_line(line: line)
 
       case result
-      when Gitsh::Executor::Result::Success
+      when Gitsh::Executor::Result::Success, Gitsh::Executor::Result::Failure
         # Save the current input line to the shell history.
         if Reline::HISTORY.last != line
           Reline::HISTORY.push(line)
           HISTORY_FILE_PATH.write("#{line}\n", mode: "a")
-        end
-      when Gitsh::Executor::Result::Failure
-        # Only save the lines with syntax or parsing errors to the session history.
-        if Reline::HISTORY.last != line
-          Reline::HISTORY.push(line)
         end
       end
 
