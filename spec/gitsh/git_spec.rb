@@ -25,6 +25,12 @@ RSpec.describe Gitsh::Git do
     end
   end
 
+  describe ".command_descriptions" do
+    it "parses the command descriptions" do
+      expect(described_class.command_descriptions).to match_snapshot("git_command_descriptions")
+    end
+  end
+
   describe ".help_page" do
     it "returns nil if command doesn't exist" do
       expect(described_class.help_page(command: "not-a-command")).to be_nil

@@ -15,10 +15,10 @@ RSpec.describe Gitsh::Completer do
         end
       end
 
-      it "excludes commands that exactly match" do
+      it "includes commands that exactly match" do
         ["commit", "add README.md || commit"].each do |line|
           expect(described_class.from_line(line))
-            .to match_array(%w[commit-tree commit-graph])
+            .to match_array(%w[commit commit-tree commit-graph])
         end
       end
 
@@ -38,16 +38,14 @@ RSpec.describe Gitsh::Completer do
 
     context "for options" do
       before do
-        allow(Gitsh).to receive(:all_commands)
-          .and_return(%w[diff])
-        allow(Gitsh::Git).to receive(:help_page)
-          .with(command: "diff")
+        allow(Gitsh).to receive(:all_commands).and_return(%w[diff])
+        allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
           .and_return(fixture("git_diff_help_page.txt"))
       end
 
-      it "doesn't complete short options" do
+      it "completes short options" do
         ["diff -s", "restore README.md; diff -s"].each do |line|
-          expect(described_class.from_line(line)).to be_nil
+          expect(described_class.from_line(line)).to eq(%w[-s])
         end
       end
 
@@ -62,9 +60,10 @@ RSpec.describe Gitsh::Completer do
         end
       end
 
-      it "excludes options that exactly match" do
+      it "includes options that exactly match" do
         ["diff --output", "restore README.md; diff --output"].each do |line|
           expect(described_class.from_line(line)).to match_array(%w[
+            --output
             --output-indicator-new
             --output-indicator-old
             --output-indicator-context

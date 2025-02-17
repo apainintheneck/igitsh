@@ -7,6 +7,7 @@ module Gitsh
     SINGLE_QUOTE = "'"
     DOUBLE_QUOTE = '"'
     BACKSLASH = "\\"
+    private_constant :SINGLE_QUOTE, :DOUBLE_QUOTE, :BACKSLASH
 
     # @param line [String]
     #

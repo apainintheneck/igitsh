@@ -64,12 +64,13 @@ module Gitsh
       #
       # @return [String]
       def pretty_error_message(message:)
+        error_title = USE_COLOR ? "error>".color(:blue).bold : "error>"
         pre_error = source[0...start_position]
         error = raw_content
         post_error = source[end_position..]
 
         <<~ERROR
-          | #{"error>".color(:blue).bold} #{message}
+          | #{error_title} #{message}
           |
           | #{pre_error}#{error}#{post_error}
           | #{" " * pre_error.length}#{"^" * error.length}

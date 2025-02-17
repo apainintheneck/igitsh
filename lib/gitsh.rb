@@ -25,6 +25,7 @@ module Gitsh
   autoload :Git, "gitsh/git"
   autoload :GitHelp, "gitsh/git_help"
   autoload :Highlighter, "gitsh/highlighter"
+  autoload :Hinter, "gitsh/hinter"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
@@ -47,10 +48,13 @@ module Gitsh
 
     # Set up shell completions.
     Reline.autocompletion = true
-    Reline.completion_proc = method(:completions)
+    Reline.completion_proc = Completer::CALLBACK
 
-    # Set up syntax highlighing.
-    Reline.output_modifier_proc = method(:highlight) if USE_COLOR
+    # Set up shell hints.
+    Reline.add_dialog_proc(:hint, Hinter.callback, Reline::DEFAULT_DIALOG_CONTEXT)
+
+    # Set up syntax highlighting.
+    Reline.output_modifier_proc = Highlighter::CALLBACK if USE_COLOR
 
     puts "# Welcome to gitsh!"
 
@@ -94,29 +98,4 @@ module Gitsh
   def self.all_commands
     @all_commands ||= (Git.command_list + %w[exit quit]).freeze
   end
-
-  # @param word [String]
-  #
-  # @return [Array<String>, nil]
-  def self.completions(word)
-    return if word.empty?
-
-    Completer.from_line(line_buffer)
-  end
-  private_class_method :completions
-
-  # @param line [String]
-  #
-  # @return [String]
-  def self.highlight(line, **)
-    return if line.strip.empty?
-
-    Highlighter.from_line(line_buffer)
-  end
-
-  # @return [String]
-  def self.line_buffer
-    Reline.line_buffer.to_s
-  end
-  private_class_method :line_buffer
 end

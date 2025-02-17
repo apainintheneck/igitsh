@@ -39,17 +39,22 @@ module Gitsh
       def short?
         !long?
       end
+
+      # @return [String]
+      def to_s
+        prefix + suffix
+      end
     end
 
     # @return [Array<String>]
-    def long_option_prefixes
-      @long_option_prefixes ||= options
-        .select(&:long?)
+    def option_prefixes
+      @option_prefixes ||= options
         .map(&:prefix)
         .uniq
         .freeze
     end
 
+    # @return [Hash<String, Gitsh::GitHelp::Option>]
     def options_by_prefix
       @options_by_prefix ||= options.group_by(&:prefix).freeze
     end
