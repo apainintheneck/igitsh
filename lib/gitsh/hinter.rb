@@ -82,38 +82,57 @@ module Gitsh
       description = Git.command_descriptions[command]
       return [] unless description
 
-      [].tap do |array|
-        array.concat(wrap_lines("[Description]", width: width, color: :blue))
-        array << ""
-        array.concat(wrap_lines(description, width: width))
-      end
+      wrap_lines(description, width: width)
     end
     private_class_method :from_command_completion
-
-    using Rainbow
 
     INDENT = "  "
     private_constant :INDENT
 
-    # @param command [String]
-    # @param width [Integer]
-    # @param color [Symbol] see `Rainbow` gem
+    # Simple word wrap implementation.
+    #
+    # 1. Splits words on whitespace boundaries.
+    # 2. Fits as many words joined by one space on a single line.
+    # 3. If word and indent are bigger than width, it gets split accross multiple lines with a hyphon.
+    #
+    # @param text [String]
+    # @param width [Integer] expected to 10 or larger otherwise it will return an empty array
     #
     # @return [Array<String>] formatted lines
-    def self.wrap_lines(text, width:, color: nil)
-      return [] if text.empty?
-      return [] if INDENT.size >= text.size
+    def self.wrap_lines(text, width:)
+      return [] if text.strip.empty?
+      return [] if width < 10
 
-      lines = text
-        .each_char
-        .each_slice(width - INDENT.size)
-        .map { |chars| chars.prepend(INDENT).join }
+      line = nil
+      lines = []
+      text.split do |word|
+        line ||= +" "
 
-      if USE_COLOR && color
-        lines.map! do |line|
-          line.color(color).bold
+        if line.size + 1 + word.size <= width
+          # Add small word to current line.
+          line << " " << word
+        elsif word.size + 2 > width
+          # Finish current line.
+          lines << line
+          # Chunk large word over multiple lines with hyphons in between.
+          0.step(by: width - 3, to: word.size - 1) do |idx|
+            if word.size - idx <= width - 2
+              # Store the end of the word.
+              line = "  #{word.slice(idx, width - 2)}"
+              break
+            else
+              # Store a chunk of the word as a line.
+              lines << "  #{word.slice(idx, width - 3)}-"
+            end
+          end
+        else
+          # Finish current line.
+          lines << line
+          # Start a new line.
+          line = "  #{word}"
         end
       end
+      lines << line if line
 
       lines
     end

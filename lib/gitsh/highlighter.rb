@@ -16,7 +16,7 @@ module Gitsh
 
     # Highlight an input line for the command line.
     #
-    # @param tokens [Gitsh::TokenZipper]
+    # @param line [String]
     # @param complete [Boolean] true means that user has pressed enter
     #
     # @return [String]
@@ -33,6 +33,7 @@ module Gitsh
       end
 
       # Add trailing option usage if it exists and there are no spaces after the option.
+      # Skip this after the user presses enter and the line is complete.
       if !complete && !line.end_with?(" ") && (option_suffix = zipper.last.option_suffix)
         string << option_suffix.color(:gray)
       end
