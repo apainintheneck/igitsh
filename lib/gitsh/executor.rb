@@ -60,7 +60,7 @@ module Gitsh
           skip_to_end = false
         end
 
-        raise ExitError if %w[exit quit].include?(command.arguments.first)
+        raise ExitError if Internal::EXIT_COMMANDS.include?(command.arguments.first)
 
         exit_code = Git.run(
           command.arguments,

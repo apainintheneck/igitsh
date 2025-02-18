@@ -26,6 +26,7 @@ module Gitsh
   autoload :GitHelp, "gitsh/git_help"
   autoload :Highlighter, "gitsh/highlighter"
   autoload :Hinter, "gitsh/hinter"
+  autoload :Internal, "gitsh/internal"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
@@ -96,6 +97,6 @@ module Gitsh
 
   # @return [Array<String>]
   def self.all_commands
-    @all_commands ||= (Git.command_list + %w[exit quit]).freeze
+    @all_commands ||= (Git.command_list + Internal::COMMANDS).freeze
   end
 end
