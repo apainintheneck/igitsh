@@ -40,7 +40,7 @@ module Gitsh
     # Set up shell history.
     original_history = Reline::HISTORY.to_a
     if HISTORY_FILE_PATH.exist?
-      Reline::HISTORY.replace(HISTORY_FILE_PATH.read.lines(chomp: true).uniq)
+      Reline::HISTORY.replace(HISTORY_FILE_PATH.read.lines(chomp: true))
     else
       HISTORY_FILE_PATH.dirname.mkpath
       Reline::HISTORY.clear

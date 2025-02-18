@@ -48,7 +48,7 @@ module Gitsh
 
     # @return [Hash<String, String>] hash of command to description
     def self.command_descriptions
-      @command_descriptions = begin
+      @command_descriptions ||= begin
         out_str, _err_str, _status = Open3.capture3("git help --all")
         description_page = out_str.strip
         description_page.scan(COMMAND_DESCRIPTION_REGEX).to_h

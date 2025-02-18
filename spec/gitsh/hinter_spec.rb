@@ -10,30 +10,24 @@ RSpec.describe Gitsh::Hinter do
     end
 
     context "with command" do
-      it "returns the expected hint lines for existing command" do
-        expect(described_class.from_completion("diff", width: 40)).to eq([
-          Rainbow("  [Description]").color(:blue).bold,
-          "",
-          "  Show changes between commits, commit a",
-          "  nd working tree, etc"
-        ])
-      end
-    end
+      it "returns command hints for 40 char width" do
+        command_hints = Gitsh::Git.command_descriptions.keys.sort.to_h do |command|
+          [command, described_class.from_completion(command, width: 40)]
+        end
 
-    context "with option" do
-      before do
-        allow(Reline).to receive(:line_buffer).and_return("diff --stat")
-        allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
-          .and_return(fixture("git_diff_help_page.txt"))
+        expect(command_hints).to match_snapshot("wide_command_hints")
       end
 
-      it "returns the expected hint lines for valid option" do
-        expect(described_class.from_completion("--stat", width: 40)).to eq([
-          Rainbow("  [Usage]").color(:blue).bold,
-          "",
-          "  --stat[=<width>[,<name-width>[,<count>",
-          "  ]]]"
-        ])
+      it "returns command hints for 10 char width" do
+        command_hints = Gitsh::Git.command_descriptions.keys.sort.to_h do |command|
+          [command, described_class.from_completion(command, width: 10)]
+        end
+
+        expect(command_hints).to match_snapshot("slim_command_hints")
+      end
+
+      it "returns empty array when width is less than 10" do
+        expect(described_class.from_completion("diff", width: 9)).to be_empty
       end
     end
   end

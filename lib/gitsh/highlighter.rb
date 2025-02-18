@@ -6,18 +6,21 @@ module Gitsh
   # This class highlights the current line before printing it to the REPL.
   module Highlighter
     # Designed to be compatible with `Reline.output_modifier_proc`.
-    CALLBACK = lambda do |line, **|
+    CALLBACK = lambda do |line, complete:|
       return if line.strip.empty?
 
-      Highlighter.from_line(line)
+      Highlighter.from_line(Reline.line_buffer.to_s, complete: complete)
     end
+
+    using Rainbow
 
     # Highlight an input line for the command line.
     #
-    # @param tokens [Gitsh::TokenZipper]
+    # @param line [String]
+    # @param complete [Boolean] true means that user has pressed enter
     #
     # @return [String]
-    def self.from_line(line)
+    def self.from_line(line, complete: false)
       zipper = Tokenizer.from_line(line)
       string = +""
       return string if zipper.empty?
@@ -29,10 +32,14 @@ module Gitsh
         string << " " * token_gap if token_gap.positive?
       end
 
+      # Add trailing option usage if it exists and there are no spaces after the option.
+      # Skip this after the user presses enter and the line is complete.
+      if !complete && !line.end_with?(" ") && (option_suffix = zipper.last.option_suffix)
+        string << option_suffix.color(:gray)
+      end
+
       string.freeze
     end
-
-    using Rainbow
 
     # @param zipper [Gitsh::Zipper]
     #
