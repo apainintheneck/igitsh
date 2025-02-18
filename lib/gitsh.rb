@@ -77,6 +77,7 @@ module Gitsh
           HISTORY_FILE_PATH.write("#{line}\n", mode: "a")
         end
       when Gitsh::Executor::Result::Failure
+        # Only save the lines with syntax or parsing errors to the session history.
         if Reline::HISTORY.last != line
           Reline::HISTORY.push(line)
         end
