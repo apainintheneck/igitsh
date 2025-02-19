@@ -60,13 +60,7 @@ module Gitsh
           skip_to_end = false
         end
 
-        raise ExitError if Internal::EXIT_COMMANDS.include?(command.arguments.first)
-
-        exit_code = Git.run(
-          command.arguments,
-          out: out,
-          err: err
-        )
+        exit_code = run_command(command.arguments, out: out, err: err)
       end
 
       Result::Success.new(exit_code: exit_code)
@@ -74,5 +68,17 @@ module Gitsh
       err.puts e.message
       Result::Failure.new(exit_code: 127)
     end
+
+    # @param args [Array<String>]
+    # @param out [IO]
+    # @param err [IO]
+    #
+    # @return [Integer]
+    def self.run_command(args, out:, err:)
+      command_name = args.first
+      command_module = Internal::COMMAND_NAME_TO_MODULE.fetch(command_name, Git)
+      command_module.run(args, out: out, err: err)
+    end
+    private_class_method :run_command
   end
 end
