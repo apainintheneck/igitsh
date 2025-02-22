@@ -2,25 +2,50 @@
 
 module Gitsh
   module Parser
+    # Represents a set of shell arguments and action pair.
+    # - Action: The logical action between the previous command and this one.
+    # - Arguments: The shell command to run as an array of strings.
+    #
+    # There are three possible actions:
+    # 1. '&&' - Requires the previous command to exit successfully.
+    #   Ex. `Gitsh::Parser::Group::And.new(%w[diff])`
+    # 2. '||' - Requires the previous command to fail.
+    #   Ex. `Gitsh::Parser::Group::Or.new(%w[commit -m "WIP"])`
+    # 3. ';'  - Runs no matter what happened with the previous command.
+    #   Ex. `Gitsh::Parser::Group::End.new(%w[add --all])`
+    module Group
+      class Base < Array; end
+      private_constant :Base
+
+      # Run this command if the previous one succeeded.
+      class And < Base; end
+
+      # Run this command if the previous one failed.
+      class Or < Base; end
+
+      # Run this command regardless of the previous command.
+      class End < Base; end
+    end
+
     # Parse a line into a series of commands.
     #
     # @param line [String]
-    # @return [Array<Gitsh::Command::Base>]
+    # @return [Array<Gitsh::Parser::Group::Base>]
     def self.parse(line)
-      command_list = []
+      groups = []
       zipper = Tokenizer.from_line(line)
-      return command_list if zipper.empty?
+      return groups if zipper.empty?
 
-      command_list << Command::End.new
+      groups << Group::End.new
       zipper.each do |sub_zipper|
         if sub_zipper.string_token?
           if sub_zipper.before.string_token? && sub_zipper.gap_to_prev.zero?
             # Concatenate string content when they are adjacent to each other.
-            command_list.last.arguments.pop.tap do |prev_string|
-              command_list.last.arguments << prev_string + sub_zipper.token.content
+            groups.last.pop.tap do |prev_string|
+              groups.last << prev_string + sub_zipper.token.content
             end
           else
-            command_list.last.arguments << sub_zipper.token.content
+            groups.last << sub_zipper.token.content
           end
         elsif sub_zipper.action?
           if sub_zipper.first?
@@ -32,11 +57,11 @@ module Gitsh
           end
 
           if sub_zipper.and_token?
-            command_list << Command::And.new
+            groups << Group::And.new
           elsif sub_zipper.or_token?
-            command_list << Command::Or.new
+            groups << Group::Or.new
           elsif sub_zipper.end_token? && !sub_zipper.last?
-            command_list << Command::End.new
+            groups << Group::End.new
           end
         elsif sub_zipper.unterminated_string_token?
           raise sub_zipper.token.syntax_error("unterminated string")
@@ -47,7 +72,7 @@ module Gitsh
         end
       end
 
-      command_list
+      groups
     end
   end
 end

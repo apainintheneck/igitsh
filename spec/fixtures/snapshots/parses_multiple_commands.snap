@@ -1,34 +1,28 @@
 ---
 - :line: add --all; commit -m "tmp"
   :commands:
-  - !ruby/object:Gitsh::Command::End
-    arguments:
+  - !ruby/array:Gitsh::Parser::Group::End
     - add
     - "--all"
-  - !ruby/object:Gitsh::Command::End
-    arguments:
+  - !ruby/array:Gitsh::Parser::Group::End
     - commit
     - "-m"
     - tmp
 - :line: add --all || commit -m "tmp"
   :commands:
-  - !ruby/object:Gitsh::Command::End
-    arguments:
+  - !ruby/array:Gitsh::Parser::Group::End
     - add
     - "--all"
-  - !ruby/object:Gitsh::Command::Or
-    arguments:
+  - !ruby/array:Gitsh::Parser::Group::Or
     - commit
     - "-m"
     - tmp
 - :line: add --all && commit -m "tmp"
   :commands:
-  - !ruby/object:Gitsh::Command::End
-    arguments:
+  - !ruby/array:Gitsh::Parser::Group::End
     - add
     - "--all"
-  - !ruby/object:Gitsh::Command::And
-    arguments:
+  - !ruby/array:Gitsh::Parser::Group::And
     - commit
     - "-m"
     - tmp

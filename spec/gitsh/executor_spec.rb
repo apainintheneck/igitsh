@@ -142,12 +142,6 @@ RSpec.describe Gitsh::Executor do
       end.to raise_error(Gitsh::ExitError)
     end
 
-    it "quits successfully" do
-      expect do
-        described_class.execute_line(line: ":quit", out: out, err: err)
-      end.to raise_error(Gitsh::ExitError)
-    end
-
     #
     # Failure
     #

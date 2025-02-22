@@ -19,14 +19,13 @@ module Gitsh
   # When a line of code should never be reached in normal execution.
   class UnreachableError < Error; end
 
-  autoload :Command, "gitsh/command"
+  autoload :Commander, "gitsh/commander"
   autoload :Completer, "gitsh/completer"
   autoload :Executor, "gitsh/executor"
   autoload :Git, "gitsh/git"
   autoload :GitHelp, "gitsh/git_help"
   autoload :Highlighter, "gitsh/highlighter"
   autoload :Hinter, "gitsh/hinter"
-  autoload :Internal, "gitsh/internal"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
   autoload :Token, "gitsh/token"
@@ -97,6 +96,6 @@ module Gitsh
 
   # @return [Array<String>]
   def self.all_commands
-    @all_commands ||= (Git.command_list + Internal::COMMANDS).freeze
+    @all_commands ||= (Git.command_list + Commander.internal_list).freeze
   end
 end
