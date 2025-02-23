@@ -33,13 +33,14 @@ module Gitsh
         option = self.class.options_by_name[option_name]
 
         if option.nil?
-          return error("unknown option: '#{option_name}'")
+          return error("invalid option: '#{option_name}'")
         end
 
-        # TODO: Check that block arity matches given arguments and/or
-        # catch any argument errors that get thrown when they are invalid.
-
-        option.block.call(*rest, out: @out, err: @err).to_i
+        begin
+          option.block.call(*rest, out: @out, err: @err).to_i
+        rescue ArgumentError
+          error("invalid arguments: #{rest}")
+        end
       end
 
       # Print the error message and the help page.
@@ -49,7 +50,6 @@ module Gitsh
       # @return [Integer] failure code
       def error(message)
         @out.puts "error: #{message}"
-        @out.puts
         @out.puts self.class.help_text
         FAILURE_CODE
       end

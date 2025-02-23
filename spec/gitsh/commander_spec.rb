@@ -48,14 +48,14 @@ RSpec.describe Gitsh::Commander do
         end
       end
 
-      it "has valid option names per command", :aggregate_failures do
+      it "has valid option blocks per command", :aggregate_failures do
         described_class.internal_commands.each do |command|
-          expect(command.options.map(&:name)).to all(be_nil.or(match(/^-(-[a-z]+)+$/))),
-            "`#{command}` must have valid option names like `--source`"
+          command.options.each do |option|
+            expect(option.name).to be_nil.or(match(/^-(-[a-z]+)+$/)),
+              "`#{command}` has invalid option name `#{option.name}`"
+          end
         end
       end
-
-      # TODO: Add test to check option block parameters.
     end
   end
 end
