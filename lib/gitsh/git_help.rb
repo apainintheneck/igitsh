@@ -71,47 +71,52 @@ module Gitsh
 
         # Skip straight to the OPTIONS section.
         scanner.skip_until(/\nOPTIONS\n/)
+        before_option = true
 
         # Parse until the end of the string or docs.
         until scanner.eos? || scanner.match?(/GIT/)
-          # Skip leading whitespace.
-          scanner.skip("       ")
+          if before_option && scanner.skip("       ") # Skip leading whitespace.
+            # Continue parsing options prefixed by dashes.
+            while scanner.match?("-")
+              prefixes = []
 
-          # Continue parsing options prefixed by dashes.
-          while scanner.match?("-")
-            prefixes = []
+              if (short_prefix = scanner.scan(/-[a-zA-Z]/))
+                # Parse short option prefix.
+                # Ex. `-a`
+                prefixes << short_prefix
+              elsif (long_prefix = scanner.scan(/-(?:-[a-zA-Z]+)+/))
+                # Parse long option prefix.
+                # Ex. `--source`
+                prefixes << long_prefix
+              elsif (reversible_prefix = scanner.skip("--[no]") && scanner.scan(/(?:-[a-zA-Z]+)+/))
+                # Parse long reversible option prefix.
+                # Ex. `--[no]-source`
+                prefixes << "-#{reversible_prefix}"
+                prefixes << "--no#{reversible_prefix}"
+              else
+                # Break when no option prefixes are parsed.
+                break
+              end
 
-            if (short_prefix = scanner.scan(/-[a-zA-Z]/))
-              # Parse short option prefix.
-              # Ex. `-a`
-              prefixes << short_prefix
-            elsif (long_prefix = scanner.scan(/-(?:-[a-zA-Z]+)+/))
-              # Parse long option prefix.
-              # Ex. `--source`
-              prefixes << long_prefix
-            elsif (reversible_prefix = scanner.skip("--[no]") && scanner.scan(/(?:-[a-zA-Z]+)+/))
-              # Parse long reversible option prefix.
-              # Ex. `--[no]-source`
-              prefixes << "-#{reversible_prefix}"
-              prefixes << "--no#{reversible_prefix}"
-            else
-              # Break when no option prefixes are parsed.
-              break
+              # Parse suffix including any parameters by parsing everything
+              # up to the next newline or command followed by a space.
+              suffix = scanner.scan(/(?:[^\n,]|,\S)*/).rstrip
+
+              # Skip the suffix if it is not usage guidelines but just a general description.
+              suffix = "" if suffix.match?(/^\s*[a-zA-Z0-9]/)
+
+              prefixes.each do |prefix|
+                options << Option.new(prefix: prefix.freeze, suffix: suffix.freeze).freeze
+              end
+
+              # Break if there isn't a comma indicating another command.
+              break unless scanner.skip(", ")
             end
-
-            # Parse suffix including any parameters by parsing everything
-            # up to the next newline or command followed by a space.
-            suffix = scanner.scan(/(?:[^\n,]|,\S)*/).rstrip
-
-            # Skip the suffix if it is not usage guidelines but just a general description.
-            suffix = "" if suffix.match?(/^\s*[a-zA-Z0-9]/)
-
-            prefixes.each do |prefix|
-              options << Option.new(prefix: prefix.freeze, suffix: suffix.freeze).freeze
-            end
-
-            # Break if there isn't a comma indicating another command.
-            break unless scanner.skip(", ")
+            before_option = false
+          elsif scanner.match?(/[A-Z\n]/) # Check for empty line or section name.
+            before_option = true
+          else
+            before_option = false
           end
 
           # Parse until the end of the line.
