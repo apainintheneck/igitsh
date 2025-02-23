@@ -5,7 +5,7 @@ require "rainbow"
 RSpec.describe Gitsh::Hinter do
   describe ".from_completion" do
     before do
-      allow(Gitsh::Git).to receive(:command_list).and_return(%w[diff])
+      allow(Gitsh::Git).to receive(:command_names).and_return(%w[diff])
       allow(Gitsh::Git).to receive(:command_set).and_return(Set["diff"])
     end
 

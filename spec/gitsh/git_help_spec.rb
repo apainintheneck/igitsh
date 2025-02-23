@@ -4,7 +4,7 @@ RSpec.describe Gitsh::GitHelp do
   subject(:help_page) { described_class.for(command: "diff") }
 
   before do
-    allow(Gitsh::Git).to receive(:command_list).and_return(%w[diff])
+    allow(Gitsh::Git).to receive(:command_names).and_return(%w[diff])
     allow(Gitsh::Git).to receive(:command_set).and_return(Set["diff"])
     allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
       .and_return(fixture("git_diff_help_page.txt"))

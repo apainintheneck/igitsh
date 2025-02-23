@@ -74,8 +74,8 @@ module Gitsh
     end
 
     # @return [Array<String>]
-    def self.command_list
-      @commands ||= `git --list-cmds=main,nohelpers`
+    def self.command_names
+      @command_names ||= `git --list-cmds=main,nohelpers`
         .lines
         .map(&:strip)
         .reject(&:empty?)
@@ -84,7 +84,7 @@ module Gitsh
 
     # @return [Set<String>]
     def self.command_set
-      @command_set ||= command_list.to_set.freeze
+      @command_set ||= command_names.to_set.freeze
     end
 
     # @param args [Array<String>]

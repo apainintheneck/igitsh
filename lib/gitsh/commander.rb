@@ -27,22 +27,26 @@ module Gitsh
         @err = err
       end
 
+      # @return [Integer] exit code
       def run
         option_name, *rest = @arguments
-
-        return default if option_name.nil?
-
         option = self.class.options_by_name[option_name]
 
         if option.nil?
           return error("unknown option: '#{option_name}'")
-        elsif option.block.arity != rest.size
-          return error("invalid arguments for '#{option_name}': #{rest}")
         end
 
-        option.block.call(*rest).to_i
+        # TODO: Check that block arity matches given arguments and/or
+        # catch any argument errors that get thrown when they are invalid.
+
+        option.block.call(*rest, out: @out, err: @err).to_i
       end
 
+      # Print the error message and the help page.
+      #
+      # @param message [String]
+      #
+      # @return [Integer] failure code
       def error(message)
         @out.puts "error: #{message}"
         @out.puts
@@ -50,72 +54,110 @@ module Gitsh
         FAILURE_CODE
       end
 
+      # @param name [String, nil]
+      # @param description [String]
+      # @param block [Proc]
       Option = Struct.new(:name, :description, :block, keyword_init: true) do
+        # @return [String]
+        def display_name
+          name || "*"
+        end
+
+        # @return [String]
         def usage
           params = block.parameters.filter_map do |type, name|
             "<#{name}>" if type == :opt
           end
 
-          [name, *params].join(" ")
+          [display_name, *params].join(" ")
         end
       end
 
       class << self
+        # Override in subclass.
+        #
+        # @return [String]
         def name
         end
 
+        # Override in subclass.
+        #
+        # @return [String]
         def description
         end
 
+        # Callback to define help option on all subclasses.
+        #
+        # @param subclass [Gitsh::Commander::Base]
         def inherited(subclass)
           subclass.def_option(
             name: "--help",
-            description: "Show this help page"
-          ) do |*, out:, err:|
+            description: "Show this help page."
+          ) do |*, out:, **|
             out.puts subclass.help_text
             SUCCESS_CODE
           end
         end
 
+        # @return [Array<Gitsh::Commander::Base>]
         def options
           @options.freeze
         end
 
+        # @return [Hash<String, Gitsh::Commander::Base>]
         def options_by_name
-          @options_by_name ||= options.each_with_object({}) do |option, hash|
-            hash[option.name] = option
+          @options_by_name ||= options.to_h do |option|
+            [option.name, option]
           end.freeze
         end
 
+        # @return [String]
         def help_text
           @help_text ||= begin
-            require "erb"
+            formatted_options = options.sort_by(&:display_name).flat_map do |option|
+              [
+                Stringer.indent_by(option.usage, size: 6),
+                *Stringer.wrap_ascii(option.description, width: 60, indent: 12)
+              ]
+            end.join("\n")
 
-            template = <<~HELP
-              GITSH-<%= command.name.delete_prefix(":").upcase %>(1)
+            <<~HELP
+              GITSH-#{name.delete_prefix(":").upcase}(1)
 
               NAME
-                    <%= command.name %>
+              #{Stringer.indent_by(name, size: 6)}
 
               DESCRIPTION
-              <% command.description.strip.lines.each do |line| %>
-                    <%= line %>
-              <% end %>
+              #{Stringer.wrap_ascii(description.strip, width: 54, indent: 6).join("\n")}
 
               OPTIONS
-              <% command.options.sort_by(&:name).each do |option| %>
-                    <%= option.usage %>
-                          <%= option.description %>
-              <% end %>
+              #{formatted_options}
             HELP
-
-            ERB.new(template, trim_mode: "<>").result_with_hash(command: self)
           end
         end
 
         protected
 
+        # @param description [String]
+        # @param block [Proc]
+        def def_default(description:, &block)
+          @options ||= []
+
+          @options << Option.new(
+            name: nil,
+            description: description,
+            block: block
+          ).freeze
+
+          nil
+        end
+
+        # @param name [String]
+        # @param description [String]
+        # @param block [Proc]
         def def_option(name:, description:, &block)
+          raise ArgumentError, "name must be a string" unless name.is_a?(String)
+
           @options ||= []
 
           @options << Option.new(
@@ -130,18 +172,19 @@ module Gitsh
     end
 
     class Exit < Base
-      # @raise [Gitsh::ExitError]
-      def default
+      def_default(description: "Exit the program.") do
         raise ExitError
       end
 
       class << self
+        # @return [String]
         def name
           ":exit"
         end
 
+        # @return [String]
         def description
-          "Gracefully exit the program. This is equivalent to ctrl-c and ctrl-d."
+          "Gracefully exit the program. This is equivalent to ctrl-c or ctrl-d."
         end
       end
     end
@@ -164,22 +207,28 @@ module Gitsh
       end
     end
 
+    # @param name [String]
+    #
+    # @return [Gitsh::Commander::Base, Gitsh::Commander::Git]
     def self.from_name(name)
       name_to_command.fetch(name, Git)
     end
 
-    def self.internal_commands
-      @internal_commands ||= Base.subclasses
-    end
-
+    # @return [Hash<String, Class>]
     def self.name_to_command
       @name_to_command ||= internal_commands
         .to_h { |subclass| [subclass.name, subclass] }
         .freeze
     end
 
-    def self.internal_list
-      @internal_list ||= name_to_command.keys.freeze
+    # @return [Array<Class>]
+    def self.internal_commands
+      @internal_commands ||= Base.subclasses
+    end
+
+    # @return [Array<String>]
+    def self.internal_command_names
+      @internal_command_names ||= internal_commands.map(&:name).freeze
     end
   end
 end

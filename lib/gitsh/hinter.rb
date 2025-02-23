@@ -82,60 +82,8 @@ module Gitsh
       description = Git.command_descriptions[command]
       return [] unless description
 
-      wrap_lines(description, width: width)
+      Stringer.wrap_ascii(description, width: width, indent: 2)
     end
     private_class_method :from_command_completion
-
-    INDENT = "  "
-    private_constant :INDENT
-
-    # Simple word wrap implementation.
-    #
-    # 1. Splits words on whitespace boundaries.
-    # 2. Fits as many words joined by one space on a single line.
-    # 3. If word and indent are bigger than width, it gets split accross multiple lines with a hyphon.
-    #
-    # @param text [String]
-    # @param width [Integer] expected to 10 or larger otherwise it will return an empty array
-    #
-    # @return [Array<String>] formatted lines
-    def self.wrap_lines(text, width:)
-      return [] if text.strip.empty?
-      return [] if width < 10
-
-      line = nil
-      lines = []
-      text.split do |word|
-        line ||= +" "
-
-        if line.size + 1 + word.size <= width
-          # Add small word to current line.
-          line << " " << word
-        elsif word.size + 2 > width
-          # Finish current line.
-          lines << line
-          # Chunk large word over multiple lines with hyphons in between.
-          0.step(by: width - 3, to: word.size - 1) do |idx|
-            if word.size - idx <= width - 2
-              # Store the end of the word.
-              line = "  #{word.slice(idx, width - 2)}"
-              break
-            else
-              # Store a chunk of the word as a line.
-              lines << "  #{word.slice(idx, width - 3)}-"
-            end
-          end
-        else
-          # Finish current line.
-          lines << line
-          # Start a new line.
-          line = "  #{word}"
-        end
-      end
-      lines << line if line
-
-      lines
-    end
-    private_class_method :wrap_lines
   end
 end

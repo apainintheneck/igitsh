@@ -28,6 +28,7 @@ module Gitsh
   autoload :Hinter, "gitsh/hinter"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
+  autoload :Stringer, "gitsh/stringer"
   autoload :Token, "gitsh/token"
   autoload :TokenZipper, "gitsh/token_zipper"
   autoload :Tokenizer, "gitsh/tokenizer"
@@ -96,6 +97,6 @@ module Gitsh
 
   # @return [Array<String>]
   def self.all_commands
-    @all_commands ||= (Git.command_list + Commander.internal_list).freeze
+    @all_commands ||= (Git.command_names + Commander.internal_command_names).freeze
   end
 end
