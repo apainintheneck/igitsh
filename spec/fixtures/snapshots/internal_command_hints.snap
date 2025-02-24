@@ -1,0 +1,10 @@
+---
+":alias":
+- "  Create local and global"
+- "  Git aliases for common"
+- "  command combinations."
+":exit":
+- "  Gracefully exit the"
+- "  program. This is"
+- "  equivalent to ctrl-c or"
+- "  ctrl-d."

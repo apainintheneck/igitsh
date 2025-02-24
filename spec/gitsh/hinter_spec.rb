@@ -9,7 +9,7 @@ RSpec.describe Gitsh::Hinter do
       allow(Gitsh::Git).to receive(:command_set).and_return(Set["diff"])
     end
 
-    context "with command" do
+    context "with Git command" do
       it "returns command hints for 40 char width" do
         command_hints = Gitsh::Git.command_descriptions.keys.sort.to_h do |command|
           [command, described_class.from_completion(command, width: 40)]
@@ -28,6 +28,16 @@ RSpec.describe Gitsh::Hinter do
 
       it "returns empty array when width is less than 10" do
         expect(described_class.from_completion("diff", width: 9)).to be_empty
+      end
+    end
+
+    context "with internal command" do
+      it "returns command hints" do
+        command_hints = Gitsh::Commander.internal_command_names.sort.to_h do |command|
+          [command, described_class.from_completion(command, width: 25)]
+        end
+
+        expect(command_hints).to match_snapshot("internal_command_hints")
       end
     end
   end

@@ -43,47 +43,58 @@ RSpec.describe Gitsh::Completer do
           .and_return(fixture("git_diff_help_page.txt"))
       end
 
-      it "completes short options" do
-        ["diff -s", "restore README.md; diff -s"].each do |line|
-          expect(described_class.from_line(line)).to eq(%w[-s])
+      context "with Git command" do
+        it "completes short options" do
+          ["diff -s", "restore README.md; diff -s"].each do |line|
+            expect(described_class.from_line(line)).to eq(%w[-s])
+          end
+        end
+
+        it "returns all options with matching prefix" do
+          ["diff --out", "restore README.md; diff --out"].each do |line|
+            expect(described_class.from_line(line)).to match_array(%w[
+              --output
+              --output-indicator-new
+              --output-indicator-old
+              --output-indicator-context
+            ])
+          end
+        end
+
+        it "includes options that exactly match" do
+          ["diff --output", "restore README.md; diff --output"].each do |line|
+            expect(described_class.from_line(line)).to match_array(%w[
+              --output
+              --output-indicator-new
+              --output-indicator-old
+              --output-indicator-context
+            ])
+          end
+        end
+
+        it "excludes options that no longer match" do
+          ["diff --output-indi", "restore README.md; diff --output-indic"].each do |line|
+            expect(described_class.from_line(line)).to match_array(%w[
+              --output-indicator-new
+              --output-indicator-old
+              --output-indicator-context
+            ])
+          end
+        end
+
+        it "returns no results when the prefix doesn't match" do
+          ["diff --input", "restore README.md; diff --input"].each do |line|
+            expect(described_class.from_line(line)).to be_empty
+          end
         end
       end
 
-      it "returns all options with matching prefix" do
-        ["diff --out", "restore README.md; diff --out"].each do |line|
-          expect(described_class.from_line(line)).to match_array(%w[
-            --output
-            --output-indicator-new
-            --output-indicator-old
-            --output-indicator-context
+      context "with internal command" do
+        it "returns results when prefix matches" do
+          expect(described_class.from_line(":alias --")).to match_array(%w[
+            --global
+            --local
           ])
-        end
-      end
-
-      it "includes options that exactly match" do
-        ["diff --output", "restore README.md; diff --output"].each do |line|
-          expect(described_class.from_line(line)).to match_array(%w[
-            --output
-            --output-indicator-new
-            --output-indicator-old
-            --output-indicator-context
-          ])
-        end
-      end
-
-      it "excludes options that no longer match" do
-        ["diff --output-indi", "restore README.md; diff --output-indic"].each do |line|
-          expect(described_class.from_line(line)).to match_array(%w[
-            --output-indicator-new
-            --output-indicator-old
-            --output-indicator-context
-          ])
-        end
-      end
-
-      it "returns no results when the prefix doesn't match" do
-        ["diff --input", "restore README.md; diff --input"].each do |line|
-          expect(described_class.from_line(line)).to be_empty
         end
       end
     end

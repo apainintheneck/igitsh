@@ -71,28 +71,41 @@ RSpec.describe Gitsh::Highlighter do
           .and_return(fixture("git_diff_help_page.txt"))
       end
 
-      it "doesn't append docs when there are no params" do
-        expect(Gitsh::Highlighter.from_line("diff --raw"))
-          .to end_with(Rainbow("--raw").color(:mediumslateblue).bold)
+      context "with Git command" do
+        it "doesn't append docs when there are no params" do
+          expect(Gitsh::Highlighter.from_line("diff --raw"))
+            .to end_with(Rainbow("--raw").color(:mediumslateblue).bold)
+        end
+
+        it "doesn't append docs when there are no more options" do
+          expect(Gitsh::Highlighter.from_line("diff -- --stat"))
+            .to end_with(Rainbow("--stat").color(:mediumslateblue).bold)
+        end
+
+        it "appends docs when there are params" do
+          expect(Gitsh::Highlighter.from_line("diff --stat")).to end_with(
+            Rainbow(
+              Rainbow("--stat").color(:mediumslateblue) +
+                Rainbow("[=<width>[,<name-width>[,<count>]]]").color(:gray)
+            ).bold
+          )
+        end
+
+        it "doesn't append docs when line is complete" do
+          expect(Gitsh::Highlighter.from_line("diff --stat", complete: true))
+            .to end_with(Rainbow("--stat").color(:mediumslateblue).bold)
+        end
       end
 
-      it "doesn't append docs when there are no more options" do
-        expect(Gitsh::Highlighter.from_line("diff -- --stat"))
-          .to end_with(Rainbow("--stat").color(:mediumslateblue).bold)
-      end
-
-      it "appends docs when there are params" do
-        expect(Gitsh::Highlighter.from_line("diff --stat")).to end_with(
-          Rainbow(
-            Rainbow("--stat").color(:mediumslateblue) +
-              Rainbow("[=<width>[,<name-width>[,<count>]]]").color(:gray)
-          ).bold
-        )
-      end
-
-      it "doesn't append docs when line is complete" do
-        expect(Gitsh::Highlighter.from_line("diff --stat", complete: true))
-          .to end_with(Rainbow("--stat").color(:mediumslateblue).bold)
+      context "with internal command" do
+        it "appends docs when there are params" do
+          expect(Gitsh::Highlighter.from_line(":alias --local")).to end_with(
+            Rainbow(
+              Rainbow("--local").color(:mediumslateblue) +
+             Rainbow(" <name> <command>").color(:gray)
+            ).bold
+          )
+        end
       end
     end
   end
