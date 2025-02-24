@@ -58,4 +58,16 @@ RSpec.describe Gitsh::Commander do
       end
     end
   end
+
+  describe "::Git" do
+    it "matches the #initialize params of the Base class" do
+      expect(described_class::Git.instance_method(:initialize).parameters)
+        .to eq(described_class::Base.instance_method(:initialize).parameters)
+    end
+
+    it "matches the #run params of the Base class" do
+      expect(described_class::Git.instance_method(:run).parameters)
+        .to eq(described_class::Base.instance_method(:run).parameters)
+    end
+  end
 end
