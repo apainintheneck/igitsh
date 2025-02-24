@@ -29,7 +29,7 @@ module Gitsh
       command_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       Gitsh
-        .all_commands
+        .all_command_names
         # Complete all commands starting with the given prefix.
         .grep(command_prefix_regex)
         # Sort results by shortest command and then alphabetically.
@@ -42,16 +42,20 @@ module Gitsh
     # @return [Array<String>, nil]
     def self.for_option(zipper)
       last_command_zipper = zipper.reverse_find(&:command?)
-      return unless last_command_zipper&.valid_command?
+      return unless last_command_zipper
 
       command = last_command_zipper.token.content
-      help_page = GitHelp.for(command: command)
-      return unless help_page
-
       option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
-      help_page
-        .option_prefixes
+      option_prefixes = if last_command_zipper.valid_git_command?
+        GitHelp.for(command: command)&.option_prefixes
+      elsif last_command_zipper.valid_internal_command?
+        Commander.from_name(command)&.option_prefixes
+      end
+
+      return unless option_prefixes
+
+      option_prefixes
         # Complete all commands starting with the given prefix.
         .grep(option_prefix_regex)
         # Sort results by shortest command and then alphabetically.

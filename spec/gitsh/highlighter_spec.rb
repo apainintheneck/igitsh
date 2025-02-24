@@ -2,7 +2,7 @@
 
 RSpec.describe Gitsh::Highlighter do
   before do
-    allow(Gitsh).to receive(:all_commands)
+    allow(Gitsh).to receive(:all_command_names)
       .and_return(%w[push pull commit grep rebase log diff exit quit])
   end
 
@@ -66,7 +66,7 @@ RSpec.describe Gitsh::Highlighter do
 
     context "with valid options" do
       before do
-        allow(Gitsh).to receive(:all_commands).and_return(%w[diff])
+        allow(Gitsh).to receive(:all_command_names).and_return(%w[diff])
         allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
           .and_return(fixture("git_diff_help_page.txt"))
       end

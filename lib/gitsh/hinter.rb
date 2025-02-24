@@ -67,23 +67,17 @@ module Gitsh
     #
     # @return [Array<String>] formatted lines
     def self.from_completion(completion, width:)
-      if Git.command_descriptions.include?(completion)
-        from_command_completion(completion, width: width)
+      description = if Git.command_descriptions.include?(completion)
+        Git.command_descriptions.fetch(completion)
+      elsif Commander.internal_command_names.include?(completion)
+        Commander.name_to_command.fetch(completion).description
+      end
+
+      if description
+        Stringer.wrap_ascii(description, width: width, indent: 2)
       else
         []
       end
     end
-
-    # @param command [String]
-    # @param width [Integer]
-    #
-    # @return [Array<String>] formatted lines
-    def self.from_command_completion(command, width:)
-      description = Git.command_descriptions[command]
-      return [] unless description
-
-      Stringer.wrap_ascii(description, width: width, indent: 2)
-    end
-    private_class_method :from_command_completion
   end
 end

@@ -96,7 +96,7 @@ module Gitsh
   end
 
   # @return [Array<String>]
-  def self.all_commands
-    @all_commands ||= (Git.command_names + Commander.internal_command_names).freeze
+  def self.all_command_names
+    @all_command_names ||= (Git.command_names + Commander.internal_command_names).freeze
   end
 end

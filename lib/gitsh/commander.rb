@@ -30,7 +30,7 @@ module Gitsh
       # @return [Integer] exit code
       def run
         option_name, *rest = @arguments
-        option = self.class.options_by_name[option_name]
+        option = self.class.option_by_prefix[option_name]
 
         if option.nil?
           return error("invalid option: '#{option_name}'")
@@ -59,17 +59,22 @@ module Gitsh
       # @param block [Proc]
       Option = Struct.new(:name, :description, :block, keyword_init: true) do
         # @return [String]
-        def display_name
+        def prefix
           name || "*"
         end
 
         # @return [String]
-        def usage
+        def suffix
           params = block.parameters.filter_map do |type, name|
             "<#{name}>" if type == :opt
           end
 
-          [display_name, *params].join(" ")
+          params.empty? ? "" : " " + params.join(" ")
+        end
+
+        # @return [String]
+        def usage
+          prefix + suffix
         end
       end
 
@@ -105,16 +110,28 @@ module Gitsh
         end
 
         # @return [Hash<String, Gitsh::Commander::Base>]
-        def options_by_name
-          @options_by_name ||= options.to_h do |option|
+        def option_by_prefix
+          @option_by_prefix ||= options.to_h do |option|
             [option.name, option]
           end.freeze
+        end
+
+        # All option prefixes for an internal command minus `--help`.
+        # Used for completions so `--help` is often not useful.
+        #
+        # @return [Array<String>]
+        def option_prefixes
+          @option_prefixes ||= option_by_prefix
+            .keys
+            .compact
+            .difference(%w[--help])
+            .freeze
         end
 
         # @return [String]
         def help_text
           @help_text ||= begin
-            formatted_options = options.sort_by(&:display_name).flat_map do |option|
+            formatted_options = options.sort_by(&:prefix).flat_map do |option|
               [
                 Stringer.indent_by(option.usage, size: 6),
                 *Stringer.wrap_ascii(option.description, width: 60, indent: 12)
@@ -185,6 +202,34 @@ module Gitsh
         # @return [String]
         def description
           "Gracefully exit the program. This is equivalent to ctrl-c or ctrl-d."
+        end
+      end
+    end
+
+    class Alias < Base
+      def_option(
+        name: "--local",
+        description: "Define a local alias for the current repo."
+      ) do |name, command, out:, err:|
+        Git.run("config", "--local", "alias.#{name}", command, out: out, err: err)
+      end
+
+      def_option(
+        name: "--global",
+        description: "Define a global alias."
+      ) do |name, command, out:, err:|
+        Git.run("config", "--global", "alias.#{name}", command, out: out, err: err)
+      end
+
+      class << self
+        # @return [String]
+        def name
+          ":alias"
+        end
+
+        # @return [String]
+        def description
+          "Create local and global Git aliases for common command combinations."
         end
       end
     end
