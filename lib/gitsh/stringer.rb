@@ -27,35 +27,33 @@ module Gitsh
     # @return [Array<String>] formatted lines
     def self.wrap_ascii(text, width:, indent:)
       raise ArgumentError, "indent must not be negative: #{indent}" if indent.negative?
+      raise ArgumentError, "indent(#{indent}) must be less than width(#{width})" if indent >= width
 
-      return [] if text.strip.empty?
       return [] if width < 10
 
       line = nil
       lines = []
       text.split do |word|
-        line ||= indent.zero? ? +"" : indent_by("", size: indent - 1)
-
-        if line.size + 1 + word.size <= width
+        if line && line.size + 1 + word.size <= width
           # Add small word to current line.
           line << " " << word
         elsif word.size + indent > width
           # Finish current line.
-          lines << line
+          lines << line if line
           # Chunk large word over multiple lines with hyphons in between.
           0.step(by: width - (indent + 1), to: word.size - 1) do |idx|
             if word.size - idx <= width - indent
               # Store the end of the word.
-              line = "  #{word.slice(idx, width - indent)}"
+              line = indent_by(word.slice(idx, width - indent), size: indent)
               break
             else
               # Store a chunk of the word as a line.
-              lines << "  #{word.slice(idx, width - (indent + 1))}-"
+              lines << indent_by("#{word.slice(idx, width - (indent + 1))}-", size: indent)
             end
           end
         else
           # Finish current line.
-          lines << line
+          lines << line if line
           # Start a new line.
           line = indent_by(word, size: indent)
         end
