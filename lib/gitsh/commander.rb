@@ -231,7 +231,9 @@ module Gitsh
         raise ArgumentError if name.nil? || command.nil?
         raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
 
-        ::Gitsh::Git.run(["config", "--local", "alias.#{name}", command], out: out, err: err)
+        ::Gitsh::Git.run(["config", "--local", "alias.#{name}", command], out: out, err: err).tap do |exit_code|
+          ::Gitsh::Git.unset_aliases! if exit_code.zero?
+        end
       end
 
       def_option(
@@ -241,7 +243,9 @@ module Gitsh
         raise ArgumentError if name.nil? || command.nil?
         raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
 
-        ::Gitsh::Git.run(["config", "--global", "alias.#{name}", command], out: out, err: err)
+        ::Gitsh::Git.run(["config", "--global", "alias.#{name}", command], out: out, err: err).tap do |exit_code|
+          ::Gitsh::Git.unset_aliases! if exit_code.zero?
+        end
       end
 
       class << self

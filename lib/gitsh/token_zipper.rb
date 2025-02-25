@@ -273,7 +273,7 @@ module Gitsh
     #
     # @return [Boolean]
     def valid_command?
-      command? && Gitsh.all_command_names.include?(token.content)
+      command? && Gitsh.command_name?(token.content)
     end
 
     # Returns true if the current token is a command present in the

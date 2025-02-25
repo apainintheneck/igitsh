@@ -98,8 +98,19 @@ module Gitsh
     Reline::HISTORY.replace(original_history)
   end
 
+  # @param name [String]
+  #
+  # @return [Boolean]
+  def self.command_name?(name)
+    Git.command_set.include?(name) ||
+      Git.aliases.include?(name) ||
+      Commander.name_to_command.include?(name)
+  end
+
   # @return [Array<String>]
   def self.all_command_names
-    @all_command_names ||= (Git.command_names + Commander.internal_command_names).freeze
+    Git.command_names |
+      Git.aliases.keys |
+      Commander.internal_command_names
   end
 end

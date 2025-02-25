@@ -70,7 +70,55 @@ module Gitsh
       Changes.new(
         staged_count: staged_count,
         unstaged_count: unstaged_count
-      )
+      ).freeze
+    end
+
+    Aliases = Struct.new(:local, :global, keyword_init: true) do
+      # @return [Boolean]
+      def include?(name)
+        local.include?(name) || global.include?(name)
+      end
+      alias_method :key?, :include?
+
+      # @return [Array<String>]
+      def keys
+        local.keys | global.keys
+      end
+    end
+
+    ALIAS_REGEX = %r{
+      ^                      # Start of line
+      (?<type>local|global)  # capture: type
+      \s+                    # whitespace
+      alias\.(?<name>\S+)    # capture: name
+      \s+                    # whitespace
+      (?<command>.+)         # capture: command
+      $
+    }x
+
+    # @return [Aliases]
+    def self.aliases
+      @aliases ||= begin
+        local = {}
+        global = {}
+
+        `git config --show-scope --get-regexp '^alias\.'`.each_line do |line|
+          line.match(ALIAS_REGEX) do |match_result|
+            case match_result[:type]
+            when "local"
+              local[match_result[:name]] = match_result[:command]
+            when "global"
+              global[match_result[:name]] = match_result[:command]
+            end
+          end
+        end
+
+        Aliases.new(local: local.freeze, global: global.freeze)
+      end.freeze
+    end
+
+    def self.unset_aliases!
+      @aliases = nil
     end
 
     # @return [Array<String>]
