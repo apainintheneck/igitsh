@@ -248,6 +248,22 @@ module Gitsh
         end
       end
 
+      def_option(
+        name: "--list",
+        description: "List all local and global aliases."
+      ) do |*, out:, **|
+        out.puts "---Local---"
+        ::Gitsh::Git.aliases.local.each do |name, command|
+          out.puts "#{name}  =>  #{command}"
+        end
+        out.puts
+        out.puts "---Global---"
+        ::Gitsh::Git.aliases.global.each do |name, command|
+          out.puts "#{name}  =>  #{command}"
+        end
+        SUCCESS_CODE
+      end
+
       class << self
         # @return [String]
         def name

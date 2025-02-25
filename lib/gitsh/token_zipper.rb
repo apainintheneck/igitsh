@@ -277,11 +277,19 @@ module Gitsh
     end
 
     # Returns true if the current token is a command present in the
-    # internal commands list.
+    # Git commands list.
     #
     # @return [Boolean]
     def valid_git_command?
-      command? && Gitsh::Git.command_names.include?(token.content)
+      command? && Gitsh::Git.command_set.include?(token.content)
+    end
+
+    # Returns true if the current token is a command present in the
+    # Git aliases list.
+    #
+    # @return [Boolean]
+    def valid_git_alias?
+      command? && Gitsh::Git.aliases.include?(token.content)
     end
 
     # Returns true if the current token is a command present in the
@@ -369,6 +377,22 @@ module Gitsh
 
         option.suffix unless option.suffix.empty?
       end
+    end
+
+    # Returns the full command that the alias stands for.
+    #
+    # @return [String, nil]
+    def alias_suffix
+      return unless valid_git_alias?
+
+      "  =>  #{Git.aliases.fetch(token.content).strip}"
+    end
+
+    # Returns either the option or alias suffix.
+    #
+    # @return [String, nil]
+    def suffix
+      option_suffix || alias_suffix
     end
   end
 end

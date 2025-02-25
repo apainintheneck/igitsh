@@ -93,6 +93,7 @@ RSpec.describe Gitsh::Completer do
         it "returns results when prefix matches" do
           expect(described_class.from_line(":alias --")).to match_array(%w[
             --global
+            --list
             --local
           ])
         end

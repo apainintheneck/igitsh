@@ -74,6 +74,16 @@ module Gitsh
     end
 
     Aliases = Struct.new(:local, :global, keyword_init: true) do
+      # @param key [String]
+      #
+      # @return [String] value
+      def fetch(key)
+        value = local[key] || global[key]
+        raise KeyError, "no alias for key: '#{key}'" unless value
+
+        value
+      end
+
       # @return [Boolean]
       def include?(name)
         local.include?(name) || global.include?(name)
@@ -106,9 +116,9 @@ module Gitsh
           line.match(ALIAS_REGEX) do |match_result|
             case match_result[:type]
             when "local"
-              local[match_result[:name]] = match_result[:command]
+              local[match_result[:name]] = match_result[:command].strip
             when "global"
-              global[match_result[:name]] = match_result[:command]
+              global[match_result[:name]] = match_result[:command].strip
             end
           end
         end
