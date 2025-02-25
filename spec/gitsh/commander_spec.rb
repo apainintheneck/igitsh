@@ -13,9 +13,6 @@ RSpec.describe Gitsh::Commander do
     end
   end
 
-  describe ".internal_commands" do
-  end
-
   describe ".from_name" do
     it "returns internal command" do
       expect(described_class.from_name(":exit")).to eq(described_class::Exit)
