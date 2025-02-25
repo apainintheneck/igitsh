@@ -70,4 +70,14 @@ RSpec.describe Gitsh::Commander do
         .to eq(described_class::Base.instance_method(:run).parameters)
     end
   end
+
+  describe "Base.help_text" do
+    it "prints a nice help page for each command" do
+      help_pages = described_class.internal_commands.to_h do |command|
+        [command.name, command.help_text]
+      end
+
+      expect(help_pages).to match_snapshot("internal_command_help_pages")
+    end
+  end
 end

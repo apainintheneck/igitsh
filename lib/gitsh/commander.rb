@@ -6,6 +6,30 @@ module Gitsh
       SUCCESS_CODE = 0
       FAILURE_CODE = 1
 
+      # @param name [String, nil]
+      # @param description [String]
+      # @param block [Proc]
+      Option = Struct.new(:name, :description, :block, keyword_init: true) do
+        # @return [String]
+        def prefix
+          name || "*"
+        end
+
+        # @return [String]
+        def suffix
+          params = block.parameters.filter_map do |type, name|
+            "<#{name}>" if type == :opt
+          end
+
+          params.empty? ? "" : " " + params.join(" ")
+        end
+
+        # @return [String]
+        def usage
+          prefix + suffix
+        end
+      end
+
       # @param arguments [Array<String>]
       # @param out [IO]
       # @param err [IO]
@@ -33,16 +57,21 @@ module Gitsh
         option = self.class.option_by_prefix[option_name]
 
         if option.nil?
-          return error("invalid option: '#{option_name}'")
+          return error("invalid option: #{option_name}")
         end
 
         begin
           option.block.call(*rest, out: @out, err: @err).to_i
         rescue ArgumentError
-          error("invalid arguments: #{rest}")
-          raise
+          params = rest.map { |param| "'#{param}'" }
+          arguments = [self.class.name, option_name, *params].join(" ")
+          error("invalid arguments: #{arguments}")
+        rescue MessageError => e
+          error(e.message)
         end
       end
+
+      private
 
       # Print the error message and the help page.
       #
@@ -50,33 +79,9 @@ module Gitsh
       #
       # @return [Integer] failure code
       def error(message)
-        @out.puts "error: #{message}"
-        @out.puts self.class.help_text
+        @err.puts "error: #{message}"
+        @err.puts self.class.help_text
         FAILURE_CODE
-      end
-
-      # @param name [String, nil]
-      # @param description [String]
-      # @param block [Proc]
-      Option = Struct.new(:name, :description, :block, keyword_init: true) do
-        # @return [String]
-        def prefix
-          name || "*"
-        end
-
-        # @return [String]
-        def suffix
-          params = block.parameters.filter_map do |type, name|
-            "<#{name}>" if type == :opt
-          end
-
-          params.empty? ? "" : " " + params.join(" ")
-        end
-
-        # @return [String]
-        def usage
-          prefix + suffix
-        end
       end
 
       class << self
@@ -132,7 +137,18 @@ module Gitsh
         # @return [String]
         def help_text
           @help_text ||= begin
-            formatted_options = options.sort_by(&:prefix).flat_map do |option|
+            # Sort alphabetically by prefix while
+            # making sure `--help` ends up at the end.
+            sorted_options = options.sort do |a, b|
+              case [a.prefix, b.prefix]
+              in [_, "--help"] then -1
+              in ["--help", _] then 1
+              else
+                a.prefix <=> b.prefix
+              end
+            end
+
+            formatted_options = sorted_options.flat_map do |option|
               [
                 Stringer.indent_by(option.usage, size: 6),
                 *Stringer.wrap_ascii(option.description, width: 60, indent: 12)
@@ -212,6 +228,9 @@ module Gitsh
         name: "--local",
         description: "Define a local alias for the current repo."
       ) do |name, command, out:, err:|
+        raise ArgumentError if name.nil? || command.nil?
+        raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
+
         ::Gitsh::Git.run(["config", "--local", "alias.#{name}", command], out: out, err: err)
       end
 
@@ -219,6 +238,9 @@ module Gitsh
         name: "--global",
         description: "Define a global alias."
       ) do |name, command, out:, err:|
+        raise ArgumentError if name.nil? || command.nil?
+        raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
+
         ::Gitsh::Git.run(["config", "--global", "alias.#{name}", command], out: out, err: err)
       end
 
@@ -230,7 +252,11 @@ module Gitsh
 
         # @return [String]
         def description
-          "Create local and global Git aliases for common command combinations."
+          <<~DESCRIPTION
+            Create local and global Git aliases for common command combinations.
+
+            Internal Git aliasing logic is reused here so that aliases are available outside of Gitsh once defined.
+          DESCRIPTION
         end
       end
     end

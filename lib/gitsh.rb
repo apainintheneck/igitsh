@@ -19,6 +19,9 @@ module Gitsh
   # When a line of code should never be reached in normal execution.
   class UnreachableError < Error; end
 
+  # Send messages from option blocks to the commander.
+  class MessageError < Error; end
+
   autoload :Commander, "gitsh/commander"
   autoload :Completer, "gitsh/completer"
   autoload :Executor, "gitsh/executor"
