@@ -44,13 +44,13 @@ module Gitsh
       last_command_zipper = zipper.reverse_find(&:command?)
       return unless last_command_zipper
 
-      command = last_command_zipper.token.content
+      command_name = last_command_zipper.token.content
       option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       option_prefixes = if last_command_zipper.valid_git_command?
-        GitHelp.for(command: command)&.option_prefixes
+        GitHelp.from_name(command_name)&.option_prefixes
       elsif last_command_zipper.valid_internal_command?
-        Commander.from_name(command)&.option_prefixes
+        Commander.from_name(command_name)&.option_prefixes
       end
 
       return unless option_prefixes

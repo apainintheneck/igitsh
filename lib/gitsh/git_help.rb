@@ -10,7 +10,7 @@ module Gitsh
     # @param command [String]
     #
     # @return [Gitsh::GitHelp, nil]
-    def self.for(command:)
+    def self.from_name(command)
       return unless Git.command_set.include?(command)
 
       @for ||= {}

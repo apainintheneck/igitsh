@@ -353,7 +353,7 @@ module Gitsh
       return unless current_command
 
       if current_command.valid_git_command?
-        help_page = GitHelp.for(command: current_command.token.content)
+        help_page = GitHelp.from_name(current_command.token.content)
         return unless help_page
 
         options = help_page.options_by_prefix[token.raw_content]

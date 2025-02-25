@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Gitsh::GitHelp do
-  subject(:help_page) { described_class.for(command: "diff") }
+  subject(:help_page) { described_class.from_name("diff") }
 
   before do
     allow(Gitsh::Git).to receive(:command_names).and_return(%w[diff])
@@ -12,11 +12,11 @@ RSpec.describe Gitsh::GitHelp do
 
   describe ".for" do
     it "returns nil for invalid command" do
-      expect(described_class.for(command: "dance")).to be_nil
+      expect(described_class.from_name("dance")).to be_nil
     end
 
     it "returns instance of itself when command is valid" do
-      expect(described_class.for(command: "diff")).to be_a(Gitsh::GitHelp)
+      expect(described_class.from_name("diff")).to be_a(Gitsh::GitHelp)
     end
   end
 

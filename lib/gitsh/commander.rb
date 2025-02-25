@@ -40,6 +40,7 @@ module Gitsh
           option.block.call(*rest, out: @out, err: @err).to_i
         rescue ArgumentError
           error("invalid arguments: #{rest}")
+          raise
         end
       end
 
@@ -211,14 +212,14 @@ module Gitsh
         name: "--local",
         description: "Define a local alias for the current repo."
       ) do |name, command, out:, err:|
-        Git.run("config", "--local", "alias.#{name}", command, out: out, err: err)
+        ::Gitsh::Git.run(["config", "--local", "alias.#{name}", command], out: out, err: err)
       end
 
       def_option(
         name: "--global",
         description: "Define a global alias."
       ) do |name, command, out:, err:|
-        Git.run("config", "--global", "alias.#{name}", command, out: out, err: err)
+        ::Gitsh::Git.run(["config", "--global", "alias.#{name}", command], out: out, err: err)
       end
 
       class << self
