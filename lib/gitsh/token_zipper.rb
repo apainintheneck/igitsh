@@ -273,7 +273,31 @@ module Gitsh
     #
     # @return [Boolean]
     def valid_command?
-      command? && Gitsh.all_commands.include?(token.content)
+      command? && Gitsh.command_name?(token.content)
+    end
+
+    # Returns true if the current token is a command present in the
+    # Git commands list.
+    #
+    # @return [Boolean]
+    def valid_git_command?
+      command? && Gitsh::Git.command_set.include?(token.content)
+    end
+
+    # Returns true if the current token is a command present in the
+    # Git aliases list.
+    #
+    # @return [Boolean]
+    def valid_git_alias?
+      command? && Gitsh::Git.aliases.include?(token.content)
+    end
+
+    # Returns true if the current token is a command present in the
+    # internal commands list.
+    #
+    # @return [Boolean]
+    def valid_internal_command?
+      command? && Gitsh::Commander.internal_command_names.include?(token.content)
     end
 
     # Returns the most recent command if one exists before an action or head.
@@ -336,11 +360,39 @@ module Gitsh
       return unless options_allowed?
       return unless current_command
 
-      help_page = GitHelp.for(command: current_command.token.content)
-      return unless help_page
+      if current_command.valid_git_command?
+        help_page = GitHelp.from_name(current_command.token.content)
+        return unless help_page
 
-      options = help_page.options_by_prefix.fetch(token.raw_content, [])
-      options.find { |option| !option.suffix.empty? }&.suffix
+        options = help_page.options_by_prefix[token.raw_content]
+        return unless options
+
+        options.find { |option| !option.suffix.empty? }&.suffix
+      elsif current_command.valid_internal_command?
+        internal_command = Commander.name_to_command[current_command.token.content]
+        return unless internal_command
+
+        option = internal_command.option_by_prefix[token.raw_content]
+        return unless option
+
+        option.suffix unless option.suffix.empty?
+      end
+    end
+
+    # Returns the full command that the alias stands for.
+    #
+    # @return [String, nil]
+    def alias_suffix
+      return unless valid_git_alias?
+
+      "  =>  #{Git.aliases.fetch(token.content).strip}"
+    end
+
+    # Returns either the option or alias suffix.
+    #
+    # @return [String, nil]
+    def suffix
+      option_suffix || alias_suffix
     end
   end
 end

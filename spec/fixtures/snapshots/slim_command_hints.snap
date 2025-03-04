@@ -158,7 +158,6 @@ cherry-pick:
 - "  existing"
 - "  commits"
 citool:
-- " "
 - "  Graphic-"
 - "  al"
 - "  alterna-"
@@ -391,7 +390,6 @@ format-bundle:
 - "  file"
 - "  format"
 format-chunk:
-- " "
 - "  Chunk-b-"
 - "  ased"
 - "  file"
@@ -515,7 +513,6 @@ http-backend:
 - "  over"
 - "  HTTP"
 ignore:
-- " "
 - "  Specifi-"
 - "  es"
 - "  intenti-"
@@ -553,7 +550,6 @@ init:
 - "  existing"
 - "  one"
 instaweb:
-- " "
 - "  Instant-"
 - "  ly"
 - "  browse"
@@ -886,7 +882,6 @@ repository-layout:
 - "  ory"
 - "  Layout"
 request-pull:
-- " "
 - "  Generat-"
 - "  es a"
 - "  summary"
@@ -934,7 +929,6 @@ revert:
 - "  existing"
 - "  commits"
 revisions:
-- " "
 - "  Specify-"
 - "  ing"
 - "  revisio-"
@@ -981,7 +975,6 @@ sh-setup:
 - "  setup"
 - "  code"
 shortlog:
-- " "
 - "  Summari-"
 - "  ze 'git"
 - "  log'"
@@ -1039,7 +1032,6 @@ stripspace:
 - "  whitesp-"
 - "  ace"
 submodule:
-- " "
 - "  Initial-"
 - "  ize,"
 - "  update"
@@ -1048,7 +1040,6 @@ submodule:
 - "  submodu-"
 - "  les"
 svn:
-- " "
 - "  Bidirec-"
 - "  tional"
 - "  operati-"

@@ -1,0 +1,16 @@
+---
+":alias":
+- "  Create local and global"
+- "  Git aliases for common"
+- "  command combinations."
+- ''
+- "  Internal Git aliasing"
+- "  logic is reused here so"
+- "  that aliases are"
+- "  available outside of"
+- "  Gitsh once defined."
+":exit":
+- "  Gracefully exit the"
+- "  program. This is"
+- "  equivalent to ctrl-c or"
+- "  ctrl-d."

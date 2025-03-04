@@ -45,28 +45,25 @@ module Gitsh
       # The rest of the commands would get skipped.
       skip_to_end = false
 
-      Parser.parse(line).each do |command|
-        case command
-        when Command::And
+      Parser.parse(line).each do |group|
+        case group
+        when Parser::Group::And
           next if skip_to_end
           # Skip the command if the previous one failed.
           next unless exit_code.zero?
-        when Command::Or
+        when Parser::Group::Or
           # Skip to the end if the previous command succeeded.
           skip_to_end = true if exit_code.zero?
           next if skip_to_end
-        when Command::End
+        when Parser::Group::End
           # Always run the command after the `end` action.
           skip_to_end = false
         end
 
-        raise ExitError if %w[exit quit].include?(command.arguments.first)
-
-        exit_code = Git.run(
-          command.arguments,
-          out: out,
-          err: err
-        )
+        exit_code = Commander
+          .from_name(group.first)
+          .new(group, out: out, err: err)
+          .run
       end
 
       Result::Success.new(exit_code: exit_code)

@@ -293,6 +293,3 @@
 - !ruby/struct:Gitsh::GitHelp::Option
   prefix: "--ita-invisible-in-index"
   suffix: ''
-- !ruby/struct:Gitsh::GitHelp::Option
-  prefix: "--diff-merges"
-  suffix: ''

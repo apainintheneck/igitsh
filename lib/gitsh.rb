@@ -19,7 +19,10 @@ module Gitsh
   # When a line of code should never be reached in normal execution.
   class UnreachableError < Error; end
 
-  autoload :Command, "gitsh/command"
+  # Send messages from option blocks to the commander.
+  class MessageError < Error; end
+
+  autoload :Commander, "gitsh/commander"
   autoload :Completer, "gitsh/completer"
   autoload :Executor, "gitsh/executor"
   autoload :Git, "gitsh/git"
@@ -28,6 +31,7 @@ module Gitsh
   autoload :Hinter, "gitsh/hinter"
   autoload :Parser, "gitsh/parser"
   autoload :Prompt, "gitsh/prompt"
+  autoload :Stringer, "gitsh/stringer"
   autoload :Token, "gitsh/token"
   autoload :TokenZipper, "gitsh/token_zipper"
   autoload :Tokenizer, "gitsh/tokenizer"
@@ -94,8 +98,19 @@ module Gitsh
     Reline::HISTORY.replace(original_history)
   end
 
+  # @param name [String]
+  #
+  # @return [Boolean]
+  def self.command_name?(name)
+    Git.command_set.include?(name) ||
+      Git.aliases.include?(name) ||
+      Commander.name_to_command.include?(name)
+  end
+
   # @return [Array<String>]
-  def self.all_commands
-    @all_commands ||= (Git.command_list + %w[exit quit]).freeze
+  def self.all_command_names
+    Git.command_names |
+      Git.aliases.keys |
+      Commander.internal_command_names
   end
 end

@@ -32,10 +32,10 @@ module Gitsh
         string << " " * token_gap if token_gap.positive?
       end
 
-      # Add trailing option usage if it exists and there are no spaces after the option.
+      # Add trailing hint if one exists and there are no spaces after the token.
       # Skip this after the user presses enter and the line is complete.
-      if !complete && !line.end_with?(" ") && (option_suffix = zipper.last.option_suffix)
-        string << option_suffix.color(:gray)
+      if !complete && !line.end_with?(" ") && (suffix = zipper.last.suffix)
+        string << suffix.color(:gray)
       end
 
       string.freeze

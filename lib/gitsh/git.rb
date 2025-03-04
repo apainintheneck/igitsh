@@ -70,12 +70,141 @@ module Gitsh
       Changes.new(
         staged_count: staged_count,
         unstaged_count: unstaged_count
-      )
+      ).freeze
+    end
+
+    Aliases = Struct.new(:local, :global, keyword_init: true) do
+      # @param key [String]
+      #
+      # @return [String] value
+      def fetch(key)
+        value = local[key] || global[key]
+        raise KeyError, "no alias for key: '#{key}'" unless value
+
+        value
+      end
+
+      # @return [Boolean]
+      def include?(name)
+        local.include?(name) || global.include?(name)
+      end
+      alias_method :key?, :include?
+
+      # @return [Array<String>]
+      def keys
+        local.keys | global.keys
+      end
+    end
+
+    ALIAS_REGEX = %r{
+      ^                      # Start of line
+      (?<type>local|global)  # capture: type
+      \s+                    # whitespace
+      alias\.(?<name>\S+)    # capture: name
+      \s+                    # whitespace
+      (?<command>.+)         # capture: command
+      $
+    }x
+
+    # @return [Aliases]
+    def self.aliases
+      @aliases ||= begin
+        local_hash = {}
+        global_hash = {}
+        `git config --show-scope --get-regexp '^alias\.'`.each_line do |line|
+          line.match(ALIAS_REGEX) do |match_result|
+            case match_result[:type]
+            when "local"
+              local_hash[match_result[:name]] = match_result[:command].strip
+            when "global"
+              global_hash[match_result[:name]] = match_result[:command].strip
+            end
+          end
+        end
+
+        Aliases.new(local: local_hash.freeze, global: global_hash.freeze)
+      end.freeze
+    end
+
+    CONFIG_LEVELS = %w[--local --global].freeze
+
+    # @param name [String] when name already exists will ask to overwrite
+    # @param command [String, nil] when nil will ask to delete
+    # @param level [String] from `Gitsh::Git::CONFIG_LEVELS`
+    # @param out [IO] (default STDOUT)
+    # @param err [IO] (default STDIN)
+    #
+    # @return [Integer]
+    def self.set_alias(name:, command:, level:, out:, err:)
+      raise ArgumentError if name.nil?
+      raise ArgumentError unless CONFIG_LEVELS.include?(level)
+      raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
+
+      if command
+        # Create alias
+        if existing_alias?(name: name, level: level)
+          # Overwrite alias
+          out.puts "Existing alias: #{name}  =>  #{command}"
+          out.puts "Do you want to overwrite the '#{name}' alias? [Y/n]"
+
+          if %w[Y y].include?($stdin.getch)
+            out.puts "Overwriting..."
+          else
+            out.puts "Skipping..."
+            return 0
+          end
+        end
+
+        run(["config", level, "alias.#{name}", command], out: out, err: err).tap do |exit_code|
+          clear_alias_cache! if exit_code.zero? # clear cache when it was successful
+        end
+      else
+        unless existing_alias?(name: name, level: level)
+          raise MessageError, "can't delete nonexistent #{level} alias: #{name}"
+        end
+
+        # Delete alias
+        out.puts "Do you want to delete the '#{name}' alias? [Y/n]"
+
+        if %w[Y y].include?($stdin.getch)
+          out.puts "Deleting..."
+        else
+          out.puts "Skipping..."
+          return 0
+        end
+
+        run(["config", level, "--unset", "alias.#{name}"], out: out, err: err).tap do |exit_code|
+          clear_alias_cache! if exit_code.zero? # clear cache when it was successful
+        end
+      end
+    end
+
+    # @param name [String]
+    # @param level [String] from `Gitsh::Git::CONFIG_LEVELS`
+    #
+    # @return [Boolean]
+    def self.existing_alias?(name:, level:)
+      raise ArgumentError unless CONFIG_LEVELS.include?(level)
+
+      clear_alias_cache!
+
+      case level
+      when "--local"
+        aliases.local.include?(name)
+      when "--global"
+        aliases.global.include?(name)
+      else
+        raise UnreachableError, "Unknown level: #{level}"
+      end
+    end
+
+    def self.clear_alias_cache!
+      @aliases = nil
     end
 
     # @return [Array<String>]
-    def self.command_list
-      @commands ||= `git --list-cmds=main,nohelpers`
+    def self.command_names
+      @command_names ||= `git --list-cmds=main,nohelpers`
         .lines
         .map(&:strip)
         .reject(&:empty?)
@@ -84,7 +213,7 @@ module Gitsh
 
     # @return [Set<String>]
     def self.command_set
-      @command_set ||= command_list.to_set.freeze
+      @command_set ||= command_names.to_set.freeze
     end
 
     # @param args [Array<String>]

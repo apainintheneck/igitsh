@@ -13,7 +13,6 @@
 - "--default-prefix"
 - "--diff-algorithm"
 - "--diff-filter"
-- "--diff-merges"
 - "--dirstat"
 - "--dirstat-by-file"
 - "--dst-prefix"
