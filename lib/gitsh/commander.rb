@@ -226,26 +226,28 @@ module Gitsh
     class Alias < Base
       def_option(
         name: "--local",
-        description: "Define a local alias for the current repo."
+        description: "Set or unset a local alias for the current repo."
       ) do |name, command, out:, err:|
-        raise ArgumentError if name.nil? || command.nil?
-        raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
-
-        ::Gitsh::Git.run(["config", "--local", "alias.#{name}", command], out: out, err: err).tap do |exit_code|
-          ::Gitsh::Git.unset_aliases! if exit_code.zero?
-        end
+        ::Gitsh::Git.set_alias(
+          name: name,
+          command: command,
+          level: "--local",
+          out: out,
+          err: err
+        )
       end
 
       def_option(
         name: "--global",
-        description: "Define a global alias."
+        description: "Set or unset a global alias for the current user."
       ) do |name, command, out:, err:|
-        raise ArgumentError if name.nil? || command.nil?
-        raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
-
-        ::Gitsh::Git.run(["config", "--global", "alias.#{name}", command], out: out, err: err).tap do |exit_code|
-          ::Gitsh::Git.unset_aliases! if exit_code.zero?
-        end
+        ::Gitsh::Git.set_alias(
+          name: name,
+          command: command,
+          level: "--global",
+          out: out,
+          err: err
+        )
       end
 
       def_option(
@@ -261,6 +263,7 @@ module Gitsh
         ::Gitsh::Git.aliases.global.each do |name, command|
           out.puts "#{name}  =>  #{command}"
         end
+        out.puts
         SUCCESS_CODE
       end
 

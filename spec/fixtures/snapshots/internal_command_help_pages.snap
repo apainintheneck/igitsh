@@ -13,11 +13,15 @@
 
   OPTIONS
         --global <name> <command>
-              Define a global alias.
+              Set or unset a global alias for the current
+              user.
         --list
-              List all local and global aliases.
+              List all local, global and system aliases.
         --local <name> <command>
-              Define a local alias for the current repo.
+              Set or unset a local alias for the current repo.
+        --system <name> <command>
+              Set or unset a system alias for the current
+              computer.
         --help
               Show this help page.
 ":exit": |
