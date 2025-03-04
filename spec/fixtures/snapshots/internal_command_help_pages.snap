@@ -7,21 +7,20 @@
 
   DESCRIPTION
         Create local and global Git aliases for common
-        command combinations. Internal Git aliasing
-        logic is reused here so that aliases are
-        available outside of Gitsh once defined.
+        command combinations.
+
+        Internal Git aliasing logic is reused here so
+        that aliases are available outside of Gitsh once
+        defined.
 
   OPTIONS
         --global <name> <command>
               Set or unset a global alias for the current
               user.
         --list
-              List all local, global and system aliases.
+              List all local and global aliases.
         --local <name> <command>
               Set or unset a local alias for the current repo.
-        --system <name> <command>
-              Set or unset a system alias for the current
-              computer.
         --help
               Show this help page.
 ":exit": |

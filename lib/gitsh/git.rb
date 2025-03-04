@@ -122,7 +122,7 @@ module Gitsh
           end
         end
 
-        Aliases.new(local: local_hash.freeze,global: global_hash.freeze)
+        Aliases.new(local: local_hash.freeze, global: global_hash.freeze)
       end.freeze
     end
 

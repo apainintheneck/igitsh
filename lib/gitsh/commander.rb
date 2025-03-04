@@ -151,7 +151,7 @@ module Gitsh
             formatted_options = sorted_options.flat_map do |option|
               [
                 Stringer.indent_by(option.usage, size: 6),
-                *Stringer.wrap_ascii(option.description, width: 60, indent: 12)
+                *Stringer.wrap_ascii_paragraph(option.description, width: 60, indent: 12)
               ]
             end.join("\n")
 
@@ -162,7 +162,7 @@ module Gitsh
               #{Stringer.indent_by(name, size: 6)}
 
               DESCRIPTION
-              #{Stringer.wrap_ascii(description.strip, width: 54, indent: 6).join("\n")}
+              #{Stringer.wrap_ascii_paragraph(description.strip, width: 54, indent: 6).join("\n")}
 
               OPTIONS
               #{formatted_options}

@@ -19,13 +19,31 @@ module Gitsh
     # 1. Splits words on whitespace boundaries.
     # 2. Fits as many words joined by one space on a single line.
     # 3. If word and indent are bigger than width, it gets split accross multiple lines with a hyphon.
+    # 4. Preserves existing newlines.
     #
     # @param text [String] text to format
     # @param width [Integer] expected to be 10+
     # @param indent [Integer] must not be negative
     #
     # @return [Array<String>] formatted lines
-    def self.wrap_ascii(text, width:, indent:)
+    def self.wrap_ascii_paragraph(text, width:, indent:)
+      text.each_line(chomp: true).flat_map do |line|
+        wrap_ascii_line(line, width: width, indent: indent)
+      end
+    end
+
+    # Simple word wrap implementation.
+    #
+    # 1. Splits words on whitespace boundaries.
+    # 2. Fits as many words joined by one space on a single line.
+    # 3. If word and indent are bigger than width, it gets split accross multiple lines with a hyphon.
+    #
+    # @param text [String] text to format
+    # @param width [Integer] expected to be 10+
+    # @param indent [Integer] must not be negative
+    #
+    # @return [Array<String>] formatted lines
+    def self.wrap_ascii_line(text, width:, indent:)
       raise ArgumentError, "indent must not be negative: #{indent}" if indent.negative?
       raise ArgumentError, "indent(#{indent}) must be less than width(#{width})" if indent >= width
 
@@ -59,6 +77,7 @@ module Gitsh
         end
       end
       lines << line if line
+      lines = [""] if lines.empty?
 
       lines
     end

@@ -95,7 +95,6 @@ RSpec.describe Gitsh::Completer do
             --global
             --list
             --local
-            --system
           ])
         end
       end

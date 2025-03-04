@@ -74,7 +74,7 @@ module Gitsh
       end
 
       if description
-        Stringer.wrap_ascii(description, width: width, indent: 2)
+        Stringer.wrap_ascii_paragraph(description, width: width, indent: 2)
       else
         []
       end
