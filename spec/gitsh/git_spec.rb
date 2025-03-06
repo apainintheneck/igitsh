@@ -25,7 +25,23 @@ RSpec.describe Gitsh::Git do
     end
   end
 
-  describe ".command_descriptions" do
+  describe ".aliases" do
+    it "returns an Aliases struct", :in_git_repo do
+      described_class.set_alias(
+        name: "append",
+        command: "commit --amend --no-edit",
+        level: "--local",
+        out: File::NULL,
+        err: File::NULL
+      )
+
+      aliases = described_class.aliases
+      expect(aliases).to be_a(described_class::Aliases)
+      expect(aliases.local).to eq({"append" => "commit --amend --no-edit"})
+    end
+  end
+
+  describe ".command_descriptions", :stub_git_help_all do
     it "parses the command descriptions" do
       expect(described_class.command_descriptions).to match_snapshot("git_command_descriptions")
     end

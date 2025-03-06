@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Parser do
+RSpec.describe Gitsh::Parser, :without_git do
   let(:error) { Rainbow("error>").blue.bold }
 
   def expect_parsed_lines(lines)
