@@ -11,13 +11,35 @@ require "yaml"
 require "pathname"
 require "set"
 
-# To prevent flakiness when calling methods unexpectedly in tests.
-class TestError < StandardError; end
+module Gitsh
+  module Test
+    # To prevent flakiness when calling methods unexpectedly in tests.
+    class Error < StandardError; end
 
-# For the snapshot testing library.
-class YAMLSerializer
-  def dump(object)
-    YAML.dump(object)
+    # For the snapshot testing library.
+    class YAMLSerializer
+      def dump(object)
+        YAML.dump(object)
+      end
+    end
+
+    # @param command [String]
+    def self.quiet_system(command)
+      system(command, out: File::NULL, err: File::NULL)
+    end
+
+    # @yield inside temporary directory
+    def self.in_temp_dir
+      old_dir = Dir.pwd
+
+      Dir.mktmpdir do |new_dir|
+        Dir.chdir(new_dir)
+
+        yield
+      end
+    ensure
+      Dir.chdir(old_dir)
+    end
   end
 end
 
@@ -125,13 +147,13 @@ RSpec.configure do |config|
   # Defaults to using the awesome_print gem to serialize values for snapshots
   #
   # Set this value to use a custom snapshot serializer
-  config.snapshot_serializer = YAMLSerializer
+  config.snapshot_serializer = Gitsh::Test::YAMLSerializer
 
   config.before(:each, :without_git) do
     # To prevent errors where these get loaded for real and get cached by another test.
     Gitsh::Git.methods(false).each do |method|
       allow(Gitsh::Git).to receive(method) do
-        raise TestError, "Unexpected call to Gitsh::Git.#{method}"
+        raise Gitsh::Test::Error, "Unexpected call to Gitsh::Git.#{method}"
       end
     end
   end
@@ -139,5 +161,21 @@ RSpec.configure do |config|
   config.before(:each, :stub_git_help_all) do
     allow(Open3).to receive(:capture3).with("git help --all")
       .and_return(fixture("git_help_all_commands.txt"))
+  end
+
+  config.around(:each, :in_temp_dir) do |example|
+    Gitsh::Test.in_temp_dir { example.run }
+  end
+
+  config.around(:each, :in_git_repo) do |example|
+    Gitsh::Test.in_temp_dir do
+      Gitsh::Test.quiet_system("git init")
+      # Add a commit to be able to set the branch name.
+      FileUtils.touch(".keep")
+      Gitsh::Test.quiet_system("git add .keep && git commit -m 'init'")
+      Gitsh::Test.quiet_system("git branch -m main")
+
+      example.run
+    end
   end
 end
