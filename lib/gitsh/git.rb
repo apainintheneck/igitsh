@@ -111,7 +111,9 @@ module Gitsh
       @aliases ||= begin
         local_hash = {}
         global_hash = {}
-        `git config --show-scope --get-regexp '^alias\.'`.each_line do |line|
+
+        out_str, _err_str, _status = Open3.capture3("git config --show-scope --get-regexp '^alias\\.'")
+        out_str.each_line do |line|
           line.match(ALIAS_REGEX) do |match_result|
             case match_result[:type]
             when "local"
