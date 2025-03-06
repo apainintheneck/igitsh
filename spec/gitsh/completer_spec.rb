@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Completer do
+RSpec.describe Gitsh::Completer, :without_git do
+  let(:command_set) { %w[commit add diff restore].to_set }
+
+  before do
+    allow(Gitsh::Git).to receive(:command_set).and_return(command_set)
+  end
+
   describe ".from_line" do
     context "for commands" do
       before do

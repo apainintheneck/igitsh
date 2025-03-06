@@ -3,7 +3,7 @@
 require "tempfile"
 require "rainbow"
 
-RSpec.describe Gitsh::Executor do
+RSpec.describe Gitsh::Executor, :without_git do
   let!(:out) { Tempfile.new }
   let!(:err) { Tempfile.new }
 
@@ -11,6 +11,10 @@ RSpec.describe Gitsh::Executor do
   let(:err_str) { err.tap(&:rewind).read }
 
   let(:error) { Rainbow("error>").blue.bold }
+
+  before do
+    allow(Gitsh::Git).to receive(:run).and_call_original
+  end
 
   around do |example|
     example.run

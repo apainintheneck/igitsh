@@ -25,7 +25,7 @@ RSpec.describe Gitsh::Git do
     end
   end
 
-  describe ".command_descriptions" do
+  describe ".command_descriptions", :stub_git_help_all do
     it "parses the command descriptions" do
       expect(described_class.command_descriptions).to match_snapshot("git_command_descriptions")
     end

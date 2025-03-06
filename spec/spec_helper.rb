@@ -11,6 +11,9 @@ require "yaml"
 require "pathname"
 require "set"
 
+# To prevent flakiness when calling methods unexpectedly in tests.
+class TestError < StandardError; end
+
 # For the snapshot testing library.
 class YAMLSerializer
   def dump(object)
@@ -124,9 +127,16 @@ RSpec.configure do |config|
   # Set this value to use a custom snapshot serializer
   config.snapshot_serializer = YAMLSerializer
 
-  config.before do
+  config.before(:each, :without_git) do
     # To prevent errors where these get loaded for real and get cached by another test.
-    allow(Open3).to receive(:capture3).and_call_original
+    Gitsh::Git.methods(false).each do |method|
+      allow(Gitsh::Git).to receive(method) do
+        raise TestError, "Unexpected call to Gitsh::Git.#{method}"
+      end
+    end
+  end
+
+  config.before(:each, :stub_git_help_all) do
     allow(Open3).to receive(:capture3).with("git help --all")
       .and_return(fixture("git_help_all_commands.txt"))
   end

@@ -2,7 +2,7 @@
 
 require "rainbow"
 
-RSpec.describe Gitsh::Prompt do
+RSpec.describe Gitsh::Prompt, :without_git do
   let(:gitsh) { Rainbow("gitsh").color(:aqua) }
   let(:branch) { Rainbow("main").color(:mediumslateblue) }
   let(:check) { Rainbow("✔").color(:green) }
@@ -37,6 +37,12 @@ RSpec.describe Gitsh::Prompt do
       quiet_system("git branch -m main")
 
       yield
+    end
+  end
+
+  before do
+    %i[current_branch uncommitted_changes repo?].each do |method|
+      allow(Gitsh::Git).to receive(method).and_call_original
     end
   end
 

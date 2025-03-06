@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Tokenizer do
+RSpec.describe Gitsh::Tokenizer, :without_git do
   def expect_tokenized_lines(lines)
     tokenized_lines = Array(lines).map do |line|
       {

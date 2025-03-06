@@ -2,11 +2,12 @@
 
 require "rainbow"
 
-RSpec.describe Gitsh::Hinter do
+RSpec.describe Gitsh::Hinter, :without_git, :stub_git_help_all do
   describe ".from_completion" do
     before do
       allow(Gitsh::Git).to receive(:command_names).and_return(%w[diff])
       allow(Gitsh::Git).to receive(:command_set).and_return(Set["diff"])
+      allow(Gitsh::Git).to receive(:command_descriptions).and_call_original
     end
 
     context "with Git command" do
