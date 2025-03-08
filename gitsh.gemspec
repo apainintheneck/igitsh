@@ -23,9 +23,10 @@ Gem::Specification.new do |spec|
   spec.bindir = "exe"
   spec.executables = ["rfc-reader"]
 
-  spec.add_dependency "tty-which", "~> 0.5"
   spec.add_dependency "rainbow", "~> 3.1.1"
   spec.add_dependency "reline", "~> 0.6.0"
+  spec.add_dependency "tty-pager", "~> 0.14"
+  spec.add_dependency "tty-which", "~> 0.5"
   spec.add_dependency "xdg", "~> 6.0"
 
   spec.add_development_dependency "rake", "~> 13.0"

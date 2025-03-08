@@ -1,4 +1,20 @@
 ---
+":history": |
+  GITSH-HISTORY(1)
+
+  NAME
+        :history
+
+  DESCRIPTION
+        Browse your Gitsh shell history with syntax
+        highlighting.
+
+  OPTIONS
+        --list
+              Browse your Gitsh shell history from newest to
+              oldest.
+        --help
+              Show this help page.
 ":alias": |
   GITSH-ALIAS(1)
 

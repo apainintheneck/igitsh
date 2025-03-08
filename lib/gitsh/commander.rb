@@ -282,6 +282,41 @@ module Gitsh
           DESCRIPTION
         end
       end
+
+      class History < Base
+        def_option(
+          name: "--list",
+          description: "Browse your Gitsh shell history from newest to oldest."
+        ) do
+          require "tty-pager"
+
+          TTY::Pager.page do |pager|
+            Reline::HISTORY.reverse_each do |line|
+              pager.write("> ")
+              if USE_COLOR
+                highlighted_line = Highlighter.from_line(line, complete: true)
+                pager.puts(highlighted_line)
+              else
+                pager.puts(line)
+              end
+            end
+          end
+
+          SUCCESS_CODE
+        end
+
+        class << self
+          # @return [String]
+          def name
+            ":history"
+          end
+
+          # @return [String]
+          def description
+            "Browse your Gitsh shell history with syntax highlighting."
+          end
+        end
+      end
     end
 
     class Git
