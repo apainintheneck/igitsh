@@ -7,8 +7,6 @@ RSpec.describe Gitsh::GitHelp, :without_git do
   before do
     allow(Gitsh::Git).to receive(:command_names).and_return(%w[diff])
     allow(Gitsh::Git).to receive(:command_set).and_return(command_set)
-    allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
-      .and_return(fixture("git_diff_help_page.txt"))
   end
 
   describe ".for" do

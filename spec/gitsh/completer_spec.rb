@@ -43,12 +43,6 @@ RSpec.describe Gitsh::Completer, :without_git do
     end
 
     context "for options" do
-      before do
-        allow(Gitsh).to receive(:command_name?).with("diff").and_return(true)
-        allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
-          .and_return(fixture("git_diff_help_page.txt"))
-      end
-
       context "with Git command" do
         it "completes short options" do
           ["diff -s", "restore README.md; diff -s"].each do |line|

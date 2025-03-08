@@ -13,8 +13,13 @@ module Gitsh
     def self.from_name(command)
       return unless Git.command_set.include?(command)
 
-      @for ||= {}
-      @for[command] ||= new(command: command)
+      @from_name ||= {}
+      @from_name[command] ||= new(command: command)
+    end
+
+    # To make testing less order dependent.
+    def self.clear_cache!
+      @from_name = nil
     end
 
     private_class_method :new
