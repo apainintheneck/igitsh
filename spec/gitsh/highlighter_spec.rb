@@ -70,11 +70,6 @@ RSpec.describe Gitsh::Highlighter, :without_git do
     end
 
     context "with valid options" do
-      before do
-        allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
-          .and_return(fixture("git_diff_help_page.txt"))
-      end
-
       context "with Git command" do
         it "doesn't append docs when there are no params" do
           expect(Gitsh::Highlighter.from_line("diff --raw"))

@@ -149,6 +149,13 @@ RSpec.configure do |config|
   # Set this value to use a custom snapshot serializer
   config.snapshot_serializer = Gitsh::Test::YAMLSerializer
 
+  config.before do
+    # To prevent errors where these get loaded for real and get cached by another test.
+    allow(Open3).to receive(:capture3).and_call_original
+    allow(Open3).to receive(:capture3).with("git help --all")
+      .and_return(fixture("git_help_all_commands.txt"))
+  end
+
   config.before(:each, :without_git) do
     # To prevent errors where these get loaded for real and get cached by another test.
     Gitsh::Git.methods(false).each do |method|
@@ -156,11 +163,9 @@ RSpec.configure do |config|
         raise Gitsh::Test::Error, "Unexpected call to Gitsh::Git.#{method}"
       end
     end
-  end
-
-  config.before(:each, :stub_git_help_all) do
-    allow(Open3).to receive(:capture3).with("git help --all")
-      .and_return(fixture("git_help_all_commands.txt"))
+    allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
+      .and_return(fixture("git_diff_help_page.txt"))
+    Gitsh::GitHelp.clear_cache!
   end
 
   config.around(:each, :in_temp_dir) do |example|
