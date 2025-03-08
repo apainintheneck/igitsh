@@ -14,3 +14,7 @@
 - "  program. This is"
 - "  equivalent to ctrl-c or"
 - "  ctrl-d."
+":history":
+- "  Browse your Gitsh shell"
+- "  history with syntax"
+- "  highlighting."
