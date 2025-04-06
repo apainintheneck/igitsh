@@ -34,6 +34,21 @@ $ bundle exec rake
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/apainintheneck/gitsh.
 
+## Related Projects
+
+- Gitsh: An interactive shell for git
+    - Repo: https://github.com/thoughtbot/gitsh
+    - Language: Ruby
+    - Last Updated: December 16, 2019
+- Gitsh: lame git wrapper tool that tries to make git act like a shell - highly unstable, prickly, experimental, and all-around bad.
+    - Repo: https://github.com/belden/gitsh
+    - Language: Perl
+    - Last Updated: March 3, 2015
+- Gitsh: A simple git shell
+    - Repo: https://github.com/caglar/gitsh
+    - Language: Perl
+    - Last Updated: September 26, 2011
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
