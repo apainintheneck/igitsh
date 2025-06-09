@@ -2,7 +2,7 @@
 
 require "rainbow/refinement"
 
-module Gitsh
+module Igitsh
   # This class highlights the current line before printing it to the REPL.
   module Highlighter
     # Designed to be compatible with `Reline.output_modifier_proc`.
@@ -41,7 +41,7 @@ module Gitsh
       string.freeze
     end
 
-    # @param zipper [Gitsh::Zipper]
+    # @param zipper [Igitsh::TokenZipper]
     #
     # @return [String]
     def self.highlight_token(zipper)

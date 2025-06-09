@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh do
+RSpec.describe Igitsh do
   it "has a version number" do
-    expect(Gitsh::VERSION).not_to be nil
+    expect(Igitsh::VERSION).not_to be nil
   end
 end

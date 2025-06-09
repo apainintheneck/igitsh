@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Tokenizer, :without_git do
+RSpec.describe Igitsh::Tokenizer, :without_git do
   def expect_tokenized_lines(lines)
     tokenized_lines = Array(lines).map do |line|
       {
@@ -67,7 +67,7 @@ RSpec.describe Gitsh::Tokenizer, :without_git do
         %(checkout -b skdlfjsdkf|)
       ].each do |line|
         expect(described_class.from_line(line).tokens)
-          .to include(Gitsh::Token::PartialAction)
+          .to include(Igitsh::Token::PartialAction)
       end
     end
 
@@ -81,7 +81,7 @@ RSpec.describe Gitsh::Tokenizer, :without_git do
         ].each do |line|
           zipper = described_class.from_line(line)
 
-          expect(zipper.tokens.map(&:class)).to eq([Gitsh::Token::String, klass, Gitsh::Token::String])
+          expect(zipper.tokens.map(&:class)).to eq([Igitsh::Token::String, klass, Igitsh::Token::String])
           expect(zipper.tokens.map(&:content)).to eq(["first", action, "second"])
         end
       end
@@ -89,21 +89,21 @@ RSpec.describe Gitsh::Tokenizer, :without_git do
 
     context "with '&&'" do
       let(:action) { "&&" }
-      let(:klass) { Gitsh::Token::And }
+      let(:klass) { Igitsh::Token::And }
 
       include_examples "tokenize with action"
     end
 
     context "with '||'" do
       let(:action) { "||" }
-      let(:klass) { Gitsh::Token::Or }
+      let(:klass) { Igitsh::Token::Or }
 
       include_examples "tokenize with action"
     end
 
     context "with ';'" do
       let(:action) { ";" }
-      let(:klass) { Gitsh::Token::End }
+      let(:klass) { Igitsh::Token::End }
 
       include_examples "tokenize with action"
     end

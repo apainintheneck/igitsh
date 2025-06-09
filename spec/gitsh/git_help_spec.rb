@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::GitHelp, :without_git do
+RSpec.describe Igitsh::GitHelp, :without_git do
   subject(:help_page) { described_class.from_name("diff") }
   let(:command_set) { %w[diff].to_set }
 
   before do
-    allow(Gitsh::Git).to receive(:command_names).and_return(%w[diff])
-    allow(Gitsh::Git).to receive(:command_set).and_return(command_set)
+    allow(Igitsh::Git).to receive(:command_names).and_return(%w[diff])
+    allow(Igitsh::Git).to receive(:command_set).and_return(command_set)
   end
 
   describe ".for" do
@@ -15,7 +15,7 @@ RSpec.describe Gitsh::GitHelp, :without_git do
     end
 
     it "returns instance of itself when command is valid" do
-      expect(described_class.from_name("diff")).to be_a(Gitsh::GitHelp)
+      expect(described_class.from_name("diff")).to be_a(Igitsh::GitHelp)
     end
   end
 

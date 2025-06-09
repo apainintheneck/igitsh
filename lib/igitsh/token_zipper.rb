@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Gitsh
+module Igitsh
   # This is a data structure representing an array of tokens with the index
   # pointing at an individual token. The advantage of this data structure
   # over an array is that it allows you to reference the tokens before
@@ -13,18 +13,18 @@ module Gitsh
 
     # @return [String]
     attr_reader :source
-    # @return [Array<Gitsh::Token::Base>]
+    # @return [Array<Igitsh::Token::Base>]
     attr_reader :tokens
     # @return [Integer]
     attr_reader :index
 
     # @param source [String] must be frozen
-    # @param tokens [Array<Gitsh::Token::Base>] must be frozen
+    # @param tokens [Array<Igitsh::Token::Base>] must be frozen
     # @param index [Integer] Defaults to 0
-    # @param before [Gitsh::TokenZipper] Defaults to nil
-    # @param after [Gitsh::TokenZipper] Defaults to nil
-    # @param first [Gitsh::TokenZipper] Defaults to nil
-    # @param last [Gitsh::TokenZipper] Defaults to nil
+    # @param before [Igitsh::TokenZipper] Defaults to nil
+    # @param after [Igitsh::TokenZipper] Defaults to nil
+    # @param first [Igitsh::TokenZipper] Defaults to nil
+    # @param last [Igitsh::TokenZipper] Defaults to nil
     def initialize(source:, tokens:, index: 0, before: nil, after: nil, first: nil, last: nil)
       raise ArgumentError, ":source must be frozen" unless source.frozen?
       raise ArgumentError, ":tokens must be frozen" unless tokens.frozen?
@@ -54,7 +54,7 @@ module Gitsh
 
     # Yields zippers representing each token starting from the beginning.
     #
-    # @yield [Gitsh::TokenZipper]
+    # @yield [Igitsh::TokenZipper]
     def each
       return if empty?
 
@@ -68,7 +68,7 @@ module Gitsh
 
     # Yields zippers representing each token starting from the end.
     #
-    # @yield [Gitsh::TokenZipper]
+    # @yield [Igitsh::TokenZipper]
     def reverse_each
       return if empty?
 
@@ -82,8 +82,8 @@ module Gitsh
 
     # Like `#find` but starting from the end.
     #
-    # @yield [Gitsh::TokenZipper]
-    # @return [Gitsh::TokenZipper, nil]
+    # @yield [Igitsh::TokenZipper]
+    # @return [Igitsh::TokenZipper, nil]
     def reverse_find
       reverse_each do |zipper|
         bool = yield zipper
@@ -91,7 +91,7 @@ module Gitsh
       end
     end
 
-    # @return [Gitsh::TokenZipper] a new zipper representing the previous token
+    # @return [Igitsh::TokenZipper] a new zipper representing the previous token
     def before
       @before ||= if head?
         self
@@ -107,7 +107,7 @@ module Gitsh
       end
     end
 
-    # @return [Gitsh::TokenZipper] a new zipper representing the next token
+    # @return [Igitsh::TokenZipper] a new zipper representing the next token
     def after
       @after ||= if tail?
         self
@@ -125,7 +125,7 @@ module Gitsh
 
     # @param index [Integer]
     #
-    # @return [Gitsh::TokenZipper] a new zipper representing the token at the index
+    # @return [Igitsh::TokenZipper] a new zipper representing the token at the index
     def at(index:)
       return self if index == @index
       return before if index == @index - 1
@@ -177,7 +177,7 @@ module Gitsh
 
     # Returns the zipper associated with the first token or head.
     #
-    # @return [Gitsh::Zipper]
+    # @return [Igitsh::TokenZipper]
     def first
       @first ||= empty? ? at(index: -1) : at(index: 0)
     end
@@ -191,7 +191,7 @@ module Gitsh
 
     # Returns the zipper associated with the first token or head.
     #
-    # @return [Gitsh::Zipper]
+    # @return [Igitsh::TokenZipper]
     def last
       @last ||= empty? ? at(index: size) : at(index: size - 1)
     end
@@ -199,7 +199,7 @@ module Gitsh
     # Returns the token at the current index or nil
     # if the current index is the head or the tail.
     #
-    # @return [Gitsh::Token::Base, nil]
+    # @return [Igitsh::Token::Base, nil]
     def token
       @tokens[@index] unless head? || tail?
     end
@@ -208,49 +208,49 @@ module Gitsh
     #
     # @return [Boolean]
     def string_token?
-      token&.is_a?(Gitsh::Token::String)
+      token&.is_a?(Igitsh::Token::String)
     end
 
     # Returns true if the current token is the and action.
     #
     # @return [Boolean]
     def and_token?
-      token&.is_a?(Gitsh::Token::And)
+      token&.is_a?(Igitsh::Token::And)
     end
 
     # Returns true if the current token is the or action.
     #
     # @return [Boolean]
     def or_token?
-      token&.is_a?(Gitsh::Token::Or)
+      token&.is_a?(Igitsh::Token::Or)
     end
 
     # Returns true if the current token is the end action.
     #
     # @return [Boolean]
     def end_token?
-      token&.is_a?(Gitsh::Token::End)
+      token&.is_a?(Igitsh::Token::End)
     end
 
     # Returns true if the current token is a unterminated string.
     #
     # @return [Boolean]
     def unterminated_string_token?
-      token&.is_a?(Gitsh::Token::UnterminatedString)
+      token&.is_a?(Igitsh::Token::UnterminatedString)
     end
 
     # Returns true if the current token is a partial action.
     #
     # @return [Boolean]
     def partial_action_token?
-      token&.is_a?(Gitsh::Token::PartialAction)
+      token&.is_a?(Igitsh::Token::PartialAction)
     end
 
     # Returns true if the current token is the end of options token.
     #
     # @return [Boolean]
     def end_of_options_token?
-      token&.is_a?(Gitsh::Token::EndOfOptions)
+      token&.is_a?(Igitsh::Token::EndOfOptions)
     end
 
     # Returns true if the current token is the and, or or end action.
@@ -273,7 +273,7 @@ module Gitsh
     #
     # @return [Boolean]
     def valid_command?
-      command? && Gitsh.command_name?(token.content)
+      command? && Igitsh.command_name?(token.content)
     end
 
     # Returns true if the current token is a command present in the
@@ -281,7 +281,7 @@ module Gitsh
     #
     # @return [Boolean]
     def valid_git_command?
-      command? && Gitsh::Git.command_set.include?(token.content)
+      command? && Igitsh::Git.command_set.include?(token.content)
     end
 
     # Returns true if the current token is a command present in the
@@ -289,7 +289,7 @@ module Gitsh
     #
     # @return [Boolean]
     def valid_git_alias?
-      command? && Gitsh::Git.aliases.include?(token.content)
+      command? && Igitsh::Git.aliases.include?(token.content)
     end
 
     # Returns true if the current token is a command present in the
@@ -297,12 +297,12 @@ module Gitsh
     #
     # @return [Boolean]
     def valid_internal_command?
-      command? && Gitsh::Commander.internal_command_names.include?(token.content)
+      command? && Igitsh::Commander.internal_command_names.include?(token.content)
     end
 
     # Returns the most recent command if one exists before an action or head.
     #
-    # @return [Gitsh::TokenZipper]
+    # @return [Igitsh::TokenZipper]
     def current_command
       return @current_command if defined?(@current_command)
 

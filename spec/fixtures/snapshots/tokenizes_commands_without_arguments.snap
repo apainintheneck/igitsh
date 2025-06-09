@@ -1,45 +1,45 @@
 ---
 - :line: diff
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: diff
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: diff
       start_position: 0
       end_position: 4
     index: 0
 - :line: log
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: log
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: log
       start_position: 0
       end_position: 3
     index: 0
 - :line: branch
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: branch
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: branch
       start_position: 0
       end_position: 6
     index: 0
 - :line: commit
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: commit
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: commit
       start_position: 0
       end_position: 6
     index: 0
 - :line: cherry-pick
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: cherry-pick
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: cherry-pick
       start_position: 0
       end_position: 11

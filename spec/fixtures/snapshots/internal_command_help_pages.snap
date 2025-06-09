@@ -6,12 +6,12 @@
         :history
 
   DESCRIPTION
-        Browse your Gitsh shell history with syntax
+        Browse your Igitsh shell history with syntax
         highlighting.
 
   OPTIONS
         --list
-              Browse your Gitsh shell history from newest to
+              Browse your Igitsh shell history from newest to
               oldest.
         --help
               Show this help page.
@@ -26,8 +26,8 @@
         command combinations.
 
         Internal Git aliasing logic is reused here so
-        that aliases are available outside of Gitsh once
-        defined.
+        that aliases are available outside of Igitsh
+        once defined.
 
   OPTIONS
         --global <name> <command>

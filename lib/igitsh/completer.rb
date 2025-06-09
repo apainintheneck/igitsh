@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Gitsh
+module Igitsh
   module Completer
     # Designed to be compatible with `Reline.completion_proc`.
     CALLBACK = lambda do |*|
@@ -22,13 +22,13 @@ module Gitsh
       end
     end
 
-    # @param zipper [Gitsh::Zipper]
+    # @param zipper [Igitsh::TokenZipper]
     #
     # @return [Array<String>, nil]
     def self.for_command(zipper)
       command_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
-      Gitsh
+      Igitsh
         .all_command_names
         # Complete all commands starting with the given prefix.
         .grep(command_prefix_regex)
@@ -37,7 +37,7 @@ module Gitsh
     end
     private_class_method :for_command
 
-    # @param zipper [Gitsh::Zipper]
+    # @param zipper [Igitsh::TokenZipper]
     #
     # @return [Array<String>, nil]
     def self.for_option(zipper)

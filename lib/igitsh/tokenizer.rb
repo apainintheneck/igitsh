@@ -2,7 +2,7 @@
 
 require "strscan"
 
-module Gitsh
+module Igitsh
   module Tokenizer
     SINGLE_QUOTE = "'"
     DOUBLE_QUOTE = '"'
@@ -11,7 +11,7 @@ module Gitsh
 
     # @param line [String]
     #
-    # @return [Gitsh::TokenZipper]
+    # @return [Igitsh::TokenZipper]
     def self.from_line(line)
       line = line.dup.freeze
       tokens = []

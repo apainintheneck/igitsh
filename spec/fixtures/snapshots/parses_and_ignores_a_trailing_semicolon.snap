@@ -1,18 +1,18 @@
 ---
 - :line: git grep 'Github::API';
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - grep
     - Github::API
 - :line: 'diff head   ;  '
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - diff
     - head
 - :line: 'git commit --amend;  '
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - commit
     - "--amend"

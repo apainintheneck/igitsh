@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Gitsh
+module Igitsh
   module Commander
     class Base
       SUCCESS_CODE = 0
@@ -99,7 +99,7 @@ module Gitsh
 
         # Callback to define help option on all subclasses.
         #
-        # @param subclass [Gitsh::Commander::Base]
+        # @param subclass [Igitsh::Commander::Base]
         def inherited(subclass)
           subclass.def_option(
             name: "--help",
@@ -110,12 +110,12 @@ module Gitsh
           end
         end
 
-        # @return [Array<Gitsh::Commander::Base>]
+        # @return [Array<Igitsh::Commander::Base>]
         def options
           @options.freeze
         end
 
-        # @return [Hash<String, Gitsh::Commander::Base>]
+        # @return [Hash<String, Igitsh::Commander::Base>]
         def option_by_prefix
           @option_by_prefix ||= options.to_h do |option|
             [option.name, option]
@@ -228,7 +228,7 @@ module Gitsh
         name: "--local",
         description: "Set or unset a local alias for the current repo."
       ) do |name, command, out:, err:|
-        ::Gitsh::Git.set_alias(
+        ::Igitsh::Git.set_alias(
           name: name,
           command: command,
           level: "--local",
@@ -241,7 +241,7 @@ module Gitsh
         name: "--global",
         description: "Set or unset a global alias for the current user."
       ) do |name, command, out:, err:|
-        ::Gitsh::Git.set_alias(
+        ::Igitsh::Git.set_alias(
           name: name,
           command: command,
           level: "--global",
@@ -255,12 +255,12 @@ module Gitsh
         description: "List all local and global aliases."
       ) do |*, out:, **|
         out.puts "---Local---"
-        ::Gitsh::Git.aliases.local.each do |name, command|
+        ::Igitsh::Git.aliases.local.each do |name, command|
           out.puts "#{name}  =>  #{command}"
         end
         out.puts
         out.puts "---Global---"
-        ::Gitsh::Git.aliases.global.each do |name, command|
+        ::Igitsh::Git.aliases.global.each do |name, command|
           out.puts "#{name}  =>  #{command}"
         end
         out.puts
@@ -278,7 +278,7 @@ module Gitsh
           <<~DESCRIPTION
             Create local and global Git aliases for common command combinations.
 
-            Internal Git aliasing logic is reused here so that aliases are available outside of Gitsh once defined.
+            Internal Git aliasing logic is reused here so that aliases are available outside of Igitsh once defined.
           DESCRIPTION
         end
       end
@@ -286,7 +286,7 @@ module Gitsh
       class History < Base
         def_option(
           name: "--list",
-          description: "Browse your Gitsh shell history from newest to oldest."
+          description: "Browse your Igitsh shell history from newest to oldest."
         ) do
           require "tty-pager"
 
@@ -313,7 +313,7 @@ module Gitsh
 
           # @return [String]
           def description
-            "Browse your Gitsh shell history with syntax highlighting."
+            "Browse your Igitsh shell history with syntax highlighting."
           end
         end
       end
@@ -333,13 +333,13 @@ module Gitsh
 
       # @return [Integer]
       def run
-        ::Gitsh::Git.run(@arguments, out: @out, err: @err)
+        ::Igitsh::Git.run(@arguments, out: @out, err: @err)
       end
     end
 
     # @param name [String]
     #
-    # @return [Gitsh::Commander::Base, Gitsh::Commander::Git]
+    # @return [Igitsh::Commander::Base, Igitsh::Commander::Git]
     def self.from_name(name)
       name_to_command.fetch(name, Git)
     end

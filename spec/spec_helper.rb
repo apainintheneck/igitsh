@@ -3,7 +3,7 @@
 # Make sure that tests run with color by default.
 ENV.delete("NO_COLOR")
 
-require "gitsh"
+require "igitsh"
 require "fileutils"
 require "prop_check"
 require "rspec/snapshot"
@@ -11,7 +11,7 @@ require "yaml"
 require "pathname"
 require "set"
 
-module Gitsh
+module Igitsh
   module Test
     # To prevent flakiness when calling methods unexpectedly in tests.
     class Error < StandardError; end
@@ -46,8 +46,8 @@ end
 # Copied from `Library/Homebrew/dev-cmd/tests.rb`.
 # This prevents git repo set up errors.
 %w[AUTHOR COMMITTER].each do |role|
-  ENV["GIT_#{role}_NAME"] = "gitsh tests"
-  ENV["GIT_#{role}_EMAIL"] = "gitsh-tests@localhost"
+  ENV["GIT_#{role}_NAME"] = "igitsh tests"
+  ENV["GIT_#{role}_EMAIL"] = "igitsh-tests@localhost"
   ENV["GIT_#{role}_DATE"] = "Sun Jan 22 19:59:13 2017 +0000"
 end
 
@@ -147,7 +147,7 @@ RSpec.configure do |config|
   # Defaults to using the awesome_print gem to serialize values for snapshots
   #
   # Set this value to use a custom snapshot serializer
-  config.snapshot_serializer = Gitsh::Test::YAMLSerializer
+  config.snapshot_serializer = Igitsh::Test::YAMLSerializer
 
   config.before do
     # To prevent errors where these get loaded for real and get cached by another test.
@@ -158,27 +158,27 @@ RSpec.configure do |config|
 
   config.before(:each, :without_git) do
     # To prevent errors where these get loaded for real and get cached by another test.
-    Gitsh::Git.methods(false).each do |method|
-      allow(Gitsh::Git).to receive(method) do
-        raise Gitsh::Test::Error, "Unexpected call to Gitsh::Git.#{method}"
+    Igitsh::Git.methods(false).each do |method|
+      allow(Igitsh::Git).to receive(method) do
+        raise Igitsh::Test::Error, "Unexpected call to Igitsh::Git.#{method}"
       end
     end
-    allow(Gitsh::Git).to receive(:help_page).with(command: "diff")
+    allow(Igitsh::Git).to receive(:help_page).with(command: "diff")
       .and_return(fixture("git_diff_help_page.txt"))
-    Gitsh::GitHelp.clear_cache!
+    Igitsh::GitHelp.clear_cache!
   end
 
   config.around(:each, :in_temp_dir) do |example|
-    Gitsh::Test.in_temp_dir { example.run }
+    Igitsh::Test.in_temp_dir { example.run }
   end
 
   config.around(:each, :in_git_repo) do |example|
-    Gitsh::Test.in_temp_dir do
-      Gitsh::Test.quiet_system("git init")
+    Igitsh::Test.in_temp_dir do
+      Igitsh::Test.quiet_system("git init")
       # Add a commit to be able to set the branch name.
       FileUtils.touch(".keep")
-      Gitsh::Test.quiet_system("git add .keep && git commit -m 'init'")
-      Gitsh::Test.quiet_system("git branch -m main")
+      Igitsh::Test.quiet_system("git add .keep && git commit -m 'init'")
+      Igitsh::Test.quiet_system("git branch -m main")
 
       example.run
     end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Parser, :without_git do
+RSpec.describe Igitsh::Parser, :without_git do
   let(:error) { Rainbow("error>").blue.bold }
 
   def expect_parsed_lines(lines)
@@ -49,7 +49,7 @@ RSpec.describe Gitsh::Parser, :without_git do
   it "raises an error when there is an action to start a line", :aggregate_failures do
     %w[&& || ;].each do |action|
       line = [action, "second", "third"].join(" ")
-      expect { described_class.parse(line) }.to raise_error(Gitsh::ParseError, <<~ERROR)
+      expect { described_class.parse(line) }.to raise_error(Igitsh::ParseError, <<~ERROR)
         | #{error} unexpected '#{action}' to start the line
         |
         | #{action} second third
@@ -61,7 +61,7 @@ RSpec.describe Gitsh::Parser, :without_git do
   it "raises an error when there are two actions in a row in the middle of a line", :aggregate_failures do
     %w[&& || ;].repeated_combination(2).each do |second, third|
       line = ["first", second, third, "last"].join(" ")
-      expect { described_class.parse(line) }.to raise_error(Gitsh::ParseError, <<~ERROR)
+      expect { described_class.parse(line) }.to raise_error(Igitsh::ParseError, <<~ERROR)
         | #{error} expected a string after '#{second}' but got '#{third}' instead
         |
         | first #{second} #{third} last
@@ -73,7 +73,7 @@ RSpec.describe Gitsh::Parser, :without_git do
   it "raises an error when there is a && or || action to end a line", :aggregate_failures do
     %w[&& ||].each do |action|
       line = ["first", "second", action].join(" ")
-      expect { described_class.parse(line) }.to raise_error(Gitsh::ParseError, <<~ERROR)
+      expect { described_class.parse(line) }.to raise_error(Igitsh::ParseError, <<~ERROR)
         | #{error} unexpected '#{action}' to end the line
         |
         | first second #{action}

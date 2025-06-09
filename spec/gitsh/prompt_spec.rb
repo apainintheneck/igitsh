@@ -2,8 +2,8 @@
 
 require "rainbow"
 
-RSpec.describe Gitsh::Prompt, :without_git do
-  let(:gitsh) { Rainbow("gitsh").color(:aqua) }
+RSpec.describe Igitsh::Prompt, :without_git do
+  let(:gitsh) { Rainbow("igitsh").color(:aqua) }
   let(:branch) { Rainbow("main").color(:mediumslateblue) }
   let(:check) { Rainbow("✔").color(:green) }
   let(:staged) { Rainbow("●2").color(:yellowgreen) }
@@ -14,7 +14,7 @@ RSpec.describe Gitsh::Prompt, :without_git do
 
   before do
     %i[current_branch uncommitted_changes repo?].each do |method|
-      allow(Gitsh::Git).to receive(method).and_call_original
+      allow(Igitsh::Git).to receive(method).and_call_original
     end
   end
 
@@ -33,7 +33,7 @@ RSpec.describe Gitsh::Prompt, :without_git do
             # Two staged file changes
             FileUtils.touch "file1"
             FileUtils.touch "file2"
-            Gitsh::Test.quiet_system("git add file1 file2")
+            Igitsh::Test.quiet_system("git add file1 file2")
 
             expect(described_class.string(exit_code: success))
               .to eq Rainbow("#{gitsh}(#{branch}|#{staged})> ").bold
@@ -44,8 +44,8 @@ RSpec.describe Gitsh::Prompt, :without_git do
           it "returns expected prompt" do
             # Commit one file
             FileUtils.touch "file1"
-            Gitsh::Test.quiet_system("git add file1")
-            Gitsh::Test.quiet_system("git commit -m 'first'")
+            Igitsh::Test.quiet_system("git add file1")
+            Igitsh::Test.quiet_system("git commit -m 'first'")
             # One unstaged file change
             File.write "file1", "text"
 
@@ -59,7 +59,7 @@ RSpec.describe Gitsh::Prompt, :without_git do
             # Two staged file changes
             FileUtils.touch "file1"
             FileUtils.touch "file2"
-            Gitsh::Test.quiet_system("git add file1 file2")
+            Igitsh::Test.quiet_system("git add file1 file2")
             # One unstaged file change
             File.write "file1", "text"
 
@@ -84,10 +84,10 @@ RSpec.describe Gitsh::Prompt, :without_git do
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{check})#{exit_code}> ").bold
 
-            stub_const("Gitsh::USE_COLOR", false)
+            stub_const("Igitsh::USE_COLOR", false)
 
             expect(described_class.string(exit_code: failure))
-              .to eq "gitsh(main|✔)[127]> "
+              .to eq "igitsh(main|✔)[127]> "
           end
         end
 
@@ -96,15 +96,15 @@ RSpec.describe Gitsh::Prompt, :without_git do
             # Two staged file changes
             FileUtils.touch "file1"
             FileUtils.touch "file2"
-            Gitsh::Test.quiet_system("git add file1 file2")
+            Igitsh::Test.quiet_system("git add file1 file2")
 
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{staged})#{exit_code}> ").bold
 
-            stub_const("Gitsh::USE_COLOR", false)
+            stub_const("Igitsh::USE_COLOR", false)
 
             expect(described_class.string(exit_code: failure))
-              .to eq "gitsh(main|●2)[127]> "
+              .to eq "igitsh(main|●2)[127]> "
           end
         end
 
@@ -112,18 +112,18 @@ RSpec.describe Gitsh::Prompt, :without_git do
           it "returns expected prompt", :aggregate_failures do
             # Commit one file
             FileUtils.touch "file1"
-            Gitsh::Test.quiet_system("git add file1")
-            Gitsh::Test.quiet_system("git commit -m 'first'")
+            Igitsh::Test.quiet_system("git add file1")
+            Igitsh::Test.quiet_system("git commit -m 'first'")
             # One unstaged file change
             File.write "file1", "text"
 
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{unstaged})#{exit_code}> ").bold
 
-            stub_const("Gitsh::USE_COLOR", false)
+            stub_const("Igitsh::USE_COLOR", false)
 
             expect(described_class.string(exit_code: failure))
-              .to eq "gitsh(main|+1)[127]> "
+              .to eq "igitsh(main|+1)[127]> "
           end
         end
 
@@ -132,17 +132,17 @@ RSpec.describe Gitsh::Prompt, :without_git do
             # Two staged file changes
             FileUtils.touch "file1"
             FileUtils.touch "file2"
-            Gitsh::Test.quiet_system("git add file1 file2")
+            Igitsh::Test.quiet_system("git add file1 file2")
             # One unstaged file change
             File.write "file1", "text"
 
             expect(described_class.string(exit_code: failure))
               .to eq Rainbow("#{gitsh}(#{branch}|#{staged}#{unstaged})#{exit_code}> ").bold
 
-            stub_const("Gitsh::USE_COLOR", false)
+            stub_const("Igitsh::USE_COLOR", false)
 
             expect(described_class.string(exit_code: failure))
-              .to eq "gitsh(main|●2+1)[127]> "
+              .to eq "igitsh(main|●2+1)[127]> "
           end
         end
       end
@@ -152,10 +152,10 @@ RSpec.describe Gitsh::Prompt, :without_git do
           expect(described_class.string(exit_code: failure))
             .to eq Rainbow("#{gitsh}#{exit_code}> ").bold
 
-          stub_const("Gitsh::USE_COLOR", false)
+          stub_const("Igitsh::USE_COLOR", false)
 
           expect(described_class.string(exit_code: failure))
-            .to eq "gitsh[127]> "
+            .to eq "igitsh[127]> "
         end
       end
     end

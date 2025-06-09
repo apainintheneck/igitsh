@@ -4,11 +4,11 @@
 require "optparse"
 
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
-require "gitsh"
+require "igitsh"
 
 OptionParser.new do |parser|
   parser.banner = <<-BANNER
-  gitsh -- a simple shell for git
+  igitsh -- an interactive shell for git
 
   This shell includes completions and history.
   Run any `git` command without prefixing `git`
@@ -18,12 +18,12 @@ OptionParser.new do |parser|
   BANNER
 
   parser.on("--history-file", "Path to the history file") do
-    puts Gitsh::HISTORY_FILE_PATH
+    puts Igitsh::HISTORY_FILE_PATH
     exit
   end
 
   parser.on("-v", "--version", "Show the current version") do
-    puts Gitsh::VERSION
+    puts Igitsh::VERSION
     exit
   end
 

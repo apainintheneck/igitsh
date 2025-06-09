@@ -2,7 +2,7 @@
 
 require "rainbow/refinement"
 
-module Gitsh
+module Igitsh
   # Each token represents the offsets in the source string of the parsed value.
   module Token
     class Base
@@ -37,21 +37,21 @@ module Gitsh
 
       # @param message [String]
       #
-      # @return [Gitsh::SyntaxError]
+      # @return [Igitsh::SyntaxError]
       def syntax_error(message)
         SyntaxError.new(pretty_error_message(message: message))
       end
 
       # @param message [String]
       #
-      # @return [Gitsh::ParseError]
+      # @return [Igitsh::ParseError]
       def parse_error(message)
         ParseError.new(pretty_error_message(message: message))
       end
 
       # @param message [String]
       #
-      # @return [Gitsh::UnreachableError]
+      # @return [Igitsh::UnreachableError]
       def unreachable_error(message)
         UnreachableError.new(pretty_error_message(message: message))
       end
