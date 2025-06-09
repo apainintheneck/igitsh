@@ -1,77 +1,77 @@
 ---
 - :line: 'grep ''type : Tokenizer'''
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: 'grep ''type : Tokenizer'''
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: 'grep ''type : Tokenizer'''
       start_position: 0
       end_position: 4
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: 'grep ''type : Tokenizer'''
       start_position: 5
       end_position: 23
     index: 0
 - :line: 'grep ''describe ".from_line" do''  '
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: 'grep ''describe ".from_line" do''  '
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: 'grep ''describe ".from_line" do''  '
       start_position: 0
       end_position: 4
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: 'grep ''describe ".from_line" do''  '
       start_position: 5
       end_position: 31
     index: 0
 - :line: add -- '*.js'
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: add -- '*.js'
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: add -- '*.js'
       start_position: 0
       end_position: 3
-    - !ruby/object:Gitsh::Token::EndOfOptions
+    - !ruby/object:Igitsh::Token::EndOfOptions
       source: add -- '*.js'
       start_position: 4
       end_position: 6
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: add -- '*.js'
       start_position: 7
       end_position: 13
     index: 0
 - :line: " log --committer='Lawrence Kraft'"
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: " log --committer='Lawrence Kraft'"
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: " log --committer='Lawrence Kraft'"
       start_position: 1
       end_position: 4
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: " log --committer='Lawrence Kraft'"
       start_position: 5
       end_position: 17
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: " log --committer='Lawrence Kraft'"
       start_position: 17
       end_position: 33
     index: 0
 - :line: commit -m 'Quote \' of some time'
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: commit -m 'Quote \' of some time'
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: commit -m 'Quote \' of some time'
       start_position: 0
       end_position: 6
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: commit -m 'Quote \' of some time'
       start_position: 7
       end_position: 9
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: commit -m 'Quote \' of some time'
       start_position: 10
       end_position: 33

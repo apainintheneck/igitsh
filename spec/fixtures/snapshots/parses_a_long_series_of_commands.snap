@@ -1,47 +1,47 @@
 ---
 - :line: add ex.js && add ex.rb; git diff; git commit -m 'commit'
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - add
     - ex.js
-  - !ruby/array:Gitsh::Parser::Group::And
+  - !ruby/array:Igitsh::Parser::Group::And
     - add
     - ex.rb
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - diff
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - commit
     - "-m"
     - commit
 - :line: git grep -q match_snapshot && git add .; git commit -m snapshots
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - grep
     - "-q"
     - match_snapshot
-  - !ruby/array:Gitsh::Parser::Group::And
+  - !ruby/array:Igitsh::Parser::Group::And
     - git
     - add
     - "."
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - commit
     - "-m"
     - snapshots
 - :line: git log -5 || git diff HEAD && git commit --amend
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - log
     - "-5"
-  - !ruby/array:Gitsh::Parser::Group::Or
+  - !ruby/array:Igitsh::Parser::Group::Or
     - git
     - diff
     - HEAD
-  - !ruby/array:Gitsh::Parser::Group::And
+  - !ruby/array:Igitsh::Parser::Group::And
     - git
     - commit
     - "--amend"

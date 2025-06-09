@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Gitsh
+module Igitsh
   module Stringer
     # Indent a string by the given amount.
     #

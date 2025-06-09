@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Git do
+RSpec.describe Igitsh::Git do
   describe ".installed?" do
     it "returns true when git exists" do
       expect(described_class.installed?).to be(true)

@@ -2,7 +2,7 @@
 
 require "rainbow/refinement"
 
-module Gitsh
+module Igitsh
   module Hinter
     # Based on https://github.com/ruby/irb/blob/9f1bfde29eba377c5454b7e85c718191b64a2456/lib/irb/input-method.rb#L327-L443
     #

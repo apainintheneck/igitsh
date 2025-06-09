@@ -5,7 +5,7 @@ require "tty-which"
 require "English"
 require "set" # needed for Ruby 3.1 support
 
-module Gitsh
+module Igitsh
   module Git
     # @return [Boolean]
     def self.installed?
@@ -132,7 +132,7 @@ module Gitsh
 
     # @param name [String] when name already exists will ask to overwrite
     # @param command [String, nil] when nil will ask to delete
-    # @param level [String] from `Gitsh::Git::CONFIG_LEVELS`
+    # @param level [String] from `Igitsh::Git::CONFIG_LEVELS`
     # @param out [IO] (default STDOUT)
     # @param err [IO] (default STDIN)
     #
@@ -182,7 +182,7 @@ module Gitsh
     end
 
     # @param name [String]
-    # @param level [String] from `Gitsh::Git::CONFIG_LEVELS`
+    # @param level [String] from `Igitsh::Git::CONFIG_LEVELS`
     #
     # @return [Boolean]
     def self.existing_alias?(name:, level:)

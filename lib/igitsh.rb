@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "gitsh/version"
+require_relative "igitsh/version"
 require "reline"
 require "xdg"
 
-module Gitsh
+module Igitsh
   class Error < StandardError; end
 
   # When the error is caught at the tokenizer level.
@@ -22,21 +22,21 @@ module Gitsh
   # Send messages from option blocks to the commander.
   class MessageError < Error; end
 
-  autoload :Commander, "gitsh/commander"
-  autoload :Completer, "gitsh/completer"
-  autoload :Executor, "gitsh/executor"
-  autoload :Git, "gitsh/git"
-  autoload :GitHelp, "gitsh/git_help"
-  autoload :Highlighter, "gitsh/highlighter"
-  autoload :Hinter, "gitsh/hinter"
-  autoload :Parser, "gitsh/parser"
-  autoload :Prompt, "gitsh/prompt"
-  autoload :Stringer, "gitsh/stringer"
-  autoload :Token, "gitsh/token"
-  autoload :TokenZipper, "gitsh/token_zipper"
-  autoload :Tokenizer, "gitsh/tokenizer"
+  autoload :Commander, "igitsh/commander"
+  autoload :Completer, "igitsh/completer"
+  autoload :Executor, "igitsh/executor"
+  autoload :Git, "igitsh/git"
+  autoload :GitHelp, "igitsh/git_help"
+  autoload :Highlighter, "igitsh/highlighter"
+  autoload :Hinter, "igitsh/hinter"
+  autoload :Parser, "igitsh/parser"
+  autoload :Prompt, "igitsh/prompt"
+  autoload :Stringer, "igitsh/stringer"
+  autoload :Token, "igitsh/token"
+  autoload :TokenZipper, "igitsh/token_zipper"
+  autoload :Tokenizer, "igitsh/tokenizer"
 
-  HISTORY_FILE_PATH = (XDG::Data.new.home / "gitsh/history").freeze
+  HISTORY_FILE_PATH = (XDG::Data.new.home / "igitsh/history").freeze
   USE_COLOR = ENV["NO_COLOR"].then { _1.nil? || _1.empty? }
 
   # Sets up shell history, completions, syntax highlighting and starts the REPL.
@@ -60,7 +60,7 @@ module Gitsh
     # Set up syntax highlighting.
     Reline.output_modifier_proc = Highlighter::CALLBACK if USE_COLOR
 
-    puts "# Welcome to gitsh!"
+    puts "# Welcome to igitsh!"
 
     exit_code = 0
 
@@ -74,13 +74,13 @@ module Gitsh
       result = Executor.execute_line(line: line)
 
       case result
-      when Gitsh::Executor::Result::Success
+      when Igitsh::Executor::Result::Success
         # Save the current input line to the shell history.
         if Reline::HISTORY.last != line
           Reline::HISTORY.push(line)
           HISTORY_FILE_PATH.write("#{line}\n", mode: "a")
         end
-      when Gitsh::Executor::Result::Failure
+      when Igitsh::Executor::Result::Failure
         # Only save the lines with syntax or parsing errors to the session history.
         if Reline::HISTORY.last != line
           Reline::HISTORY.push(line)

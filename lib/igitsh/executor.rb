@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Gitsh
+module Igitsh
   module Executor
     module Result
       class Base
@@ -34,7 +34,7 @@ module Gitsh
     # @param out [IO] (default STDOUT)
     # @param err [IO] (default STDIN)
     #
-    # @return [Gitsh::Executor::Result::Base]
+    # @return [Igitsh::Executor::Result::Base]
     def self.execute_line(line:, out: $stdout, err: $stderr)
       exit_code = 0
 

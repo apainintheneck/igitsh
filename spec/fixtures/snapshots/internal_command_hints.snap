@@ -8,13 +8,13 @@
 - "  logic is reused here so"
 - "  that aliases are"
 - "  available outside of"
-- "  Gitsh once defined."
+- "  Igitsh once defined."
 ":exit":
 - "  Gracefully exit the"
 - "  program. This is"
 - "  equivalent to ctrl-c or"
 - "  ctrl-d."
 ":history":
-- "  Browse your Gitsh shell"
-- "  history with syntax"
-- "  highlighting."
+- "  Browse your Igitsh"
+- "  shell history with"
+- "  syntax highlighting."

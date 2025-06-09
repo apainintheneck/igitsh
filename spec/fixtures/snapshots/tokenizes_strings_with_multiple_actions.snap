@@ -1,103 +1,103 @@
 ---
 - :line: one && two; three || four
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: one && two; three || four
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one && two; three || four
       start_position: 0
       end_position: 3
-    - !ruby/object:Gitsh::Token::And
+    - !ruby/object:Igitsh::Token::And
       source: one && two; three || four
       start_position: 4
       end_position: 6
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one && two; three || four
       start_position: 7
       end_position: 10
-    - !ruby/object:Gitsh::Token::End
+    - !ruby/object:Igitsh::Token::End
       source: one && two; three || four
       start_position: 10
       end_position: 11
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one && two; three || four
       start_position: 12
       end_position: 17
-    - !ruby/object:Gitsh::Token::Or
+    - !ruby/object:Igitsh::Token::Or
       source: one && two; three || four
       start_position: 18
       end_position: 20
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one && two; three || four
       start_position: 21
       end_position: 25
     index: 0
 - :line: "&&   &&&&;||"
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: "&&   &&&&;||"
     tokens:
-    - !ruby/object:Gitsh::Token::And
+    - !ruby/object:Igitsh::Token::And
       source: "&&   &&&&;||"
       start_position: 0
       end_position: 2
-    - !ruby/object:Gitsh::Token::And
+    - !ruby/object:Igitsh::Token::And
       source: "&&   &&&&;||"
       start_position: 5
       end_position: 7
-    - !ruby/object:Gitsh::Token::And
+    - !ruby/object:Igitsh::Token::And
       source: "&&   &&&&;||"
       start_position: 7
       end_position: 9
-    - !ruby/object:Gitsh::Token::End
+    - !ruby/object:Igitsh::Token::End
       source: "&&   &&&&;||"
       start_position: 9
       end_position: 10
-    - !ruby/object:Gitsh::Token::Or
+    - !ruby/object:Igitsh::Token::Or
       source: "&&   &&&&;||"
       start_position: 10
       end_position: 12
     index: 0
 - :line: one two &&||||; three four ;;
-  :tokens: !ruby/object:Gitsh::TokenZipper
+  :tokens: !ruby/object:Igitsh::TokenZipper
     source: one two &&||||; three four ;;
     tokens:
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one two &&||||; three four ;;
       start_position: 0
       end_position: 3
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one two &&||||; three four ;;
       start_position: 4
       end_position: 7
-    - !ruby/object:Gitsh::Token::And
+    - !ruby/object:Igitsh::Token::And
       source: one two &&||||; three four ;;
       start_position: 8
       end_position: 10
-    - !ruby/object:Gitsh::Token::Or
+    - !ruby/object:Igitsh::Token::Or
       source: one two &&||||; three four ;;
       start_position: 10
       end_position: 12
-    - !ruby/object:Gitsh::Token::Or
+    - !ruby/object:Igitsh::Token::Or
       source: one two &&||||; three four ;;
       start_position: 12
       end_position: 14
-    - !ruby/object:Gitsh::Token::End
+    - !ruby/object:Igitsh::Token::End
       source: one two &&||||; three four ;;
       start_position: 14
       end_position: 15
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one two &&||||; three four ;;
       start_position: 16
       end_position: 21
-    - !ruby/object:Gitsh::Token::String
+    - !ruby/object:Igitsh::Token::String
       source: one two &&||||; three four ;;
       start_position: 22
       end_position: 26
-    - !ruby/object:Gitsh::Token::End
+    - !ruby/object:Igitsh::Token::End
       source: one two &&||||; three four ;;
       start_position: 27
       end_position: 28
-    - !ruby/object:Gitsh::Token::End
+    - !ruby/object:Igitsh::Token::End
       source: one two &&||||; three four ;;
       start_position: 28
       end_position: 29

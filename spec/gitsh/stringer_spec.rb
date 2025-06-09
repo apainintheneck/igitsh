@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Stringer, :without_git do
+RSpec.describe Igitsh::Stringer, :without_git do
   describe ".indent_by" do
     it "indents the given string by non-negative size", :aggregate_failures do
       [

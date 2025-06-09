@@ -27,7 +27,7 @@ RSpec.describe "property testing" do
     it "tokenizes and highlights unexpected input lines" do
       PropCheck.forall(line_generator) do |array|
         line = array.join
-        expect { Gitsh::Highlighter.from_line(line) }.not_to raise_error
+        expect { Igitsh::Highlighter.from_line(line) }.not_to raise_error
       end
     end
 
@@ -35,8 +35,8 @@ RSpec.describe "property testing" do
       PropCheck.forall(line_generator) do |array|
         line = array.join
         expect do
-          Gitsh::Parser.parse(line)
-        rescue Gitsh::SyntaxError, Gitsh::ParseError
+          Igitsh::Parser.parse(line)
+        rescue Igitsh::SyntaxError, Igitsh::ParseError
           # ignore expected parsing errors
         end.not_to raise_error
       end
@@ -45,7 +45,7 @@ RSpec.describe "property testing" do
     it "tokenizes and completes unexpected input lines" do
       PropCheck.forall(line_generator) do |array|
         line = array.join
-        expect { Gitsh::Completer.from_line(line) }.not_to raise_error
+        expect { Igitsh::Completer.from_line(line) }.not_to raise_error
       end
     end
   end

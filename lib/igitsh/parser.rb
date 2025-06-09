@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Gitsh
+module Igitsh
   module Parser
     # Represents a set of shell arguments and action pair.
     # - Action: The logical action between the previous command and this one.
@@ -8,11 +8,11 @@ module Gitsh
     #
     # There are three possible actions:
     # 1. '&&' - Requires the previous command to exit successfully.
-    #   Ex. `Gitsh::Parser::Group::And.new(%w[diff])`
+    #   Ex. `Igitsh::Parser::Group::And.new(%w[diff])`
     # 2. '||' - Requires the previous command to fail.
-    #   Ex. `Gitsh::Parser::Group::Or.new(%w[commit -m "WIP"])`
+    #   Ex. `Igitsh::Parser::Group::Or.new(%w[commit -m "WIP"])`
     # 3. ';'  - Runs no matter what happened with the previous command.
-    #   Ex. `Gitsh::Parser::Group::End.new(%w[add --all])`
+    #   Ex. `Igitsh::Parser::Group::End.new(%w[add --all])`
     module Group
       class Base < Array; end
       private_constant :Base
@@ -30,7 +30,7 @@ module Gitsh
     # Parse a line into a series of commands.
     #
     # @param line [String]
-    # @return [Array<Gitsh::Parser::Group::Base>]
+    # @return [Array<Igitsh::Parser::Group::Base>]
     def self.parse(line)
       groups = []
       zipper = Tokenizer.from_line(line)

@@ -1,18 +1,18 @@
 ---
 - :line: checkout auto_update_tap
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - checkout
     - auto_update_tap
 - :line: git clone https://github.com/ruby/irb.git
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - git
     - clone
     - https://github.com/ruby/irb.git
 - :line: grep -C 5 -i -F match_snapshot
   :commands:
-  - !ruby/array:Gitsh::Parser::Group::End
+  - !ruby/array:Igitsh::Parser::Group::End
     - grep
     - "-C"
     - '5'

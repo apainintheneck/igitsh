@@ -2,7 +2,7 @@
 
 require "rainbow/refinement"
 
-module Gitsh
+module Igitsh
   module Prompt
     # Returns the shell prompt as a string.
     #
@@ -25,14 +25,14 @@ module Gitsh
 
     # @param status [Integer]
     # @param branch [String, nil]
-    # @param changes [Gitsh::Git::Changes, nil]
+    # @param changes [Igitsh::Git::Changes, nil]
     #
     # @return [String]
     def self.build(status:, branch: nil, changes: nil)
       string = +""
 
       if USE_COLOR
-        string << "gitsh".color(:aqua)
+        string << "igitsh".color(:aqua)
 
         if branch
           string << "(" << branch.color(:mediumslateblue)
@@ -64,7 +64,7 @@ module Gitsh
 
         string.bold.freeze
       else
-        string << "gitsh"
+        string << "igitsh"
 
         if branch
           string << "(" << branch

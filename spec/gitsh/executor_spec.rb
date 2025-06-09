@@ -3,7 +3,7 @@
 require "tempfile"
 require "rainbow"
 
-RSpec.describe Gitsh::Executor, :without_git do
+RSpec.describe Igitsh::Executor, :without_git do
   let!(:out) { Tempfile.new }
   let!(:err) { Tempfile.new }
 
@@ -13,7 +13,7 @@ RSpec.describe Gitsh::Executor, :without_git do
   let(:error) { Rainbow("error>").blue.bold }
 
   before do
-    allow(Gitsh::Git).to receive(:run).and_call_original
+    allow(Igitsh::Git).to receive(:run).and_call_original
   end
 
   around do |example|
@@ -33,7 +33,7 @@ RSpec.describe Gitsh::Executor, :without_git do
     context "with a single command" do
       it "executes a command without a git prefix" do
         expect(described_class.execute_line(line: "help", out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
+          .to eq(Igitsh::Executor::Result::Success.new(exit_code: 0))
 
         expect(out_str).to start_with("usage: git")
         expect(err.size).to eq(0)
@@ -41,7 +41,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
       it "executes an unknown command and returns a non-zero exit code" do
         expect(described_class.execute_line(line: "not-a-git-command", out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 1))
+          .to eq(Igitsh::Executor::Result::Success.new(exit_code: 1))
 
         expect(out.size).to eq(0)
         expect(err_str).to eq("git: 'not-a-git-command' is not a git command. See 'git --help'.\n")
@@ -52,7 +52,7 @@ RSpec.describe Gitsh::Executor, :without_git do
       context "with '&&'" do
         it "executes the second command when the first succeeds" do
           expect(described_class.execute_line(line: "help && unknown command", out: out, err: err))
-            .to eq(Gitsh::Executor::Result::Success.new(exit_code: 1))
+            .to eq(Igitsh::Executor::Result::Success.new(exit_code: 1))
 
           expect(out_str).to start_with("usage: git")
           expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -60,7 +60,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
         it "skips the second command when the first fails" do
           expect(described_class.execute_line(line: "unknown command && help", out: out, err: err))
-            .to eq(Gitsh::Executor::Result::Success.new(exit_code: 1))
+            .to eq(Igitsh::Executor::Result::Success.new(exit_code: 1))
 
           expect(out.size).to eq(0)
           expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -70,7 +70,7 @@ RSpec.describe Gitsh::Executor, :without_git do
       context "with '||'" do
         it "skips the second command when the first succeeds" do
           expect(described_class.execute_line(line: "help || unknown command", out: out, err: err))
-            .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
+            .to eq(Igitsh::Executor::Result::Success.new(exit_code: 0))
 
           expect(out_str).to start_with("usage: git")
           expect(err.size).to eq(0)
@@ -78,7 +78,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
         it "executes the second command when the first fails" do
           expect(described_class.execute_line(line: "unknown command || help", out: out, err: err))
-            .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
+            .to eq(Igitsh::Executor::Result::Success.new(exit_code: 0))
 
           expect(out_str).to start_with("usage: git")
           expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -88,7 +88,7 @@ RSpec.describe Gitsh::Executor, :without_git do
       context "with semicolon" do
         it "executes the second command when the first succeeds" do
           expect(described_class.execute_line(line: "help; unknown command", out: out, err: err))
-            .to eq(Gitsh::Executor::Result::Success.new(exit_code: 1))
+            .to eq(Igitsh::Executor::Result::Success.new(exit_code: 1))
 
           expect(out_str).to start_with("usage: git")
           expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -96,7 +96,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
         it "executes the second command when the first fails" do
           expect(described_class.execute_line(line: "unknown command; help", out: out, err: err))
-            .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
+            .to eq(Igitsh::Executor::Result::Success.new(exit_code: 0))
 
           expect(out_str).to start_with("usage: git")
           expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -109,7 +109,7 @@ RSpec.describe Gitsh::Executor, :without_git do
         line = "help || help || help && help; unknown command"
 
         expect(described_class.execute_line(line: line, out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 1))
+          .to eq(Igitsh::Executor::Result::Success.new(exit_code: 1))
 
         expect(out_str.scan("usage: git").size).to eq(1)
         expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -119,7 +119,7 @@ RSpec.describe Gitsh::Executor, :without_git do
         line = "unknown command && help && help || version && help; version"
 
         expect(described_class.execute_line(line: line, out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
+          .to eq(Igitsh::Executor::Result::Success.new(exit_code: 0))
 
         expect(out_str.scan("usage: git").size).to eq(1)
         expect(out_str.scan("git version").size).to eq(2)
@@ -130,7 +130,7 @@ RSpec.describe Gitsh::Executor, :without_git do
         line = "unknown && version && version && version; version"
 
         expect(described_class.execute_line(line: line, out: out, err: err))
-          .to eq(Gitsh::Executor::Result::Success.new(exit_code: 0))
+          .to eq(Igitsh::Executor::Result::Success.new(exit_code: 0))
 
         expect(out_str.scan("git version").size).to eq(1)
         expect(err_str).to eq("git: 'unknown' is not a git command. See 'git --help'.\n")
@@ -143,7 +143,7 @@ RSpec.describe Gitsh::Executor, :without_git do
     it "exits successfully" do
       expect do
         described_class.execute_line(line: ":exit", out: out, err: err)
-      end.to raise_error(Gitsh::ExitError)
+      end.to raise_error(Igitsh::ExitError)
     end
 
     #
@@ -151,7 +151,7 @@ RSpec.describe Gitsh::Executor, :without_git do
     #
     it "fails when there is an unterminated single-quoted string" do
       expect(described_class.execute_line(line: "first second 'third fourth", out: out, err: err))
-        .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
+        .to eq(Igitsh::Executor::Result::Failure.new(exit_code: 127))
 
       expect(out.size).to eq(0)
       expect(err_str).to eq <<~ERROR
@@ -164,7 +164,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
     it "fails when there is an unterminated double-quoted string" do
       expect(described_class.execute_line(line: "first second \"third fourth", out: out, err: err))
-        .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
+        .to eq(Igitsh::Executor::Result::Failure.new(exit_code: 127))
 
       expect(out.size).to eq(0)
       expect(err_str).to eq <<~ERROR
@@ -177,7 +177,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
     it "fails when there is a partial action" do
       expect(described_class.execute_line(line: "git clone sdlkfdjsf&sdfklsdfjsd", out: out, err: err))
-        .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
+        .to eq(Igitsh::Executor::Result::Failure.new(exit_code: 127))
 
       expect(out.size).to eq(0)
       expect(err_str).to eq <<~ERROR
@@ -190,7 +190,7 @@ RSpec.describe Gitsh::Executor, :without_git do
 
     it "fails when there is a parse error" do
       expect(described_class.execute_line(line: "first && && fourth", out: out, err: err))
-        .to eq(Gitsh::Executor::Result::Failure.new(exit_code: 127))
+        .to eq(Igitsh::Executor::Result::Failure.new(exit_code: 127))
 
       expect(out.size).to eq(0)
       expect(err_str).to eq <<~ERROR

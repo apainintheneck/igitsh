@@ -2,14 +2,14 @@
 
 require "strscan"
 
-module Gitsh
+module Igitsh
   # Represents the help page for a Git command along with
   # any relevant usage and option information that was
   # able to be parsed from it.
   class GitHelp
     # @param command [String]
     #
-    # @return [Gitsh::GitHelp, nil]
+    # @return [Igitsh::GitHelp, nil]
     def self.from_name(command)
       return unless Git.command_set.include?(command)
 
@@ -59,14 +59,14 @@ module Gitsh
         .freeze
     end
 
-    # @return [Hash<String, Gitsh::GitHelp::Option>]
+    # @return [Hash<String, Igitsh::GitHelp::Option>]
     def options_by_prefix
       @options_by_prefix ||= options.group_by(&:prefix).freeze
     end
 
     # Extract options from the help page.
     #
-    # @return [Array<Gitsh::Git::Option>]
+    # @return [Array<Igitsh::Git::Option>]
     def options
       @options ||= [].tap do |options|
         help_text = Git.help_page(command: @command)

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Gitsh::Commander, :without_git do
+RSpec.describe Igitsh::Commander, :without_git do
   describe ".internal_command_names" do
     let(:command_names) { described_class.internal_command_names }
 
