@@ -33,4 +33,4 @@ OptionParser.new do |parser|
   end
 end.parse!
 
-Gitsh.run!
+Igitsh.run!
