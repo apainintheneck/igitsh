@@ -60,7 +60,13 @@ module Igitsh
     # Set up syntax highlighting.
     Reline.output_modifier_proc = Highlighter::CALLBACK if USE_COLOR
 
-    puts "# Welcome to igitsh!"
+    puts <<~WELCOME
+      # Welcome to igitsh!
+      #
+      # (enter :commands to list all commands)
+      # (enter :help for more information)
+      # (enter :exit to exit)
+    WELCOME
 
     exit_code = 0
 
