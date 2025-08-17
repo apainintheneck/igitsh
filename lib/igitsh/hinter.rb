@@ -70,7 +70,7 @@ module Igitsh
       description = if Git.command_descriptions.include?(completion)
         Git.command_descriptions.fetch(completion)
       elsif Commander.internal_command_names.include?(completion)
-        Commander.name_to_command.fetch(completion).description
+        Commander.name_to_internal_command.fetch(completion).description
       end
 
       if description

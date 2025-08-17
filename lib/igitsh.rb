@@ -32,6 +32,7 @@ module Igitsh
   autoload :Parser, "igitsh/parser"
   autoload :Prompt, "igitsh/prompt"
   autoload :Stringer, "igitsh/stringer"
+  autoload :Terminal, "igitsh/terminal"
   autoload :Token, "igitsh/token"
   autoload :TokenZipper, "igitsh/token_zipper"
   autoload :Tokenizer, "igitsh/tokenizer"
@@ -61,11 +62,8 @@ module Igitsh
     Reline.output_modifier_proc = Highlighter::CALLBACK if USE_COLOR
 
     puts <<~WELCOME
-      # Welcome to igitsh!
-      #
-      # (enter :commands to list all commands)
-      # (enter :help for more information)
-      # (enter :exit to exit)
+      #                 Welcome to igitsh!
+      # (enter :exit to exit and :commands to list all commands)
     WELCOME
 
     exit_code = 0
@@ -110,7 +108,7 @@ module Igitsh
   def self.command_name?(name)
     Git.command_set.include?(name) ||
       Git.aliases.include?(name) ||
-      Commander.name_to_command.include?(name)
+      Commander.name_to_internal_command.include?(name)
   end
 
   # @return [Array<String>]

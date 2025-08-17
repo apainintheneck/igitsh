@@ -11,8 +11,7 @@ OptionParser.new do |parser|
   igitsh -- an interactive shell for git
 
   This shell includes completions and history.
-  Run any `git` command without prefixing `git`
-  and just `exit` when you're done.
+  Run any `git` command without prefixing `git`.
 
   Options:
   BANNER
