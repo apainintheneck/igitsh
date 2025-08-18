@@ -8,6 +8,7 @@ RSpec.describe Igitsh::Hinter, :without_git do
       allow(Igitsh::Git).to receive(:command_names).and_return(%w[diff])
       allow(Igitsh::Git).to receive(:command_set).and_return(Set["diff"])
       allow(Igitsh::Git).to receive(:command_descriptions).and_call_original
+      allow(Igitsh::Git).to receive(:raw_command_descriptions).and_call_original
     end
 
     context "with Git command" do

@@ -99,6 +99,13 @@ module Igitsh
           raise NotImplementedError
         end
 
+        # One line version of `#description`
+        #
+        # @return [String]
+        def short_description
+          description.split("\n").first.strip
+        end
+
         # Callback to define help option on all subclasses.
         #
         # @param subclass [Igitsh::Commander::Base]
@@ -268,6 +275,38 @@ module Igitsh
       end
     end
 
+    class Commands < Base
+      def_default(description: "List all commands.") do
+        internal_commands = ::Igitsh::Commander
+          .internal_commands
+          .sort_by(&:name)
+          .map { |command| format("   %-24s%s", command.name, command.short_description) }
+          .join("\n")
+        external_commands = ::Igitsh::Git.raw_command_descriptions
+
+        Terminal.page(<<~PAGE.strip)
+          Igitsh Internal Commands
+          #{internal_commands}
+
+          #{external_commands}
+        PAGE
+
+        SUCCESS_CODE
+      end
+
+      class << self
+        # @return [String]
+        def name
+          ":commands"
+        end
+
+        # @return [String]
+        def description
+          "List all internal and external commands along with descriptions."
+        end
+      end
+    end
+
     class Exit < Base
       def_default(description: "Exit the program.") do
         raise ExitError
@@ -287,8 +326,7 @@ module Igitsh
     end
 
     class History < Base
-      def_option(
-        name: "--list",
+      def_default(
         description: "Browse your Igitsh shell history from newest to oldest."
       ) do
         Terminal.page do |pager|

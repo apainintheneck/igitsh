@@ -56,6 +56,15 @@ RSpec.describe Igitsh::Commander, :without_git do
     end
   end
 
+  describe "::Commands" do
+    it "shows the command list" do
+      allow(::Igitsh::Git).to receive(:raw_command_descriptions).and_call_original
+      expect(::Igitsh::Terminal).to receive(:page).with(match_snapshot("internal_command_list_output"))
+
+      described_class::Commands.new([":commands"], out: File::NULL, err: File::NULL).run
+    end
+  end
+
   describe "::Git" do
     it "matches the #initialize params of the Base class" do
       expect(described_class::Git.instance_method(:initialize).parameters)
@@ -65,6 +74,35 @@ RSpec.describe Igitsh::Commander, :without_git do
     it "matches the #run params of the Base class" do
       expect(described_class::Git.instance_method(:run).parameters)
         .to eq(described_class::Base.instance_method(:run).parameters)
+    end
+  end
+
+  describe "::Help" do
+    it "matches the #initialize params of the Base class" do
+      expect(described_class::Help.instance_method(:initialize).parameters)
+        .to eq(described_class::Base.instance_method(:initialize).parameters)
+    end
+
+    it "matches the #run params of the Base class" do
+      expect(described_class::Help.instance_method(:run).parameters)
+        .to eq(described_class::Base.instance_method(:run).parameters)
+    end
+
+    it "shows help pages for internal commands", :aggregate_failures do
+      described_class.internal_commands.each do |command|
+        expect(::Igitsh::Terminal).to receive(:page).with(command.help_text)
+
+        described_class::Help.new(["help", command.name], out: File::NULL, err: File::NULL).run
+      end
+    end
+
+    it "calls out to git for external commands", :aggregate_failures do
+      allow(::Igitsh::Git).to receive(:run)
+      %w[commit push].each do |command_name|
+        expect(::Igitsh::Git).to receive(:run).with(["help", command_name], out: File::NULL, err: File::NULL)
+
+        described_class::Help.new(["help", command_name], out: File::NULL, err: File::NULL).run
+      end
     end
   end
 
