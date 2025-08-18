@@ -46,13 +46,18 @@ module Igitsh
     }x
     private_constant :COMMAND_DESCRIPTION_REGEX
 
+    # @return [String]
+    def self.raw_command_descriptions
+      out_str, _err_str, _status = Open3.capture3("git help --all")
+      out_str.strip
+    end
+
     # @return [Hash<String, String>] hash of command to description
     def self.command_descriptions
-      @command_descriptions ||= begin
-        out_str, _err_str, _status = Open3.capture3("git help --all")
-        description_page = out_str.strip
-        description_page.scan(COMMAND_DESCRIPTION_REGEX).to_h
-      end.freeze
+      @command_descriptions ||= raw_command_descriptions
+        .scan(COMMAND_DESCRIPTION_REGEX)
+        .to_h
+        .freeze
     end
 
     Changes = Struct.new(:staged_count, :unstaged_count, keyword_init: true)

@@ -9,6 +9,10 @@
 - "  that aliases are"
 - "  available outside of"
 - "  Igitsh once defined."
+":commands":
+- "  List all internal and"
+- "  external commands along"
+- "  with descriptions."
 ":exit":
 - "  Gracefully exit the"
 - "  program. This is"

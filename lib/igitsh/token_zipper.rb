@@ -369,7 +369,7 @@ module Igitsh
 
         options.find { |option| !option.suffix.empty? }&.suffix
       elsif current_command.valid_internal_command?
-        internal_command = Commander.name_to_command[current_command.token.content]
+        internal_command = Commander.name_to_internal_command[current_command.token.content]
         return unless internal_command
 
         option = internal_command.option_by_prefix[token.raw_content]

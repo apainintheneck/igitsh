@@ -89,12 +89,21 @@ module Igitsh
         #
         # @return [String]
         def name
+          raise NotImplementedError
         end
 
         # Override in subclass.
         #
         # @return [String]
         def description
+          raise NotImplementedError
+        end
+
+        # One line version of `#description`
+        #
+        # @return [String]
+        def short_description
+          description.split("\n").first.strip
         end
 
         # Callback to define help option on all subclasses.
@@ -104,8 +113,8 @@ module Igitsh
           subclass.def_option(
             name: "--help",
             description: "Show this help page."
-          ) do |*, out:, **|
-            out.puts subclass.help_text
+          ) do
+            Terminal.page subclass.help_text
             SUCCESS_CODE
           end
         end
@@ -156,7 +165,7 @@ module Igitsh
             end.join("\n")
 
             <<~HELP
-              GITSH-#{name.delete_prefix(":").upcase}(1)
+              IGITSH-#{name.delete_prefix(":").upcase}(1)
 
               NAME
               #{Stringer.indent_by(name, size: 6)}
@@ -201,24 +210,6 @@ module Igitsh
           ).freeze
 
           nil
-        end
-      end
-    end
-
-    class Exit < Base
-      def_default(description: "Exit the program.") do
-        raise ExitError
-      end
-
-      class << self
-        # @return [String]
-        def name
-          ":exit"
-        end
-
-        # @return [String]
-        def description
-          "Gracefully exit the program. This is equivalent to ctrl-c or ctrl-d."
         end
       end
     end
@@ -282,39 +273,86 @@ module Igitsh
           DESCRIPTION
         end
       end
+    end
 
-      class History < Base
-        def_option(
-          name: "--list",
-          description: "Browse your Igitsh shell history from newest to oldest."
-        ) do
-          require "tty-pager"
+    class Commands < Base
+      def_default(description: "List all commands.") do
+        internal_commands = ::Igitsh::Commander
+          .internal_commands
+          .sort_by(&:name)
+          .map { |command| format("   %-24s%s", command.name, command.short_description) }
+          .join("\n")
+        external_commands = ::Igitsh::Git.raw_command_descriptions
 
-          TTY::Pager.page do |pager|
-            Reline::HISTORY.reverse_each do |line|
-              pager.write("> ")
-              if USE_COLOR
-                highlighted_line = Highlighter.from_line(line, complete: true)
-                pager.puts(highlighted_line)
-              else
-                pager.puts(line)
-              end
-            end
-          end
+        Terminal.page(<<~PAGE.strip)
+          Igitsh Internal Commands
+          #{internal_commands}
 
-          SUCCESS_CODE
+          #{external_commands}
+        PAGE
+
+        SUCCESS_CODE
+      end
+
+      class << self
+        # @return [String]
+        def name
+          ":commands"
         end
 
-        class << self
-          # @return [String]
-          def name
-            ":history"
-          end
+        # @return [String]
+        def description
+          "List all internal and external commands along with descriptions."
+        end
+      end
+    end
 
-          # @return [String]
-          def description
-            "Browse your Igitsh shell history with syntax highlighting."
+    class Exit < Base
+      def_default(description: "Exit the program.") do
+        raise ExitError
+      end
+
+      class << self
+        # @return [String]
+        def name
+          ":exit"
+        end
+
+        # @return [String]
+        def description
+          "Gracefully exit the program. This is equivalent to ctrl-c or ctrl-d."
+        end
+      end
+    end
+
+    class History < Base
+      def_default(
+        description: "Browse your Igitsh shell history from newest to oldest."
+      ) do
+        Terminal.page do |pager|
+          Reline::HISTORY.reverse_each do |line|
+            pager.write("> ")
+            if USE_COLOR
+              highlighted_line = Highlighter.from_line(line, complete: true)
+              pager.puts(highlighted_line)
+            else
+              pager.puts(line)
+            end
           end
+        end
+
+        SUCCESS_CODE
+      end
+
+      class << self
+        # @return [String]
+        def name
+          ":history"
+        end
+
+        # @return [String]
+        def description
+          "Browse your Igitsh shell history with syntax highlighting."
         end
       end
     end
@@ -337,16 +375,39 @@ module Igitsh
       end
     end
 
+    class Help
+      # @param arguments [Array<String>]
+      # @params out [IO]
+      # @params err [IO]
+      #
+      # @return [Integer]
+      def initialize(arguments, out:, err:)
+        @arguments = arguments.freeze
+        @out = out
+        @err = err
+      end
+
+      # @return [Integer]
+      def run
+        case @arguments
+        in ["help", command] if ::Igitsh::Commander.internal_command_names.include?(command)
+          ::Igitsh::Commander.from_name(command).new([command, "--help"], out: @out, err: @err).run
+        else
+          ::Igitsh::Git.run(@arguments, out: @out, err: @err)
+        end
+      end
+    end
+
     # @param name [String]
     #
     # @return [Igitsh::Commander::Base, Igitsh::Commander::Git]
     def self.from_name(name)
-      name_to_command.fetch(name, Git)
+      (name == "help") ? Help : name_to_internal_command.fetch(name, Git)
     end
 
-    # @return [Hash<String, Class>]
-    def self.name_to_command
-      @name_to_command ||= internal_commands
+    # @return [Hash<String, Igitsh::Commander::Base>]
+    def self.name_to_internal_command
+      @name_to_internal_command ||= internal_commands
         .to_h { |subclass| [subclass.name, subclass] }
         .freeze
     end
