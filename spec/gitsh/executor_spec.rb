@@ -14,6 +14,7 @@ RSpec.describe Igitsh::Executor, :without_git do
 
   before do
     allow(Igitsh::Git).to receive(:run).and_call_original
+    allow(Igitsh::Git).to receive(:command_names).and_call_original
   end
 
   around do |example|

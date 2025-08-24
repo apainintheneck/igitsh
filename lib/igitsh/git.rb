@@ -48,8 +48,7 @@ module Igitsh
 
     # @return [String]
     def self.raw_command_descriptions
-      out_str, _err_str, _status = Open3.capture3("git help --all")
-      out_str.strip
+      `git help --all`.strip
     end
 
     # @return [Hash<String, String>] hash of command to description

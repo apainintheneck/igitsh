@@ -151,9 +151,11 @@ RSpec.configure do |config|
 
   config.before do
     # To prevent errors where these get loaded for real and get cached by another test.
-    allow(Open3).to receive(:capture3).and_call_original
-    allow(Open3).to receive(:capture3).with("git help --all")
+    allow_any_instance_of(Module).to receive(:`).and_call_original
+    allow_any_instance_of(Module).to receive(:`).with("git help --all")
       .and_return(fixture("git_help_all_commands.txt"))
+    allow_any_instance_of(Module).to receive(:`).with("git --list-cmds=main,nohelpers")
+      .and_return(fixture("git_list_commands.txt"))
   end
 
   config.before(:each, :without_git) do

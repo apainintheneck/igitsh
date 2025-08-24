@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Igitsh::Commander, :without_git do
+  before do
+    allow(Igitsh::Git).to receive(:command_names).and_call_original
+  end
+
   describe ".internal_command_names" do
     let(:command_names) { described_class.internal_command_names }
 
@@ -14,12 +18,17 @@ RSpec.describe Igitsh::Commander, :without_git do
   end
 
   describe ".from_name" do
-    it "returns internal command" do
-      expect(described_class.from_name(":exit")).to eq(described_class::Exit)
-    end
-
-    it "falls back to Git command when not internal" do
-      expect(described_class.from_name("diff")).to eq(described_class::Git)
+    it "returns the expected command", :aggregate_failures do
+      [
+        # Internal commands
+        *described_class.name_to_internal_command.to_a,
+        # Mispelled internal commands
+        *described_class.internal_command_mispellings.map { |name| [name, described_class::Mispell] },
+        # External git commands
+        *%w[push pull commit].map { |name| [name, described_class::Git] }
+      ].each do |name, klass|
+        expect(described_class.from_name(name)).to eq(klass)
+      end
     end
   end
 
@@ -65,28 +74,24 @@ RSpec.describe Igitsh::Commander, :without_git do
     end
   end
 
-  describe "::Git" do
+  shared_examples "an internal command" do |command:|
     it "matches the #initialize params of the Base class" do
-      expect(described_class::Git.instance_method(:initialize).parameters)
+      expect(command.instance_method(:initialize).parameters)
         .to eq(described_class::Base.instance_method(:initialize).parameters)
     end
 
     it "matches the #run params of the Base class" do
-      expect(described_class::Git.instance_method(:run).parameters)
+      expect(command.instance_method(:run).parameters)
         .to eq(described_class::Base.instance_method(:run).parameters)
     end
   end
 
-  describe "::Help" do
-    it "matches the #initialize params of the Base class" do
-      expect(described_class::Help.instance_method(:initialize).parameters)
-        .to eq(described_class::Base.instance_method(:initialize).parameters)
-    end
+  describe "::Git" do
+    it_behaves_like "an internal command", command: described_class::Git
+  end
 
-    it "matches the #run params of the Base class" do
-      expect(described_class::Help.instance_method(:run).parameters)
-        .to eq(described_class::Base.instance_method(:run).parameters)
-    end
+  describe "::Help" do
+    it_behaves_like "an internal command", command: described_class::Help
 
     it "shows help pages for internal commands", :aggregate_failures do
       described_class.internal_commands.each do |command|
@@ -103,6 +108,24 @@ RSpec.describe Igitsh::Commander, :without_git do
 
         described_class::Help.new(["help", command_name], out: File::NULL, err: File::NULL).run
       end
+    end
+  end
+
+  describe "::Mispell" do
+    it_behaves_like "an internal command", command: described_class::Mispell
+
+    it "prints out a helpful message" do
+      out = File::NULL
+      err = spy("err")
+
+      described_class::Mispell.new(["exit"], out:, err:).run
+
+      expect(err).to have_received(:puts).with(<<~ERROR)
+        igitsh: 'exit' is not an igitsh command. See ':commands'.
+
+        The most similar command is
+                :exit
+      ERROR
     end
   end
 
