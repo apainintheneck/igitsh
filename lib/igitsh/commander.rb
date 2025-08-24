@@ -2,10 +2,10 @@
 
 module Igitsh
   module Commander
-    class Base
-      SUCCESS_CODE = 0
-      FAILURE_CODE = 1
+    SUCCESS_CODE = 0
+    FAILURE_CODE = 1
 
+    class Base
       # @param name [String, nil]
       # @param description [String]
       # @param block [Proc]
@@ -398,11 +398,47 @@ module Igitsh
       end
     end
 
+    class Mispell
+      # @param arguments [Array<String>]
+      # @params out [IO]
+      # @params err [IO]
+      #
+      # @return [Integer]
+      def initialize(arguments, out:, err:)
+        @arguments = arguments.freeze
+        @out = out
+        @err = err
+      end
+
+      # @return [Integer]
+      def run
+        command = @arguments.first
+
+        @err.puts <<~ERROR
+          igitsh: '#{command}' is not an igitsh command. See ':commands'.
+
+          The most similar command is
+                  :#{command}
+        ERROR
+
+        FAILURE_CODE
+      end
+    end
+
     # @param name [String]
     #
     # @return [Igitsh::Commander::Base, Igitsh::Commander::Git]
     def self.from_name(name)
-      (name == "help") ? Help : name_to_internal_command.fetch(name, Git)
+      case name
+      when "help"
+        Help
+      when *internal_command_names
+        name_to_internal_command.fetch(name)
+      when *internal_command_mispellings
+        Mispell
+      else
+        Git
+      end
     end
 
     # @return [Hash<String, Igitsh::Commander::Base>]
@@ -420,6 +456,14 @@ module Igitsh
     # @return [Array<String>]
     def self.internal_command_names
       @internal_command_names ||= internal_commands.map(&:name).freeze
+    end
+
+    # @return [Array<String>]
+    def self.internal_command_mispellings
+      @internal_command_mispellings ||= internal_command_names
+        .map { |name| name.delete_prefix(":") }
+        .difference(::Igitsh::Git.command_names)
+        .freeze
     end
   end
 end
