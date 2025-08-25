@@ -17,6 +17,8 @@ $ bundle rake install
 $ igitsh
 ```
 
+![GIF demoing the shell](./assets/igitsh-v1.0.0.gif)
+
 ## Development
 
 ```console
