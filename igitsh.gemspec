@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{lib,exe}/**/*"]
   spec.bindir = "exe"
-  spec.executables = ["rfc-reader"]
+  spec.executables = ["igitsh"]
 
   spec.add_dependency "rainbow", "~> 3.1.1"
   spec.add_dependency "reline", "~> 0.6.0"

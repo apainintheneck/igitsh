@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    igitsh (0.1.0)
+    igitsh (1.0.0)
       rainbow (~> 3.1.1)
       reline (~> 0.6.0)
       tty-pager (~> 0.14)
