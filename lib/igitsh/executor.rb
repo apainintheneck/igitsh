@@ -48,17 +48,17 @@ module Igitsh
       Parser.parse(line).each do |group|
         case group
         when Parser::Group::And
-          next if skip_to_end
           # Skip the command if the previous one failed.
           next unless exit_code.zero?
         when Parser::Group::Or
           # Skip to the end if the previous command succeeded.
           skip_to_end = true if exit_code.zero?
-          next if skip_to_end
         when Parser::Group::End
           # Always run the command after the `end` action.
           skip_to_end = false
         end
+
+        next if skip_to_end
 
         exit_code = Commander
           .from_name(group.first)

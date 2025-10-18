@@ -200,6 +200,7 @@ module Igitsh
         # @param block [Proc]
         def def_option(name:, description:, &block)
           raise ArgumentError, "name must be a string" unless name.is_a?(String)
+          raise ArgumentError, "name must not be blank" if name.strip.empty?
 
           @options ||= []
 
