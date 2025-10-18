@@ -45,7 +45,6 @@ module Igitsh
       return unless last_command_zipper
 
       command_name = last_command_zipper.token.content
-      option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       option_prefixes = if last_command_zipper.valid_git_command?
         GitHelp.from_name(command_name)&.option_prefixes
@@ -55,11 +54,14 @@ module Igitsh
 
       return unless option_prefixes
 
+      option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
+
       option_prefixes
         # Complete all commands starting with the given prefix.
         .grep(option_prefix_regex)
         # Sort results by shortest command and then alphabetically.
         .sort_by { |cmd| [cmd.size, cmd] }
     end
+    private_class_method :for_option
   end
 end
