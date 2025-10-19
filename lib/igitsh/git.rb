@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "open3"
+require "shellwords"
 require "tty-which"
 require "English"
 require "set" # needed for Ruby 3.1 support
@@ -14,13 +14,13 @@ module Igitsh
 
     # @return [Boolean]
     def self.repo?
-      out_str, _err_str, _status = Open3.capture3("git rev-parse --is-inside-work-tree")
+      out_str = `git rev-parse --is-inside-work-tree`
       out_str.strip == "true"
     end
 
     # @return [String, nil]
     def self.current_branch
-      out_str, _err_str, _status = Open3.capture3("git rev-parse --abbrev-ref HEAD")
+      out_str = `git rev-parse --abbrev-ref HEAD`
       branch_name = out_str.strip
       branch_name unless branch_name.empty?
     end
@@ -31,8 +31,8 @@ module Igitsh
     def self.help_page(command:)
       return unless command_set.include?(command)
 
-      out_str, _err_str, _status = Open3.capture3("git", "help", "--man", command)
-      help_text = out_str.strip
+      shell_command = Shellwords.join(["git", "help", "--man", command])
+      help_text = `#{shell_command}`.strip
       help_text unless help_text.empty?
     end
 
@@ -109,6 +109,7 @@ module Igitsh
       (?<command>.+)         # capture: command
       $
     }x
+    private_constant :ALIAS_REGEX
 
     # @return [Aliases]
     def self.aliases
@@ -116,8 +117,7 @@ module Igitsh
         local_hash = {}
         global_hash = {}
 
-        out_str, _err_str, _status = Open3.capture3("git config --show-scope --get-regexp '^alias\\.'")
-        out_str.each_line do |line|
+        `git config --show-scope --get-regexp '^alias\\.'`.each_line do |line|
           line.match(ALIAS_REGEX) do |match_result|
             case match_result[:type]
             when "local"
@@ -142,8 +142,8 @@ module Igitsh
     #
     # @return [Integer]
     def self.set_alias(name:, command:, level:, out:, err:)
-      raise ArgumentError if name.nil?
-      raise ArgumentError unless CONFIG_LEVELS.include?(level)
+      raise ArgumentError, "missing name" if name.nil?
+      raise ArgumentError, "invalid config level: #{level}" unless CONFIG_LEVELS.include?(level)
       raise MessageError, "alias name must not include whitespace" if name.match?(/\s/)
 
       if command
@@ -162,7 +162,7 @@ module Igitsh
         end
 
         run(["config", level, "alias.#{name}", command], out: out, err: err).tap do |exit_code|
-          clear_alias_cache! if exit_code.zero? # clear cache when it was successful
+          clear_alias_cache! if exit_code.zero? # clear cache when it was set successfully
         end
       else
         unless existing_alias?(name: name, level: level)
@@ -190,7 +190,7 @@ module Igitsh
     #
     # @return [Boolean]
     def self.existing_alias?(name:, level:)
-      raise ArgumentError unless CONFIG_LEVELS.include?(level)
+      raise ArgumentError, "invalid config level: #{level}" unless CONFIG_LEVELS.include?(level)
 
       clear_alias_cache!
 

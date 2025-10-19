@@ -53,10 +53,7 @@ module Igitsh
 
     # @return [Array<String>]
     def option_prefixes
-      @option_prefixes ||= options
-        .map(&:prefix)
-        .uniq
-        .freeze
+      @option_prefixes ||= options_by_prefix.keys.freeze
     end
 
     # @return [Hash<String, Igitsh::GitHelp::Option>]
@@ -74,58 +71,47 @@ module Igitsh
 
         scanner = StringScanner.new(help_text)
 
-        # Skip straight to the OPTIONS section.
-        scanner.skip_until(/\nOPTIONS\n/)
-        before_option = true
+        # NOTE: Options are only parsed after section headings or empty lines
+        # since other lines prefixed by dashes might not represent options
+        # but other text like descriptions, explanations and examples instead.
+        loop do
+          if scanner.skip(/(\n?[A-Z].+)?\n/) # Skip section headings and empty lines.
+            if scanner.skip("       ") # Skip leading whitespace.
+              while scanner.match?("-") # Parse options prefixed by dashes.
+                prefixes =
+                  if (short_prefix = scanner.scan(/-[a-zA-Z]/))
+                    # Parse short option prefix.
+                    # Ex. `-a`
+                    [short_prefix]
+                  elsif (long_prefix = scanner.scan(/-(?:-[a-zA-Z]+)+/))
+                    # Parse long option prefix.
+                    # Ex. `--source`
+                    [long_prefix]
+                  elsif (reversible_prefix = scanner.skip("--[no]") && scanner.scan(/(?:-[a-zA-Z]+)+/))
+                    # Parse long reversible option prefix.
+                    # Ex. `--[no]-source`
+                    ["-#{reversible_prefix}", "--no#{reversible_prefix}"]
+                  end
 
-        # Parse until the end of the string or docs.
-        until scanner.eos? || scanner.match?(/GIT/)
-          if before_option && scanner.skip("       ") # Skip leading whitespace.
-            # Continue parsing options prefixed by dashes.
-            while scanner.match?("-")
-              prefixes = []
+                break unless prefixes
 
-              if (short_prefix = scanner.scan(/-[a-zA-Z]/))
-                # Parse short option prefix.
-                # Ex. `-a`
-                prefixes << short_prefix
-              elsif (long_prefix = scanner.scan(/-(?:-[a-zA-Z]+)+/))
-                # Parse long option prefix.
-                # Ex. `--source`
-                prefixes << long_prefix
-              elsif (reversible_prefix = scanner.skip("--[no]") && scanner.scan(/(?:-[a-zA-Z]+)+/))
-                # Parse long reversible option prefix.
-                # Ex. `--[no]-source`
-                prefixes << "-#{reversible_prefix}"
-                prefixes << "--no#{reversible_prefix}"
-              else
-                # Break when no option prefixes are parsed.
-                break
+                # Parse suffix including any parameters by parsing everything
+                # up to the next newline or command followed by a space.
+                suffix = scanner.scan(/(?:[^\n,]|,\S)*/).rstrip
+
+                # Skip the suffix if it is not usage guidelines but just a general description.
+                suffix = "" if suffix.match?(/^\s*[a-zA-Z0-9]/)
+
+                prefixes.each do |prefix|
+                  options << Option.new(prefix: prefix.freeze, suffix: suffix.freeze).freeze
+                end
+
+                # Break if there isn't a comma indicating another command.
+                break unless scanner.skip(", ")
               end
-
-              # Parse suffix including any parameters by parsing everything
-              # up to the next newline or command followed by a space.
-              suffix = scanner.scan(/(?:[^\n,]|,\S)*/).rstrip
-
-              # Skip the suffix if it is not usage guidelines but just a general description.
-              suffix = "" if suffix.match?(/^\s*[a-zA-Z0-9]/)
-
-              prefixes.each do |prefix|
-                options << Option.new(prefix: prefix.freeze, suffix: suffix.freeze).freeze
-              end
-
-              # Break if there isn't a comma indicating another command.
-              break unless scanner.skip(", ")
             end
-            before_option = false
-          elsif scanner.match?(/[A-Z\n]/) # Check for empty line or section name.
-            before_option = true
-          else
-            before_option = false
           end
-
-          # Parse until the end of the line.
-          scanner.skip_until(/\n/)
+          break unless scanner.skip_until(/\n/) # Parse until the end of the line.
         end
       end.uniq.freeze
     end
