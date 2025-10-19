@@ -11,21 +11,21 @@ module Igitsh
     #
     # @return [Array<String>, nil]
     def self.from_line(line)
-      return if line.end_with?(" ")
-
       zipper = Tokenizer.from_line(line)
+      trailing_space = line.end_with?(" ")
 
-      if zipper.last.command?
-        for_command(zipper)
-      elsif zipper.last.option? && zipper.last.options_allowed?
-        for_option(zipper)
-      end
+      for_command(zipper:, trailing_space:) ||
+        for_option(zipper:, trailing_space:)
     end
 
     # @param zipper [Igitsh::TokenZipper]
+    # @param trailing_space [Boolean]
     #
     # @return [Array<String>, nil]
-    def self.for_command(zipper)
+    def self.for_command(zipper:, trailing_space:)
+      return if trailing_space
+      return unless zipper.last.command?
+
       command_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
 
       Igitsh
@@ -38,9 +38,14 @@ module Igitsh
     private_class_method :for_command
 
     # @param zipper [Igitsh::TokenZipper]
+    # @param trailing_space [Boolean]
     #
     # @return [Array<String>, nil]
-    def self.for_option(zipper)
+    def self.for_option(zipper:, trailing_space:)
+      return if trailing_space
+      return unless zipper.last.option?
+      return unless zipper.last.options_allowed?
+
       last_command_zipper = zipper.reverse_find(&:command?)
       return unless last_command_zipper
 
