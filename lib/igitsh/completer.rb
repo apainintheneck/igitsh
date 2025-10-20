@@ -12,37 +12,35 @@ module Igitsh
     # @return [Array<String>, nil]
     def self.from_line(line)
       zipper = Tokenizer.from_line(line)
-      trailing_space = line.end_with?(" ")
 
-      for_command(zipper:, trailing_space:) ||
-        for_option(zipper:, trailing_space:)
+      completions =
+        for_command(zipper:, line:) ||
+        for_option(zipper:, line:) ||
+        for_custom(zipper:, line:)
+
+      completions&.take(250)
     end
 
     # @param zipper [Igitsh::TokenZipper]
-    # @param trailing_space [Boolean]
+    # @param line [String]
     #
     # @return [Array<String>, nil]
-    def self.for_command(zipper:, trailing_space:)
-      return if trailing_space
+    def self.for_command(zipper:, line:)
+      return if line.end_with?(" ")
       return unless zipper.last.command?
 
-      command_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
+      prefix = zipper.last.token.raw_content
 
-      Igitsh
-        .all_command_names
-        # Complete all commands starting with the given prefix.
-        .grep(command_prefix_regex)
-        # Sort results by shortest command and then alphabetically.
-        .sort_by { |cmd| [cmd.size, cmd] }
+      filter_by_prefix(terms: Igitsh.all_command_names, prefix:)
     end
     private_class_method :for_command
 
     # @param zipper [Igitsh::TokenZipper]
-    # @param trailing_space [Boolean]
+    # @param line [String]
     #
     # @return [Array<String>, nil]
-    def self.for_option(zipper:, trailing_space:)
-      return if trailing_space
+    def self.for_option(zipper:, line:)
+      return if line.end_with?(" ")
       return unless zipper.last.option?
       return unless zipper.last.options_allowed?
 
@@ -50,6 +48,7 @@ module Igitsh
       return unless last_command_zipper
 
       command_name = last_command_zipper.token.content
+      prefix = zipper.last.token.raw_content
 
       option_prefixes = if last_command_zipper.valid_git_command?
         GitHelp.from_name(command_name)&.option_prefixes
@@ -59,14 +58,71 @@ module Igitsh
 
       return unless option_prefixes
 
-      option_prefix_regex = /^#{Regexp.escape(zipper.last.token.raw_content)}/
-
-      option_prefixes
-        # Complete all commands starting with the given prefix.
-        .grep(option_prefix_regex)
-        # Sort results by shortest command and then alphabetically.
-        .sort_by { |cmd| [cmd.size, cmd] }
+      filter_by_prefix(terms: option_prefixes, prefix:)
     end
     private_class_method :for_option
+
+    # @param zipper [Igitsh::TokenZipper]
+    # @param line [String]
+    #
+    # @return [Array<String>, nil]
+    def self.for_custom(zipper:, line:)
+      if line.end_with?(" ")
+        return unless zipper.last.command?
+
+        command_name = zipper.last.token.raw_content
+        prefix = nil
+      else
+        return unless zipper.last.before.command?
+        return unless zipper.last.string_token?
+        return if zipper.last.option?
+
+        command_name = zipper.last.before.token.raw_content
+        prefix = zipper.last.token.raw_content
+        return if prefix.start_with?("-")
+      end
+
+      completions = custom_completions_for(command_name:)
+      return unless completions
+
+      if prefix
+        completions = filter_by_prefix(terms: completions, prefix:)
+      end
+
+      completions
+    end
+    private_class_method :for_custom
+
+    # @param command_name [String]
+    #
+    # @return [Array<String>, nil]
+    def self.custom_completions_for(command_name:)
+      completions =
+        case command_name
+        when "add", "restore"
+          Git.unstaged_files
+        when "checkout", "switch", "merge"
+          Git.other_branch_names
+        else
+          return
+        end
+
+      completions.take(1_000) unless completions.empty?
+    end
+
+    # @param terms [Array<String>]
+    # @param prefix [String]
+    #
+    # @return [Array<String>, nil]
+    def self.filter_by_prefix(terms:, prefix:)
+      filtered_terms = terms
+        # Select all terms starting with the given prefix.
+        .select { |term| term.start_with?(prefix) }
+        # Sort results by shortest command and then alphabetically.
+        .sort_by { |term| [term.size, term] }
+
+      filtered_terms unless filtered_terms.empty?
+    end
+    private_class_method :filter_by_prefix
   end
 end

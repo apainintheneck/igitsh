@@ -37,7 +37,7 @@ RSpec.describe Igitsh::Completer, :without_git do
 
       it "returns no results when prefix doesn't match" do
         ["smile", "add README.md && smile"].each do |line|
-          expect(described_class.from_line(line)).to be_empty
+          expect(described_class.from_line(line)).to be_nil
         end
       end
     end
@@ -84,7 +84,7 @@ RSpec.describe Igitsh::Completer, :without_git do
 
         it "returns no results when the prefix doesn't match" do
           ["diff --input", "restore README.md; diff --input"].each do |line|
-            expect(described_class.from_line(line)).to be_empty
+            expect(described_class.from_line(line)).to be_nil
           end
         end
       end

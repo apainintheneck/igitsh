@@ -77,6 +77,18 @@ module Igitsh
       ).freeze
     end
 
+    # @return [Array<String>]
+    def self.unstaged_files
+      `git ls-files -z --modified --others --exclude-standard`.split("\0")
+    end
+
+    # @return [Array<String>]
+    def self.other_branch_names
+      `git branch --sort=-committerdate`
+        .lines(chomp: true)
+        .filter_map { |line| line.strip unless line.start_with?("*") }
+    end
+
     Aliases = Struct.new(:local, :global, keyword_init: true) do
       # @param key [String]
       #
