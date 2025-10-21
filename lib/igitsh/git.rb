@@ -78,6 +78,11 @@ module Igitsh
     end
 
     # @return [Array<String>]
+    def self.staged_files
+      `git diff --name-only --staged`.lines(chomp: true)
+    end
+
+    # @return [Array<String>]
     def self.unstaged_files
       `git ls-files -z --modified --others --exclude-standard`.split("\0")
     end

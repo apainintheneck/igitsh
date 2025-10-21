@@ -12,6 +12,7 @@ module Igitsh
     # @return [Array<String>, nil]
     def self.from_line(line)
       zipper = Tokenizer.from_line(line)
+      return if zipper.empty?
 
       completions =
         for_command(zipper:, line:) ||
@@ -67,48 +68,43 @@ module Igitsh
     #
     # @return [Array<String>, nil]
     def self.for_custom(zipper:, line:)
-      if line.end_with?(" ")
-        return unless zipper.last.command?
+      return if !line.end_with?(" ") && (zipper.last.command? || zipper.last.option?)
 
-        command_name = zipper.last.token.raw_content
-        prefix = nil
-      else
-        return unless zipper.last.before.command?
-        return unless zipper.last.string_token?
-        return if zipper.last.option?
-
-        command_name = zipper.last.before.token.raw_content
-        prefix = zipper.last.token.raw_content
-        return if prefix.start_with?("-")
-      end
-
-      completions = custom_completions_for(command_name:)
+      completions = custom_completions_for(zipper:)
       return unless completions
+      return completions if line.end_with?(" ")
 
-      if prefix
-        completions = filter_by_prefix(terms: completions, prefix:)
-      end
-
-      completions
+      filter_by_prefix(terms: completions, prefix: zipper.last.token.raw_content)
     end
     private_class_method :for_custom
 
-    # @param command_name [String]
+    # @param zipper [Igitsh::TokenZipper]
     #
     # @return [Array<String>, nil]
-    def self.custom_completions_for(command_name:)
+    def self.custom_completions_for(zipper:)
+      command = zipper.last.current_command
+      return unless command
+
       completions =
-        case command_name
-        when "add", "restore"
+        case command.token.raw_content
+        when "add"
           Git.unstaged_files
-        when "checkout", "switch", "merge"
+        when "checkout", "diff", "merge", "rebase", "switch"
           Git.other_branch_names
+        when "restore"
+          options = zipper.drop(zipper.index.succ).select(&:option?)
+          if options.any? { |opt| opt.token.raw_content in "-S" | "--staged" }
+            Git.staged_files
+          else
+            Git.unstaged_files
+          end
         else
           return
         end
 
       completions.take(1_000) unless completions.empty?
     end
+    private_class_method :custom_completions_for
 
     # @param terms [Array<String>]
     # @param prefix [String]

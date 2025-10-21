@@ -302,7 +302,7 @@ module Igitsh
 
     # Returns the most recent command if one exists before an action or head.
     #
-    # @return [Igitsh::TokenZipper]
+    # @return [Igitsh::TokenZipper, nil]
     def current_command
       return @current_command if defined?(@current_command)
 
