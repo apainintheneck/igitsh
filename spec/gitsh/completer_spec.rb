@@ -99,5 +99,83 @@ RSpec.describe Igitsh::Completer, :without_git do
         end
       end
     end
+
+    context "for custom" do
+      context "with branch name completions" do
+        let(:commands) { %w[checkout diff merge rebase switch] }
+
+        before do
+          allow(Igitsh::Git).to receive(:other_branch_names).and_return(%w[test release fix])
+        end
+
+        it "includes all branches without a prefix", :aggregate_failures do
+          commands.each do |command|
+            expect(described_class.from_line("#{command}  "))
+              .to eq(%w[test release fix])
+          end
+
+          commands.each do |command|
+            expect(described_class.from_line(" #{command} -v "))
+            .to eq(%w[test release fix])
+          end
+        end
+
+        it "includes matching branches by prefix", :aggregate_failures do
+          commands.each do |command|
+            expect(described_class.from_line("#{command}  re")).to eq(%w[release])
+          end
+
+          commands.each do |command|
+            expect(described_class.from_line(" #{command} -v re")).to eq(%w[release])
+          end
+        end
+      end
+
+      context "with staged file completions" do
+        before do
+          allow(Igitsh::Git).to receive(:staged_files).and_return(%w[staged_1.rb staged_2.rb])
+        end
+
+        it "includes all staged files without a prefix", :aggregate_failures do
+          ["restore -v -S  ", "restore --staged "].each do |command|
+            expect(described_class.from_line(command)).to eq(%w[staged_1.rb staged_2.rb])
+          end
+        end
+
+        it "includes matching staged files by prefix", :aggregate_failures do
+          ["restore -v -S  staged_2", "restore --staged staged_2"].each do |command|
+            expect(described_class.from_line(command)).to eq(%w[staged_2.rb])
+          end
+        end
+      end
+
+      context "with unstaged file completions" do
+        let(:commands) { %w[add restore] }
+
+        before do
+          allow(Igitsh::Git).to receive(:unstaged_files).and_return(%w[unstaged_1.rb unstaged_2.rb])
+        end
+
+        it "includes all unstaged files without a prefix", :aggregate_failures do
+          commands.each do |command|
+            expect(described_class.from_line("#{command}   ")).to eq(%w[unstaged_1.rb unstaged_2.rb])
+          end
+
+          commands.each do |command|
+            expect(described_class.from_line("#{command} -d ")).to eq(%w[unstaged_1.rb unstaged_2.rb])
+          end
+        end
+
+        it "includes matching unstaged files by prefix", :aggregate_failures do
+          commands.each do |command|
+            expect(described_class.from_line("#{command}  unstaged_1")).to eq(%w[unstaged_1.rb])
+          end
+
+          commands.each do |command|
+            expect(described_class.from_line(" #{command} -v unstaged_1.")).to eq(%w[unstaged_1.rb])
+          end
+        end
+      end
+    end
   end
 end
