@@ -15,13 +15,49 @@ RSpec.describe Igitsh::Git do
 
   describe ".current_branch" do
     it "returns a branch name" do
-      expect(described_class.current_branch).to be_a(String)
+      branch_name = described_class.current_branch
+      expect(branch_name).to be_a(String)
+      expect(branch_name).not_to be_empty
     end
   end
 
   describe ".uncommitted_changes" do
     it "returns a Changes struct" do
       expect(described_class.uncommitted_changes).to be_a(described_class::Changes)
+    end
+  end
+
+  RSpec.shared_context "uncommitted changes", :in_git_repo do
+    before do
+      FileUtils.touch(%w[staged_1.rb staged_2.rb unstaged_1.rb unstaged_2.rb])
+      Igitsh::Test.quiet_system("git add staged_1.rb staged_2.rb")
+    end
+  end
+
+  describe ".staged_files" do
+    include_context "uncommitted changes"
+
+    it "lists staged files" do
+      expect(described_class.staged_files).to eq(%w[staged_1.rb staged_2.rb])
+    end
+  end
+
+  describe ".unstaged_files" do
+    include_context "uncommitted changes"
+
+    it "lists unstaged files" do
+      expect(described_class.unstaged_files).to eq(%w[unstaged_1.rb unstaged_2.rb])
+    end
+  end
+
+  describe ".other_branch_names", :in_git_repo do
+    before do
+      Igitsh::Test.quiet_system("git branch -c second")
+      Igitsh::Test.quiet_system("git branch -c first")
+    end
+
+    it "returns the branch name list" do
+      expect(described_class.other_branch_names).to eq(%w[first second])
     end
   end
 
