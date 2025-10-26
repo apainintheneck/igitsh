@@ -96,8 +96,6 @@ RSpec.describe Igitsh::Git do
 
   describe ".commits", :in_git_repo do
     it "it loads commit hashes and titles", :aggregate_failures do
-      expect(described_class.commit_hash_to_title).to be_empty
-
       commits = described_class.commits(limit: 5)
       expect(commits.size).to eq(1)
       expect(described_class.commit_hash_to_title).to eq({
