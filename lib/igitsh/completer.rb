@@ -69,6 +69,8 @@ module Igitsh
     private_class_method :for_option
 
     # @param zipper [Igitsh::TokenZipper]
+    #
+    # @return [Array<String>, nil]
     def self.for_filepath(zipper:)
       return if zipper.trailing_whitespace?
       return unless zipper.last.string_token?

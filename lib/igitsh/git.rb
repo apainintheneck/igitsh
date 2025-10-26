@@ -128,8 +128,10 @@ module Igitsh
 
     # @param prefix [String]
     #
-    # @return [String]
+    # @return [String, nil]
     def self.build_pathspec_from(prefix:)
+      return if prefix.empty?
+
       prefix.gsub(/[.*]/, "." => "\\.", "*" => "\\*") + "*"
     end
 
@@ -140,12 +142,10 @@ module Igitsh
     def self.other_branch_names(prefix:, limit:)
       command = %w[git branch --sort=-committerdate]
       last_stdout, _wait_threads = Open3.pipeline_r(command)
-      last_stdout.each_line(chomp: true).lazy.filter_map do |line|
-        next if line.start_with?("*")
-
-        stripped_line = line.strip
-        stripped_line if stripped_line.start_with?(prefix)
-      end.first(limit)
+      enum = last_stdout.each_line(chomp: true).lazy
+      enum = enum.filter_map { |line| line.strip unless line.start_with?("*") }
+      enum = enum.select { |line| line.start_with?(prefix) } unless prefix.empty?
+      enum.first(limit)
     ensure
       last_stdout&.close
     end
