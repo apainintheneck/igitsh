@@ -38,7 +38,18 @@ RSpec.describe Igitsh::Git do
     include_context "uncommitted changes"
 
     it "lists staged files" do
-      expect(described_class.staged_files).to eq(%w[staged_1.rb staged_2.rb])
+      expect(described_class.staged_files(prefix: "", limit: 5))
+        .to eq(%w[staged_1.rb staged_2.rb])
+    end
+
+    it "filters staged files by prefix" do
+      expect(described_class.staged_files(prefix: "staged_2", limit: 5))
+        .to eq(%w[staged_2.rb])
+    end
+
+    it "filters staged files by limit" do
+      expect(described_class.staged_files(prefix: "", limit: 1))
+        .to eq(%w[staged_1.rb])
     end
   end
 
@@ -46,7 +57,18 @@ RSpec.describe Igitsh::Git do
     include_context "uncommitted changes"
 
     it "lists unstaged files" do
-      expect(described_class.unstaged_files).to eq(%w[unstaged_1.rb unstaged_2.rb])
+      expect(described_class.unstaged_files(prefix: "", limit: 5))
+        .to eq(%w[unstaged_1.rb unstaged_2.rb])
+    end
+
+    it "filters unstaged files by prefix" do
+      expect(described_class.unstaged_files(prefix: "unstaged_2", limit: 5))
+        .to eq(%w[unstaged_2.rb])
+    end
+
+    it "filters unstaged files by limit" do
+      expect(described_class.unstaged_files(prefix: "", limit: 1))
+        .to eq(%w[unstaged_1.rb])
     end
   end
 
@@ -57,7 +79,18 @@ RSpec.describe Igitsh::Git do
     end
 
     it "returns the branch name list" do
-      expect(described_class.other_branch_names).to eq(%w[first second])
+      expect(described_class.other_branch_names(prefix: "", limit: 5))
+        .to eq(%w[first second])
+    end
+
+    it "filters branch names by prefix" do
+      expect(described_class.other_branch_names(prefix: "sec", limit: 5))
+        .to eq(%w[second])
+    end
+
+    it "filters branch names by limit" do
+      expect(described_class.other_branch_names(prefix: "", limit: 1))
+        .to eq(%w[first])
     end
   end
 

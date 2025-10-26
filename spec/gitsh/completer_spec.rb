@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Igitsh::Completer, :without_git do
+RSpec.describe Igitsh::Completer do
   let(:command_set) { %w[commit add diff restore].to_set }
 
   before do
@@ -8,7 +8,7 @@ RSpec.describe Igitsh::Completer, :without_git do
   end
 
   describe ".from_line" do
-    context "for commands" do
+    context "for commands", :without_git do
       before do
         allow(Igitsh).to receive(:all_command_names)
           .and_return(%w[commit commit-tree commit-graph])
@@ -42,7 +42,7 @@ RSpec.describe Igitsh::Completer, :without_git do
       end
     end
 
-    context "for options" do
+    context "for options", :without_git do
       context "with Git command" do
         it "completes short options" do
           ["diff -s", "restore README.md; diff -s"].each do |line|
@@ -100,23 +100,106 @@ RSpec.describe Igitsh::Completer, :without_git do
       end
     end
 
-    context "for custom" do
+    context "with filepath completions", :in_git_repo do
+      let(:files) do
+        %w[
+          .github/workflows/main.yml
+          .rspec
+          README.md
+          Rakefile
+          lib/main.rb
+          lib/parser.rb
+          lib/tokenizer.rb
+          lib/transpiler.rb
+        ]
+      end
+
+      before do
+        Dir.mkdir("lib")
+        FileUtils.mkdir_p(".github/workflows")
+        FileUtils.touch(files)
+        Igitsh::Test.quiet_system("git add --all")
+        Igitsh::Test.quiet_system("git commit -m 'test commit'")
+      end
+
+      it "returns filepath completions", :aggregate_failures do
+        {
+          "add lib" => nil,
+          "add Rake" => nil,
+          "restore ." => nil,
+          "grep /" => nil,
+          "restore ./*" => nil,
+          "commit ./" => %w[
+            ./.github/workflows/main.yml
+            ./.keep
+            ./.rspec
+            ./README.md
+            ./Rakefile
+            ./lib/main.rb
+            ./lib/parser.rb
+            ./lib/tokenizer.rb
+            ./lib/transpiler.rb
+          ],
+          "ls-files ./." => %w[
+            ./.github/workflows/main.yml
+            ./.keep
+            ./.rspec
+          ],
+          "./." => nil,
+          "grep green ./lib/main.rb ./lib" => %w[
+            ./lib/main.rb
+            ./lib/parser.rb
+            ./lib/tokenizer.rb
+            ./lib/transpiler.rb
+          ],
+          "grep def && ./lib" => nil,
+          "push --fast ./lib*" => nil,
+          "command ./lib/t" => %w[
+            ./lib/tokenizer.rb
+            ./lib/transpiler.rb
+          ],
+          "add --all && commit ./.github/workflows/" => %w[
+            ./.github/workflows/main.yml
+          ],
+          "rebase ./R" => %w[
+            ./README.md
+            ./Rakefile
+          ],
+          "blame -v ./README." => %w[
+            ./README.md
+          ]
+        }.each do |line, completions|
+          expect(described_class.from_line(line)).to eq(completions)
+        end
+      end
+    end
+
+    context "for custom", :in_git_repo do
+      RSpec.shared_context "uncommitted files", :in_git_repo do
+        before do
+          FileUtils.touch(%w[staged_1.rb staged_2.rb unstaged_1.rb unstaged_2.rb])
+          Igitsh::Test.quiet_system("git add staged_1.rb staged_2.rb")
+        end
+      end
+
       context "with branch name completions" do
         let(:commands) { %w[checkout diff merge rebase switch] }
 
         before do
-          allow(Igitsh::Git).to receive(:other_branch_names).and_return(%w[test release fix])
+          %w[fix release test].each do |branch_name|
+            Igitsh::Test.quiet_system("git branch -c #{branch_name}")
+          end
         end
 
         it "includes all branches without a prefix", :aggregate_failures do
           commands.each do |command|
             expect(described_class.from_line("#{command}  "))
-              .to eq(%w[test release fix])
+              .to eq(%w[fix release test])
           end
 
           commands.each do |command|
             expect(described_class.from_line(" #{command} -v "))
-            .to eq(%w[test release fix])
+              .to eq(%w[fix release test])
           end
         end
 
@@ -132,9 +215,7 @@ RSpec.describe Igitsh::Completer, :without_git do
       end
 
       context "with staged file completions" do
-        before do
-          allow(Igitsh::Git).to receive(:staged_files).and_return(%w[staged_1.rb staged_2.rb])
-        end
+        include_context "uncommitted files"
 
         it "includes all staged files without a prefix", :aggregate_failures do
           ["restore -v -S  ", "restore --staged "].each do |command|
@@ -150,11 +231,9 @@ RSpec.describe Igitsh::Completer, :without_git do
       end
 
       context "with unstaged file completions" do
-        let(:commands) { %w[add restore] }
+        include_context "uncommitted files"
 
-        before do
-          allow(Igitsh::Git).to receive(:unstaged_files).and_return(%w[unstaged_1.rb unstaged_2.rb])
-        end
+        let(:commands) { %w[add restore] }
 
         it "includes all unstaged files without a prefix", :aggregate_failures do
           commands.each do |command|

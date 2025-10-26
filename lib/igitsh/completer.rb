@@ -7,6 +7,8 @@ module Igitsh
       Completer.from_line(Reline.line_buffer.to_s)
     end
 
+    MAX_COMPLETIONS = 250
+
     # @param line [String]
     #
     # @return [Array<String>, nil]
@@ -14,34 +16,33 @@ module Igitsh
       zipper = Tokenizer.from_line(line)
       return if zipper.empty?
 
-      completions =
-        for_command(zipper:, line:) ||
-        for_option(zipper:, line:) ||
-        for_custom(zipper:, line:)
-
-      completions&.take(250)
+      for_command(zipper:) ||
+        for_option(zipper:) ||
+        for_filepath(zipper:) ||
+        for_custom(zipper:)
     end
 
     # @param zipper [Igitsh::TokenZipper]
-    # @param line [String]
     #
     # @return [Array<String>, nil]
-    def self.for_command(zipper:, line:)
-      return if line.end_with?(" ")
+    def self.for_command(zipper:)
+      return if zipper.trailing_whitespace?
       return unless zipper.last.command?
 
       prefix = zipper.last.token.raw_content
+      completions = Igitsh.all_command_names.select do |command_name|
+        command_name.start_with?(prefix)
+      end
 
-      filter_by_prefix(terms: Igitsh.all_command_names, prefix:)
+      completions unless completions.empty?
     end
     private_class_method :for_command
 
     # @param zipper [Igitsh::TokenZipper]
-    # @param line [String]
     #
     # @return [Array<String>, nil]
-    def self.for_option(zipper:, line:)
-      return if line.end_with?(" ")
+    def self.for_option(zipper:)
+      return if zipper.trailing_whitespace?
       return unless zipper.last.option?
       return unless zipper.last.options_allowed?
 
@@ -59,66 +60,73 @@ module Igitsh
 
       return unless option_prefixes
 
-      filter_by_prefix(terms: option_prefixes, prefix:)
+      completions = option_prefixes.select do |option_prefix|
+        option_prefix.start_with?(prefix)
+      end
+
+      completions unless completions.empty?
     end
     private_class_method :for_option
 
     # @param zipper [Igitsh::TokenZipper]
-    # @param line [String]
-    #
-    # @return [Array<String>, nil]
-    def self.for_custom(zipper:, line:)
-      return if !line.end_with?(" ") && (zipper.last.command? || zipper.last.option?)
+    def self.for_filepath(zipper:)
+      return if zipper.trailing_whitespace?
+      return unless zipper.last.string_token?
+      return if zipper.last.command?
+      return if zipper.last.option?
 
-      completions = custom_completions_for(zipper:)
-      return unless completions
-      return completions if line.end_with?(" ")
+      filepath = zipper.last.token.raw_content
+      return unless filepath.start_with?("./")
 
-      filter_by_prefix(terms: completions, prefix: zipper.last.token.raw_content)
+      completions = Git
+        .files(prefix: filepath.delete_prefix("./"), limit: MAX_COMPLETIONS)
+        .map { |filepath| "./#{filepath}" }
+
+      completions unless completions.empty?
     end
-    private_class_method :for_custom
 
     # @param zipper [Igitsh::TokenZipper]
     #
     # @return [Array<String>, nil]
-    def self.custom_completions_for(zipper:)
+    def self.for_custom(zipper:)
+      unless zipper.trailing_whitespace?
+        return unless zipper.last.string_token?
+        return if zipper.last.command?
+        return if zipper.last.option?
+      end
+
+      prefix = zipper.trailing_whitespace? ? "" : zipper.last.token.raw_content
+      custom_completions_for(zipper:, prefix:)
+    end
+    private_class_method :for_custom
+
+    # @param zipper [Igitsh::TokenZipper]
+    # @param prefix [String]
+    #
+    # @return [Array<String>, nil]
+    def self.custom_completions_for(zipper:, prefix:)
       command = zipper.last.current_command
       return unless command
 
       completions =
         case command.token.raw_content
         when "add"
-          Git.unstaged_files
+          Git.unstaged_files(prefix:, limit: MAX_COMPLETIONS)
         when "checkout", "diff", "merge", "rebase", "switch"
-          Git.other_branch_names
+          Git.other_branch_names(prefix:, limit: MAX_COMPLETIONS)
         when "restore"
           options = zipper.drop(zipper.index.succ).select(&:option?)
           if options.any? { |opt| opt.token.raw_content in "-S" | "--staged" }
-            Git.staged_files
+            Git.staged_files(prefix:, limit: MAX_COMPLETIONS)
           else
-            Git.unstaged_files
+            Git.unstaged_files(prefix:, limit: MAX_COMPLETIONS)
           end
         else
-          return
+          []
         end
 
-      completions.take(1_000) unless completions.empty?
+      completions unless completions.empty?
     end
     private_class_method :custom_completions_for
-
-    # @param terms [Array<String>]
-    # @param prefix [String]
-    #
-    # @return [Array<String>, nil]
-    def self.filter_by_prefix(terms:, prefix:)
-      filtered_terms = terms
-        # Select all terms starting with the given prefix.
-        .select { |term| term.start_with?(prefix) }
-        # Sort results by shortest command and then alphabetically.
-        .sort_by { |term| [term.size, term] }
-
-      filtered_terms unless filtered_terms.empty?
-    end
-    private_class_method :filter_by_prefix
   end
 end
