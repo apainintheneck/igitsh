@@ -94,6 +94,29 @@ RSpec.describe Igitsh::Git do
     end
   end
 
+  describe ".commits", :in_git_repo do
+    it "it loads commit hashes and titles", :aggregate_failures do
+      expect(described_class.commit_hash_to_title).to be_empty
+
+      commits = described_class.commits(limit: 5)
+      expect(commits.size).to eq(1)
+      expect(described_class.commit_hash_to_title).to eq({
+        commits.fetch(0) => "init"
+      })
+
+      FileUtils.touch(%w[second.rb])
+      Igitsh::Test.quiet_system("git add second.rb")
+      Igitsh::Test.quiet_system("git commit -m 'second'")
+
+      commits = described_class.commits(limit: 5)
+      expect(commits.size).to eq(2)
+      expect(described_class.commit_hash_to_title).to eq({
+        commits.fetch(0) => "second",
+        commits.fetch(1) => "init"
+      })
+    end
+  end
+
   describe ".aliases" do
     it "returns an Aliases struct", :in_git_repo do
       described_class.set_alias(
