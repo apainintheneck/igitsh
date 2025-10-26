@@ -123,11 +123,11 @@ module Igitsh
           else
             Git.unstaged_files(prefix:, limit: MAX_COMPLETIONS)
           end
-        else
-          []
+        when "log", "revert", "reset"
+          Git.commits(limit: MAX_COMPLETIONS) if zipper.trailing_whitespace?
         end
 
-      completions unless completions.empty?
+      completions unless completions.nil? || completions.empty?
     end
     private_class_method :custom_completions_for
   end

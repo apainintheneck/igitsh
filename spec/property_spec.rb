@@ -7,7 +7,7 @@ RSpec.describe "property testing" do
 
       gen_constants = %w[
         & | ; && || -- ' "
-        push pull commit grep diff :exit :alias
+        add push pull commit merge grep diff log restore :exit :alias
         --no- --stat --max-depth --color=never --local --global --help
       ]
       gen_constants << " " << "  "

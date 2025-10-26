@@ -150,6 +150,25 @@ module Igitsh
       last_stdout&.close
     end
 
+    # @param limit [Integer]
+    #
+    # @return [Array<String>]
+    def self.commits(limit:)
+      command = Shellwords.join(["git", "rev-list", "--all", "--oneline", "--max-count", limit])
+      output = `#{command}`
+      @commit_hash_to_title = output
+        .each_line(chomp: true)
+        .to_h { |line| line.split(" ", 2) }
+      @commit_hash_to_title.keys
+    end
+
+    # Note: This is loaded by the `.commits` method so that it can be reused for hints.
+    #
+    # @return [Hash<String, String>]
+    def self.commit_hash_to_title
+      @commit_hash_to_title || {}
+    end
+
     Aliases = Struct.new(:local, :global, keyword_init: true) do
       # @param key [String]
       #
