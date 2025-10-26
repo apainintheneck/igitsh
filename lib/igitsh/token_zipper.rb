@@ -42,14 +42,21 @@ module Igitsh
     #
     # @return [Integer]
     def size
-      @tokens.size
+      tokens.size
     end
 
     # Returns true if there are no tokens.
     #
     # @return [Boolean]
     def empty?
-      @tokens.empty?
+      tokens.empty?
+    end
+
+    # Returns true if there is trailing whitespace after the last token.
+    #
+    # @return [Boolean]
+    def trailing_whitespace?
+      (last.token&.end_position || 0) < source.size
     end
 
     # Yields zippers representing each token starting from the beginning.
@@ -97,9 +104,9 @@ module Igitsh
         self
       else
         self.class.new(
-          source: @source,
-          tokens: @tokens,
-          index: @index - 1,
+          source:,
+          tokens:,
+          index: index - 1,
           after: self,
           first: @first,
           last: @last
@@ -113,9 +120,9 @@ module Igitsh
         self
       else
         self.class.new(
-          source: @source,
-          tokens: @tokens,
-          index: @index + 1,
+          source:,
+          tokens:,
+          index: index + 1,
           before: self,
           first: @first,
           last: @last
@@ -201,7 +208,7 @@ module Igitsh
     #
     # @return [Igitsh::Token::Base, nil]
     def token
-      @tokens[@index] unless head? || tail?
+      tokens[index] unless head? || tail?
     end
 
     # Returns true if the current token is a string.
@@ -302,7 +309,7 @@ module Igitsh
 
     # Returns the most recent command if one exists before an action or head.
     #
-    # @return [Igitsh::TokenZipper]
+    # @return [Igitsh::TokenZipper, nil]
     def current_command
       return @current_command if defined?(@current_command)
 

@@ -4,6 +4,7 @@ require "shellwords"
 require "tty-which"
 require "English"
 require "set" # needed for Ruby 3.1 support
+require "open3"
 
 module Igitsh
   module Git
@@ -66,7 +67,8 @@ module Igitsh
       staged_count = 0
       unstaged_count = 0
 
-      `git status --porcelain`.each_line(chomp: true) do |line|
+      last_stdout, _wait_threads = Open3.pipeline_r(%w[git status --porcelain])
+      last_stdout.each_line(chomp: true).lazy.each do |line|
         staged_count += 1 if ("A".."Z").cover?(line[0])
         unstaged_count += 1 if ("A".."Z").cover?(line[1])
       end
@@ -75,6 +77,96 @@ module Igitsh
         staged_count: staged_count,
         unstaged_count: unstaged_count
       ).freeze
+    ensure
+      last_stdout&.close
+    end
+
+    # @param prefix [String]
+    # @param limit [Integer]
+    #
+    # @return [Array<String>]
+    def self.files(prefix:, limit:)
+      command = %w[git ls-files -z --exclude-standard]
+      if (pathspec = build_pathspec_from(prefix:))
+        command << "--" << pathspec
+      end
+      last_stdout, _wait_threads = Open3.pipeline_r(command)
+      last_stdout.each_line("\0", chomp: true).lazy.first(limit)
+    ensure
+      last_stdout&.close
+    end
+
+    # @param prefix [String]
+    # @param limit [Integer]
+    #
+    # @return [Array<String>]
+    def self.staged_files(prefix:, limit:)
+      command = %w[git diff --name-only --staged]
+      if (pathspec = build_pathspec_from(prefix:))
+        command << "--" << pathspec
+      end
+      last_stdout, _wait_threads = Open3.pipeline_r(command)
+      last_stdout.each_line(chomp: true).lazy.first(limit)
+    ensure
+      last_stdout&.close
+    end
+
+    # @param prefix [String]
+    # @param limit [Integer]
+    #
+    # @return [Array<String>]
+    def self.unstaged_files(prefix:, limit:)
+      command = %w[git ls-files -z --modified --others --exclude-standard --deduplicate]
+      if (pathspec = build_pathspec_from(prefix:))
+        command << "--" << pathspec
+      end
+      last_stdout, _wait_threads = Open3.pipeline_r(command)
+      last_stdout.each_line("\0", chomp: true).lazy.first(limit)
+    ensure
+      last_stdout&.close
+    end
+
+    # @param prefix [String]
+    #
+    # @return [String, nil]
+    def self.build_pathspec_from(prefix:)
+      return if prefix.empty?
+
+      prefix.gsub(/[.*]/, "." => "\\.", "*" => "\\*") + "*"
+    end
+
+    # @param prefix [String]
+    # @param limit [Integer]
+    #
+    # @return [Array<String>]
+    def self.other_branch_names(prefix:, limit:)
+      command = %w[git branch --sort=-committerdate]
+      last_stdout, _wait_threads = Open3.pipeline_r(command)
+      enum = last_stdout.each_line(chomp: true).lazy
+      enum = enum.filter_map { |line| line.strip unless line.start_with?("*") }
+      enum = enum.select { |line| line.start_with?(prefix) } unless prefix.empty?
+      enum.first(limit)
+    ensure
+      last_stdout&.close
+    end
+
+    # @param limit [Integer]
+    #
+    # @return [Array<String>]
+    def self.commits(limit:)
+      command = Shellwords.join(["git", "rev-list", "--all", "--oneline", "--max-count", limit])
+      output = `#{command}`
+      @commit_hash_to_title = output
+        .each_line(chomp: true)
+        .to_h { |line| line.split(" ", 2) }
+      @commit_hash_to_title.keys
+    end
+
+    # Note: This is loaded by the `.commits` method so that it can be reused for hints.
+    #
+    # @return [Hash<String, String>]
+    def self.commit_hash_to_title
+      @commit_hash_to_title || {}
     end
 
     Aliases = Struct.new(:local, :global, keyword_init: true) do

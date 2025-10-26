@@ -67,11 +67,10 @@ module Igitsh
     #
     # @return [Array<String>] formatted lines
     def self.from_completion(completion, width:)
-      description = if Git.command_descriptions.include?(completion)
-        Git.command_descriptions.fetch(completion)
-      elsif Commander.internal_command_names.include?(completion)
-        Commander.name_to_internal_command.fetch(completion).description
-      end
+      description =
+        Git.command_descriptions[completion] ||
+        Commander.name_to_internal_command[completion]&.description ||
+        Git.commit_hash_to_title[completion]
 
       if description
         Stringer.wrap_ascii_paragraph(description, width: width, indent: 2)
